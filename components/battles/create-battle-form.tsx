@@ -124,14 +124,30 @@ function SubmitButton() {
 export function CreateBattleForm() {
   const [state, formAction] = useActionState<BattleState, FormData>(createBattle, null)
 
+  if (state && 'success' in state) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 rounded-3xl border border-border bg-card py-20 text-center">
+        <div className="text-4xl">🎉</div>
+        <p className="text-lg font-bold">새 Better 올리기가 성공하였습니다</p>
+        <a
+          href="/"
+          className="mt-2 rounded-xl px-6 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
+          style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
+        >
+          홈으로 돌아가기
+        </a>
+      </div>
+    )
+  }
+
   return (
     <form action={formAction} className="space-y-8">
-      {state?.error && (
+      {state && 'error' in state && (
         <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
           <svg className="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
           </svg>
-          {state.error}
+          {(state as { error: string }).error}
         </div>
       )}
 
