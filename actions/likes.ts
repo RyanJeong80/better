@@ -1,0 +1,36 @@
+'use server'
+
+import { and, eq } from 'drizzle-orm'
+import { createClient } from '@/lib/supabase/server'
+import { db } from '@/lib/db'
+import { likes } from '@/lib/db/schema'
+
+export async function toggleLike(
+  betterId: string,
+): Promise<{ isLiked: boolean; likeCount: number } | { error: string }> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: '로그인이 필요합니다' }
+
+  try {
+    const existing = await db.query.likes.findFirst({
+      where: and(eq(likes.betterId, betterId), eq(likes.userId, user.id)),
+    })
+
+    if (existing) {
+      await db.delete(likes).where(and(eq(likes.betterId, betterId), eq(likes.userId, user.id)))
+    } else {
+      await db.insert(likes).values({ betterId, userId: user.id })
+    }
+
+    const allLikes = await db.query.likes.findMany({
+      where: eq(likes.betterId, betterId),
+    })
+
+    return { isLiked: !existing, likeCount: allLikes.length }
+  } catch {
+    return { error: '좋아요 처리에 실패했습니다' }
+  }
+}
