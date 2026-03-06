@@ -13,7 +13,12 @@ export function useRealtimeVotes(betterId: string, initial: VoteCounts) {
   const [counts, setCounts] = useState<VoteCounts>(initial)
 
   useEffect(() => {
-    const supabase = createClient()
+    let supabase: ReturnType<typeof createClient>
+    try {
+      supabase = createClient()
+    } catch {
+      return
+    }
 
     const channel = supabase
       .channel(`votes:${betterId}`)

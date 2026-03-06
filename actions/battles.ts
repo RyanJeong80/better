@@ -131,65 +131,70 @@ export async function getRandomBattle(excludeIds: string[]): Promise<BattleForVo
   }
 }
 
-export type BattleState = { error: string } | null
+export type BattleState = { error: string } | { success: true } | null
 
 export async function createBattle(
   _prev: BattleState,
   formData: FormData,
 ): Promise<BattleState> {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) redirect('/login')
 
-  const title = formData.get('title') as string
-  const imageAFile = formData.get('imageA') as File
-  const imageBFile = formData.get('imageB') as File
-  const descriptionA = (formData.get('descriptionA') as string) || ''
-  const descriptionB = (formData.get('descriptionB') as string) || ''
+    const title = formData.get('title') as string
+    const imageAFile = formData.get('imageA') as File
+    const imageBFile = formData.get('imageB') as File
+    const descriptionA = (formData.get('descriptionA') as string) || ''
+    const descriptionB = (formData.get('descriptionB') as string) || ''
 
-  if (!imageAFile || imageAFile.size === 0) return { error: '사진 A를 업로드해주세요' }
-  if (!imageBFile || imageBFile.size === 0) return { error: '사진 B를 업로드해주세요' }
-  if (descriptionA.length > 100) return { error: '사진 A 설명은 100자 이내로 입력해주세요' }
-  if (descriptionB.length > 100) return { error: '사진 B 설명은 100자 이내로 입력해주세요' }
+    if (!imageAFile || imageAFile.size === 0) return { error: '사진 A를 업로드해주세요' }
+    if (!imageBFile || imageBFile.size === 0) return { error: '사진 B를 업로드해주세요' }
+    if (descriptionA.length > 100) return { error: '사진 A 설명은 100자 이내로 입력해주세요' }
+    if (descriptionB.length > 100) return { error: '사진 B 설명은 100자 이내로 입력해주세요' }
 
-  const timestamp = Date.now()
+    const timestamp = Date.now()
 
-  const { data: imageAData, error: imageAError } = await supabase.storage
-    .from('battle-images')
-    .upload(`${user.id}/${timestamp}-A`, imageAFile)
+    const { data: imageAData, error: imageAError } = await supabase.storage
+      .from('battle-images')
+      .upload(`${user.id}/${timestamp}-A`, imageAFile)
 
-  if (imageAError) return { error: `이미지 업로드 실패: ${imageAError.message}` }
+    if (imageAError) return { error: `이미지 업로드 실패: ${imageAError.message}` }
 
-  const { data: imageBData, error: imageBError } = await supabase.storage
-    .from('battle-images')
-    .upload(`${user.id}/${timestamp}-B`, imageBFile)
+    const { data: imageBData, error: imageBError } = await supabase.storage
+      .from('battle-images')
+      .upload(`${user.id}/${timestamp}-B`, imageBFile)
 
-  if (imageBError) return { error: `이미지 업로드 실패: ${imageBError.message}` }
+    if (imageBError) return { error: `이미지 업로드 실패: ${imageBError.message}` }
 
-  const {
-    data: { publicUrl: imageAUrl },
-  } = supabase.storage.from('battle-images').getPublicUrl(imageAData.path)
+    const {
+      data: { publicUrl: imageAUrl },
+    } = supabase.storage.from('battle-images').getPublicUrl(imageAData.path)
 
-  const {
-    data: { publicUrl: imageBUrl },
-  } = supabase.storage.from('battle-images').getPublicUrl(imageBData.path)
+    const {
+      data: { publicUrl: imageBUrl },
+    } = supabase.storage.from('battle-images').getPublicUrl(imageBData.path)
 
-  const [better] = await db
-    .insert(betters)
-    .values({
-      userId: user.id,
-      title,
-      imageAUrl,
-      imageADescription: descriptionA || null,
-      imageBUrl,
-      imageBDescription: descriptionB || null,
-    })
-    .returning()
+    await db
+      .insert(betters)
+      .values({
+        userId: user.id,
+        title,
+        imageAUrl,
+        imageADescription: descriptionA || null,
+        imageBUrl,
+        imageBDescription: descriptionB || null,
+      })
 
-  revalidatePath('/')
-  redirect(`/battles/${better.id}`)
+    revalidatePath('/')
+    return { success: true as const }
+  } catch (e) {
+    if (e instanceof Error && e.message === 'NEXT_REDIRECT') throw e
+    console.error('[createBattle]', e)
+    return { error: '업로드 중 오류가 발생했습니다. 다시 시도해주세요.' }
+  }
 }
 
 export async function getBattles() {

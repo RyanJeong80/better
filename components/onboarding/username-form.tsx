@@ -33,9 +33,14 @@ export function UsernameForm() {
 
     setChecking(true)
     timerRef.current = setTimeout(async () => {
-      const result = await checkUsernameAvailable(value)
-      setAvailability(result)
-      setChecking(false)
+      try {
+        const result = await checkUsernameAvailable(value)
+        setAvailability(result)
+      } catch {
+        setAvailability(null)
+      } finally {
+        setChecking(false)
+      }
     }, 500)
 
     return () => clearTimeout(timerRef.current)
