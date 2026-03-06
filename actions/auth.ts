@@ -65,7 +65,9 @@ export async function signUp(_prev: AuthState, formData: FormData): Promise<Auth
 export async function signInWithGoogle() {
   const supabase = await createClient()
   const headersList = await headers()
-  const origin = headersList.get('origin') ?? process.env.NEXT_PUBLIC_SUPABASE_URL
+  const host = headersList.get('host') ?? ''
+  const proto = headersList.get('x-forwarded-proto') ?? 'https'
+  const origin = headersList.get('origin') ?? `${proto}://${host}`
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
