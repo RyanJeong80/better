@@ -9,25 +9,6 @@ type BattleThumb = { id: string; title: string; imageAUrl: string; imageBUrl: st
 type HotThumb = BattleThumb & { likeCount: number }
 type Ranker = { name: string; participated: number }
 
-// ─── 목 데이터 ────────────────────────────────────────────────────
-const MOCK_BATTLES: BattleThumb[] = [
-  { id: 'e1', title: '어떤 배경화면이 더 나아?', imageAUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100&h=100&fit=crop', imageBUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=100&h=100&fit=crop' },
-  { id: 'e2', title: '어떤 커피가 더 나아?', imageAUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100&h=100&fit=crop', imageBUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=100&h=100&fit=crop' },
-  { id: 'e3', title: '어떤 반려동물이 더 귀여워?', imageAUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=100&h=100&fit=crop', imageBUrl: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=100&h=100&fit=crop' },
-]
-const MOCK_HOT: HotThumb[] = [
-  { id: 'e3', title: '어떤 반려동물이 더 귀여워?', imageAUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=100&h=100&fit=crop', imageBUrl: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=100&h=100&fit=crop', likeCount: 41 },
-  { id: 'e1', title: '어떤 배경화면이 더 나아?', imageAUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100&h=100&fit=crop', imageBUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=100&h=100&fit=crop', likeCount: 24 },
-  { id: 'e4', title: '어떤 도시가 더 살기 좋아?', imageAUrl: 'https://images.unsplash.com/photo-1538485399081-7191377e8241?w=100&h=100&fit=crop', imageBUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=100&h=100&fit=crop', likeCount: 17 },
-  { id: 'e2', title: '어떤 커피가 더 나아?', imageAUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100&h=100&fit=crop', imageBUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=100&h=100&fit=crop', likeCount: 9 },
-]
-const MOCK_RANKERS: Ranker[] = [
-  { name: '김민준', participated: 45 },
-  { name: '이서연', participated: 38 },
-  { name: '박지현', participated: 31 },
-  { name: '최현우', participated: 24 },
-  { name: '정수아', participated: 18 },
-]
 
 // ─── 데이터 패칭 ──────────────────────────────────────────────────
 async function fetchHomeData(): Promise<{
@@ -35,14 +16,6 @@ async function fetchHomeData(): Promise<{
   hotBattles: HotThumb[]
   rankers: Ranker[]
 }> {
-  const isConfigured =
-    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project')
-
-  if (!isConfigured) {
-    return { randomBattles: MOCK_BATTLES, hotBattles: MOCK_HOT, rankers: MOCK_RANKERS }
-  }
-
   try {
     // 랜덤 배틀: 최신 6개 중 3개
     const recent = await db.query.betters.findMany({
@@ -85,8 +58,9 @@ async function fetchHomeData(): Promise<{
       .map((r) => ({ name: r.name, participated: r.count }))
 
     return { randomBattles, hotBattles, rankers }
-  } catch {
-    return { randomBattles: MOCK_BATTLES, hotBattles: MOCK_HOT, rankers: MOCK_RANKERS }
+  } catch (e) {
+    console.error('[HomePage] DB error:', e)
+    return { randomBattles: [], hotBattles: [], rankers: [] }
   }
 }
 

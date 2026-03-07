@@ -18,60 +18,8 @@ export type BattleForVoting = {
   isLiked: boolean
 }
 
-const EXPLORE_MOCK: BattleForVoting[] = [
-  {
-    id: 'explore-1',
-    title: '어떤 배경화면이 더 나아?',
-    imageAUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=600&fit=crop',
-    imageADescription: '산 풍경',
-    imageBUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=600&fit=crop',
-    imageBDescription: '해변 풍경',
-    likeCount: 24,
-    isLiked: false,
-  },
-  {
-    id: 'explore-2',
-    title: '어떤 커피가 더 나아?',
-    imageAUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&h=600&fit=crop',
-    imageADescription: '아메리카노',
-    imageBUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=600&fit=crop',
-    imageBDescription: '라떼',
-    likeCount: 9,
-    isLiked: false,
-  },
-  {
-    id: 'explore-3',
-    title: '어떤 반려동물이 더 귀여워?',
-    imageAUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=600&h=600&fit=crop',
-    imageADescription: '고양이',
-    imageBUrl: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&h=600&fit=crop',
-    imageBDescription: '강아지',
-    likeCount: 41,
-    isLiked: false,
-  },
-  {
-    id: 'explore-4',
-    title: '어떤 도시가 더 살기 좋아?',
-    imageAUrl: 'https://images.unsplash.com/photo-1538485399081-7191377e8241?w=600&h=600&fit=crop',
-    imageADescription: '서울',
-    imageBUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&h=600&fit=crop',
-    imageBDescription: '파리',
-    likeCount: 17,
-    isLiked: false,
-  },
-]
 
 export async function getRandomBattle(excludeIds: string[]): Promise<BattleForVoting | null> {
-  const isConfigured =
-    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project')
-
-  if (!isConfigured) {
-    const available = EXPLORE_MOCK.filter((b) => !excludeIds.includes(b.id))
-    if (!available.length) return null
-    return available[Math.floor(Math.random() * available.length)]
-  }
-
   try {
     const supabase = await createClient()
     const {
@@ -126,7 +74,8 @@ export async function getRandomBattle(excludeIds: string[]): Promise<BattleForVo
       likeCount: picked.likes.length,
       isLiked: userId ? picked.likes.some((l) => l.userId === userId) : false,
     }
-  } catch {
+  } catch (e) {
+    console.error('[getRandomBattle] DB error:', e)
     return null
   }
 }
@@ -191,7 +140,8 @@ export async function createBattle(
     revalidatePath('/')
     return { success: true as const }
   } catch (e) {
-    if (e instanceof Error && e.message === 'NEXT_REDIRECT') throw e
+    // Next.js redirect / notFound 에러는 반드시 재throw
+    if (e && typeof e === 'object' && 'digest' in e) throw e
     console.error('[createBattle]', e)
     return { error: '업로드 중 오류가 발생했습니다. 다시 시도해주세요.' }
   }

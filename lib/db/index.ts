@@ -10,7 +10,14 @@ let _db: DB | null = null
 
 function getDb(): DB {
   if (!_db) {
-    const client = postgres(process.env.DATABASE_URL!)
+    const url = process.env.DATABASE_URL
+    if (!url) throw new Error('[DB] DATABASE_URL is not set')
+    const client = postgres(url, {
+      ssl: 'require',
+      max: 1, // 서버리스 환경에서 연결 수 제한
+      idle_timeout: 20,
+      connect_timeout: 10,
+    })
     _db = drizzle(client, { schema })
   }
   return _db

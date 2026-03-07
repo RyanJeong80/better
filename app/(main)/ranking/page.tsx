@@ -4,21 +4,6 @@ import { db } from '@/lib/db'
 import { votes, betters, users } from '@/lib/db/schema'
 import { RankingView, type RankEntry, type MyStats } from '@/components/ranking/ranking-view'
 
-// ─── 데모 목 데이터 ────────────────────────────────────────────────
-const MOCK_PARTICIPATION: RankEntry[] = [
-  { userId: 'u1', displayName: '김민준', participated: 45, hits: 28, accuracy: 62 },
-  { userId: 'u2', displayName: '이서연', participated: 38, hits: 27, accuracy: 71 },
-  { userId: 'u3', displayName: '박지현', participated: 31, hits: 27, accuracy: 87 },
-  { userId: 'u4', displayName: '최현우', participated: 24, hits: 13, accuracy: 54 },
-  { userId: 'u5', displayName: '정수아', participated: 18, hits: 14, accuracy: 78 },
-  { userId: 'u6', displayName: '한지민', participated: 12, hits: 8, accuracy: 67 },
-]
-
-const MOCK_ACCURACY: RankEntry[] = [...MOCK_PARTICIPATION].sort(
-  (a, b) => b.accuracy - a.accuracy || b.participated - a.participated,
-)
-
-const MOCK_MY_STATS: MyStats = { participated: 23, hits: 16, accuracy: 70 }
 
 // ─── 순위 계산 ─────────────────────────────────────────────────────
 async function buildRankingData(currentUserId?: string): Promise<{
@@ -96,21 +81,6 @@ async function buildRankingData(currentUserId?: string): Promise<{
 
 // ─── 페이지 ────────────────────────────────────────────────────────
 export default async function RankingPage() {
-  const isConfigured =
-    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project')
-
-  if (!isConfigured) {
-    return (
-      <RankingView
-        myStats={MOCK_MY_STATS}
-        participationRanking={MOCK_PARTICIPATION}
-        accuracyRanking={MOCK_ACCURACY}
-        isDemo
-      />
-    )
-  }
-
   const supabase = await createClient()
   const {
     data: { user },

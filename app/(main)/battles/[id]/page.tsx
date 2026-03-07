@@ -12,12 +12,6 @@ export default async function BattlePage({
 }) {
   const { id } = await params
 
-  const isConfigured =
-    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project')
-
-  if (!isConfigured) notFound()
-
   try {
     const better = await db.query.betters.findFirst({
       where: eq(betters.id, id),

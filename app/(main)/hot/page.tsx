@@ -2,12 +2,6 @@ import Link from 'next/link'
 import { Heart, Flame } from 'lucide-react'
 import { db } from '@/lib/db'
 
-const MOCK_HOT = [
-  { id: 'm1', title: '어떤 반려동물이 더 귀여워?', imageAUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=200&h=200&fit=crop', imageBUrl: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=200&h=200&fit=crop', likeCount: 41 },
-  { id: 'm2', title: '어떤 배경화면이 더 나아?', imageAUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=200&h=200&fit=crop', imageBUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200&h=200&fit=crop', likeCount: 24 },
-  { id: 'm3', title: '어떤 도시가 더 살기 좋아?', imageAUrl: 'https://images.unsplash.com/photo-1538485399081-7191377e8241?w=200&h=200&fit=crop', imageBUrl: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=200&h=200&fit=crop', likeCount: 17 },
-  { id: 'm4', title: '어떤 커피가 더 나아?', imageAUrl: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=200&h=200&fit=crop', imageBUrl: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&h=200&fit=crop', likeCount: 9 },
-]
 
 type HotEntry = { id: string; title: string; imageAUrl: string; imageBUrl: string; likeCount: number }
 
@@ -18,39 +12,25 @@ const RANK_STYLE: Record<number, { bg: string; text: string }> = {
 }
 
 export default async function HotPage() {
-  const isConfigured =
-    !!process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('your-project')
-
   let entries: HotEntry[] = []
-  let isDemo = false
 
-  if (!isConfigured) {
-    entries = MOCK_HOT
-    isDemo = true
-  } else {
-    try {
-      const all = await db.query.betters.findMany({
-        columns: { id: true, title: true, imageAUrl: true, imageBUrl: true },
-        with: { likes: { columns: { id: true } } },
-      })
-      entries = all
-        .map((b) => ({ id: b.id, title: b.title, imageAUrl: b.imageAUrl, imageBUrl: b.imageBUrl, likeCount: b.likes.length }))
-        .filter((b) => b.likeCount > 0)
-        .sort((a, b) => b.likeCount - a.likeCount)
-        .slice(0, 100)
-    } catch {
-      entries = []
-    }
+  try {
+    const all = await db.query.betters.findMany({
+      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true },
+      with: { likes: { columns: { id: true } } },
+    })
+    entries = all
+      .map((b) => ({ id: b.id, title: b.title, imageAUrl: b.imageAUrl, imageBUrl: b.imageBUrl, likeCount: b.likes.length }))
+      .filter((b) => b.likeCount > 0)
+      .sort((a, b) => b.likeCount - a.likeCount)
+      .slice(0, 100)
+  } catch (e) {
+    console.error('[HotPage] DB error:', e)
+    entries = []
   }
 
   return (
     <div className="space-y-6">
-      {isDemo && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-          <strong>미리보기 모드</strong> — Supabase를 연결하면 실제 데이터가 표시됩니다.
-        </div>
-      )}
 
       {/* 헤더 */}
       <div
