@@ -108,12 +108,12 @@ export async function saveBattle(
     console.log('[saveBattle] step 3: upsert user, id:', user.id)
 
     // public.users에 없으면 생성 (OAuth 콜백 실패로 누락됐을 경우 대비)
+    // username은 온보딩에서만 설정 — 여기서 포함하면 unique 충돌 위험
     await db.insert(users).values({
       id: user.id,
       email: user.email!,
       name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
       avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-      username: user.user_metadata?.username ?? null,
     }).onConflictDoNothing()
 
     console.log('[saveBattle] step 4: DB insert better')
@@ -132,8 +132,15 @@ export async function saveBattle(
     return { success: true as const }
   } catch (e) {
     if (e && typeof e === 'object' && 'digest' in e) throw e
-    console.error('[saveBattle] error at step:', e)
-    return { error: `저장 중 오류가 발생했습니다: ${e instanceof Error ? e.message : String(e)}` }
+    const pg = e as Record<string, unknown>
+    console.error('[saveBattle] error:', {
+      message: pg.message,
+      code: pg.code,
+      detail: pg.detail,
+      hint: pg.hint,
+      constraint: pg.constraint,
+    })
+    return { error: `저장 중 오류가 발생했습니다: ${pg.detail ?? pg.message ?? String(e)}` }
   }
 }
 
