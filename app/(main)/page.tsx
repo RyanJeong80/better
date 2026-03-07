@@ -211,7 +211,10 @@ function FeatureCard({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
+    <Link
+      href={href}
+      className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-5 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+    >
       <div className="flex items-center gap-2.5">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: iconBg }}>
           {icon}
@@ -221,13 +224,12 @@ function FeatureCard({
 
       <div className="flex-1">{children}</div>
 
-      <Link
-        href={href}
-        className="mt-auto text-xs font-bold transition-opacity hover:opacity-70"
+      <span
+        className="mt-auto text-xs font-bold"
         style={{ color: accentColor }}
       >
         {linkLabel} →
-      </Link>
-    </div>
+      </span>
+    </Link>
   )
 }

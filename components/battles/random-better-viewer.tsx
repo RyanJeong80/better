@@ -156,6 +156,7 @@ export function RandomBetterViewer({
           className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold transition-all hover:border-rose-200 hover:bg-rose-50 disabled:opacity-60 active:scale-95"
           style={{ color: isLiked ? '#F43F5E' : undefined }}
         >
+          <span className="text-muted-foreground" style={{ color: isLiked ? '#F43F5E' : undefined }}>Hot100에 추천하기</span>
           <Heart
             size={14}
             style={{
