@@ -21,12 +21,16 @@ export async function castVote(betterId: string, choice: VoteChoice) {
 
   if (existing) return { error: '이미 투표했습니다' }
 
-  await db.insert(users).values({
-    id: user.id,
-    email: user.email!,
-    name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-    avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-  }).onConflictDoNothing()
+  try {
+    await db.insert(users).values({
+      id: user.id,
+      email: user.email!,
+      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+      avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+    }).onConflictDoNothing()
+  } catch (e) {
+    console.warn('[castVote] user upsert failed (continuing):', (e as Error)?.message)
+  }
 
   await db.insert(votes).values({
     betterId,
@@ -54,12 +58,16 @@ export async function submitVote(
   })
   if (existing) return { error: '이미 투표했습니다' }
 
-  await db.insert(users).values({
-    id: user.id,
-    email: user.email!,
-    name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-    avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-  }).onConflictDoNothing()
+  try {
+    await db.insert(users).values({
+      id: user.id,
+      email: user.email!,
+      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+      avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+    }).onConflictDoNothing()
+  } catch (e) {
+    console.warn('[submitVote] user upsert failed (continuing):', (e as Error)?.message)
+  }
 
   await db.insert(votes).values({
     betterId,

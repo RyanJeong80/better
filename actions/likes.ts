@@ -19,12 +19,16 @@ export async function toggleLike(
       where: and(eq(likes.betterId, betterId), eq(likes.userId, user.id)),
     })
 
-    await db.insert(users).values({
-      id: user.id,
-      email: user.email!,
-      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-      avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-    }).onConflictDoNothing()
+    try {
+      await db.insert(users).values({
+        id: user.id,
+        email: user.email!,
+        name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+        avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+      }).onConflictDoNothing()
+    } catch (e) {
+      console.warn('[toggleLike] user upsert failed (continuing):', (e as Error)?.message)
+    }
 
     if (existing) {
       await db.delete(likes).where(and(eq(likes.betterId, betterId), eq(likes.userId, user.id)))

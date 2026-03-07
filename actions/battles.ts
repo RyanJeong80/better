@@ -107,14 +107,17 @@ export async function saveBattle(
 
     console.log('[saveBattle] step 3: upsert user, id:', user.id)
 
-    // public.users에 없으면 생성 (OAuth 콜백 실패로 누락됐을 경우 대비)
-    // username은 온보딩에서만 설정 — 여기서 포함하면 unique 충돌 위험
-    await db.insert(users).values({
-      id: user.id,
-      email: user.email!,
-      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-      avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-    }).onConflictDoNothing()
+    // public.users에 없으면 생성 — 실패해도 트리거로 이미 존재하면 FK 통과
+    try {
+      await db.insert(users).values({
+        id: user.id,
+        email: user.email!,
+        name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+        avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+      }).onConflictDoNothing()
+    } catch (upsertErr) {
+      console.warn('[saveBattle] user upsert failed (continuing):', (upsertErr as Error)?.message)
+    }
 
     console.log('[saveBattle] step 4: DB insert better')
 
