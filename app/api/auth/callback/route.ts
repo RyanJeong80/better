@@ -20,17 +20,21 @@ export async function GET(request: Request) {
       return NextResponse.redirect(`${origin}/login?error=인증에 실패했습니다`)
     }
 
-    // public.users에 upsert
+    // public.users에 upsert (이름/아바타는 최신 OAuth 값으로 갱신)
+    const name = data.user.user_metadata?.full_name ?? data.user.user_metadata?.name ?? null
+    const avatarUrl = data.user.user_metadata?.avatar_url ?? data.user.user_metadata?.picture ?? null
     await db
       .insert(users)
       .values({
         id: data.user.id,
         email: data.user.email!,
-        name: data.user.user_metadata?.full_name ?? data.user.user_metadata?.name ?? null,
-        avatarUrl: data.user.user_metadata?.avatar_url ?? data.user.user_metadata?.picture ?? null,
+        name,
+        avatarUrl,
       })
-      .onConflictDoNothing()
-      .catch((e) => console.error('[callback] db upsert error:', e))
+      .onConflictDoUpdate({
+        target: users.id,
+        set: { name, avatarUrl },
+      })
 
     // username 미설정 시 온보딩으로
     if (!data.user.user_metadata?.username) {

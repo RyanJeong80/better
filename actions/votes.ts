@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { eq, and } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { votes } from '@/lib/db/schema'
+import { votes, users } from '@/lib/db/schema'
 import type { VoteChoice } from '@/types'
 
 export async function castVote(betterId: string, choice: VoteChoice) {
@@ -20,6 +20,13 @@ export async function castVote(betterId: string, choice: VoteChoice) {
   })
 
   if (existing) return { error: '이미 투표했습니다' }
+
+  await db.insert(users).values({
+    id: user.id,
+    email: user.email!,
+    name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+    avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+  }).onConflictDoNothing()
 
   await db.insert(votes).values({
     betterId,
@@ -46,6 +53,13 @@ export async function submitVote(
     where: and(eq(votes.betterId, betterId), eq(votes.voterId, user.id)),
   })
   if (existing) return { error: '이미 투표했습니다' }
+
+  await db.insert(users).values({
+    id: user.id,
+    email: user.email!,
+    name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+    avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+  }).onConflictDoNothing()
 
   await db.insert(votes).values({
     betterId,

@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { and, eq, ne, notInArray } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { betters, votes } from '@/lib/db/schema'
+import { betters, votes, users } from '@/lib/db/schema'
 
 export type BattleForVoting = {
   id: string
@@ -88,7 +88,10 @@ export async function saveBattle(
   formData: FormData,
 ): Promise<BattleState> {
   try {
+    console.log('[saveBattle] step 1: createClient')
     const supabase = await createClient()
+
+    console.log('[saveBattle] step 2: getUser')
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/login')
 
@@ -102,7 +105,18 @@ export async function saveBattle(
     if (!imageAUrl) return { error: '사진 A 업로드가 완료되지 않았습니다' }
     if (!imageBUrl) return { error: '사진 B 업로드가 완료되지 않았습니다' }
 
-    console.log('[saveBattle] inserting to DB for user:', user.id)
+    console.log('[saveBattle] step 3: upsert user, id:', user.id)
+
+    // public.users에 없으면 생성 (OAuth 콜백 실패로 누락됐을 경우 대비)
+    await db.insert(users).values({
+      id: user.id,
+      email: user.email!,
+      name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+      avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+      username: user.user_metadata?.username ?? null,
+    }).onConflictDoNothing()
+
+    console.log('[saveBattle] step 4: DB insert better')
 
     await db.insert(betters).values({
       userId: user.id,
@@ -113,12 +127,12 @@ export async function saveBattle(
       imageBDescription: descriptionB || null,
     })
 
-    console.log('[saveBattle] DB insert success')
+    console.log('[saveBattle] step 4: success')
     revalidatePath('/')
     return { success: true as const }
   } catch (e) {
     if (e && typeof e === 'object' && 'digest' in e) throw e
-    console.error('[saveBattle] error:', e)
+    console.error('[saveBattle] error at step:', e)
     return { error: `저장 중 오류가 발생했습니다: ${e instanceof Error ? e.message : String(e)}` }
   }
 }
