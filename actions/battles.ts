@@ -82,68 +82,44 @@ export async function getRandomBattle(excludeIds: string[]): Promise<BattleForVo
 
 export type BattleState = { error: string } | { success: true } | null
 
-export async function createBattle(
+// 이미지는 클라이언트에서 직접 업로드 후 URL만 전달받아 DB에 저장
+export async function saveBattle(
   _prev: BattleState,
   formData: FormData,
 ): Promise<BattleState> {
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/login')
 
-    const title = formData.get('title') as string
-    const imageAFile = formData.get('imageA') as File
-    const imageBFile = formData.get('imageB') as File
+    const title = (formData.get('title') as string)?.trim()
+    const imageAUrl = formData.get('imageAUrl') as string
+    const imageBUrl = formData.get('imageBUrl') as string
     const descriptionA = (formData.get('descriptionA') as string) || ''
     const descriptionB = (formData.get('descriptionB') as string) || ''
 
-    if (!imageAFile || imageAFile.size === 0) return { error: '사진 A를 업로드해주세요' }
-    if (!imageBFile || imageBFile.size === 0) return { error: '사진 B를 업로드해주세요' }
-    if (descriptionA.length > 100) return { error: '사진 A 설명은 100자 이내로 입력해주세요' }
-    if (descriptionB.length > 100) return { error: '사진 B 설명은 100자 이내로 입력해주세요' }
+    if (!title) return { error: '제목을 입력해주세요' }
+    if (!imageAUrl) return { error: '사진 A 업로드가 완료되지 않았습니다' }
+    if (!imageBUrl) return { error: '사진 B 업로드가 완료되지 않았습니다' }
 
-    const timestamp = Date.now()
+    console.log('[saveBattle] inserting to DB for user:', user.id)
 
-    const { data: imageAData, error: imageAError } = await supabase.storage
-      .from('battle-images')
-      .upload(`${user.id}/${timestamp}-A`, imageAFile)
+    await db.insert(betters).values({
+      userId: user.id,
+      title,
+      imageAUrl,
+      imageADescription: descriptionA || null,
+      imageBUrl,
+      imageBDescription: descriptionB || null,
+    })
 
-    if (imageAError) return { error: `이미지 업로드 실패: ${imageAError.message}` }
-
-    const { data: imageBData, error: imageBError } = await supabase.storage
-      .from('battle-images')
-      .upload(`${user.id}/${timestamp}-B`, imageBFile)
-
-    if (imageBError) return { error: `이미지 업로드 실패: ${imageBError.message}` }
-
-    const {
-      data: { publicUrl: imageAUrl },
-    } = supabase.storage.from('battle-images').getPublicUrl(imageAData.path)
-
-    const {
-      data: { publicUrl: imageBUrl },
-    } = supabase.storage.from('battle-images').getPublicUrl(imageBData.path)
-
-    await db
-      .insert(betters)
-      .values({
-        userId: user.id,
-        title,
-        imageAUrl,
-        imageADescription: descriptionA || null,
-        imageBUrl,
-        imageBDescription: descriptionB || null,
-      })
-
+    console.log('[saveBattle] DB insert success')
     revalidatePath('/')
     return { success: true as const }
   } catch (e) {
-    // Next.js redirect / notFound 에러는 반드시 재throw
     if (e && typeof e === 'object' && 'digest' in e) throw e
-    console.error('[createBattle]', e)
-    return { error: '업로드 중 오류가 발생했습니다. 다시 시도해주세요.' }
+    console.error('[saveBattle] error:', e)
+    return { error: `저장 중 오류가 발생했습니다: ${e instanceof Error ? e.message : String(e)}` }
   }
 }
 
