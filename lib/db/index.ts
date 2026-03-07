@@ -29,6 +29,7 @@ function getDb(): DB {
       max: 1,
       idle_timeout: 20,
       connect_timeout: 10,
+      prepare: false, // PgBouncer(Supabase pooler) 호환 — prepared statement 비활성화
     })
     _db = drizzle(client, { schema })
   }
