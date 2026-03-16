@@ -1,32 +1,21 @@
 import Link from 'next/link'
-import { Shuffle, Flame, Trophy, Heart } from 'lucide-react'
-import { desc } from 'drizzle-orm'
+import { Flame, Trophy, Heart } from 'lucide-react'
 import { db } from '@/lib/db'
 import { AnimatedWord } from '@/components/home/animated-word'
+import { RandomBattlesCard } from '@/components/home/random-battles-card'
+import { getBattleThumbnails } from '@/actions/battles'
 
 // ─── 타입 ─────────────────────────────────────────────────────────
-type BattleThumb = { id: string; title: string; imageAUrl: string; imageBUrl: string }
-type HotThumb = BattleThumb & { likeCount: number }
+type HotThumb = { id: string; title: string; imageAUrl: string; imageBUrl: string; likeCount: number }
 type Ranker = { name: string; participated: number }
 
 
 // ─── 데이터 패칭 ──────────────────────────────────────────────────
 async function fetchHomeData(): Promise<{
-  randomBattles: BattleThumb[]
   hotBattles: HotThumb[]
   rankers: Ranker[]
 }> {
   try {
-    // 랜덤 배틀: 최신 6개 중 3개
-    const recent = await db.query.betters.findMany({
-      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true },
-      orderBy: (b, { desc }) => [desc(b.createdAt)],
-      limit: 6,
-    })
-    const randomBattles = recent
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 3)
-
     // Hot 5
     const allWithLikes = await db.query.betters.findMany({
       columns: { id: true, title: true, imageAUrl: true, imageBUrl: true },
@@ -57,16 +46,19 @@ async function fetchHomeData(): Promise<{
       .slice(0, 5)
       .map((r) => ({ name: r.name, participated: r.count }))
 
-    return { randomBattles, hotBattles, rankers }
+    return { hotBattles, rankers }
   } catch (e) {
     console.error('[HomePage] DB error:', e)
-    return { randomBattles: [], hotBattles: [], rankers: [] }
+    return { hotBattles: [], rankers: [] }
   }
 }
 
 // ─── 페이지 ───────────────────────────────────────────────────────
 export default async function HomePage() {
-  const { randomBattles, hotBattles, rankers } = await fetchHomeData()
+  const [{ hotBattles, rankers }, randomBattles] = await Promise.all([
+    fetchHomeData(),
+    getBattleThumbnails(0),
+  ])
 
   return (
     <div className="space-y-8 md:space-y-12">
@@ -110,28 +102,7 @@ export default async function HomePage() {
       {/* ── 피처 카드 3개 ── */}
       <section className="grid grid-cols-1 gap-5 md:grid-cols-3">
         {/* 랜덤 Better */}
-        <FeatureCard
-          icon={<Shuffle size={20} color="#6366F1" />}
-          iconBg="#EEF2FF"
-          title="랜덤 Better 보기"
-          href="/explore"
-          linkLabel="지금 시작"
-          accentColor="#6366F1"
-        >
-          <ul className="space-y-2">
-            {randomBattles.map((b) => (
-              <li key={b.id} className="flex items-center gap-2.5">
-                <div className="flex shrink-0 overflow-hidden rounded-lg">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={b.imageAUrl} alt="" style={{ width: 34, height: 34, objectFit: 'cover' }} />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={b.imageBUrl} alt="" style={{ width: 34, height: 34, objectFit: 'cover', borderLeft: '2px solid #F5F3FF' }} />
-                </div>
-                <span className="truncate text-sm text-muted-foreground">{b.title}</span>
-              </li>
-            ))}
-          </ul>
-        </FeatureCard>
+        <RandomBattlesCard initialBattles={randomBattles} initialOffset={10} />
 
         {/* Hot 100 */}
         <FeatureCard

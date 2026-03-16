@@ -153,3 +153,50 @@ export async function getBattles() {
     with: { user: true },
   })
 }
+
+export type BattleThumb = { id: string; title: string; imageAUrl: string; imageBUrl: string }
+
+export async function getBattleThumbnails(offset: number): Promise<BattleThumb[]> {
+  try {
+    return await db.query.betters.findMany({
+      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true },
+      orderBy: (b, { desc }) => [desc(b.createdAt)],
+      offset,
+      limit: 10,
+    })
+  } catch {
+    return []
+  }
+}
+
+export async function getBattleById(id: string): Promise<BattleForVoting | null> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    const battle = await db.query.betters.findFirst({
+      where: eq(betters.id, id),
+      columns: {
+        id: true, title: true,
+        imageAUrl: true, imageADescription: true,
+        imageBUrl: true, imageBDescription: true,
+      },
+      with: { likes: { columns: { userId: true } } },
+    })
+
+    if (!battle) return null
+
+    return {
+      id: battle.id,
+      title: battle.title,
+      imageAUrl: battle.imageAUrl,
+      imageADescription: battle.imageADescription,
+      imageBUrl: battle.imageBUrl,
+      imageBDescription: battle.imageBDescription,
+      likeCount: battle.likes.length,
+      isLiked: user ? battle.likes.some((l) => l.userId === user.id) : false,
+    }
+  } catch {
+    return null
+  }
+}
