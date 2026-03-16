@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { ChevronRight, Check, Heart } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
@@ -26,12 +26,28 @@ export function RandomBetterViewer({
   const [selectedChoice, setSelectedChoice] = useState<'A' | 'B' | null>(null)
   const [reason, setReason] = useState('')
   const [voteResult, setVoteResult] = useState<VoteResult | null>(null)
-  const [seenIds, setSeenIds] = useState<string[]>(initialBattle ? [initialBattle.id] : [])
+  const [seenIds, setSeenIds] = useState<string[]>(() => {
+    // sessionStorage에서 이전 세션의 seenIds 복원 (같은 탭 내 중복 방지)
+    if (typeof window === 'undefined') return initialBattle ? [initialBattle.id] : []
+    try {
+      const stored = sessionStorage.getItem('seenBattleIds')
+      const prev: string[] = stored ? JSON.parse(stored) : []
+      const merged = new Set([...prev, ...(initialBattle ? [initialBattle.id] : [])])
+      return [...merged]
+    } catch {
+      return initialBattle ? [initialBattle.id] : []
+    }
+  })
   const [error, setError] = useState<string | null>(null)
   const [likeCount, setLikeCount] = useState(initialBattle?.likeCount ?? 0)
   const [isLiked, setIsLiked] = useState(initialBattle?.isLiked ?? false)
   const [likePending, setLikePending] = useState(false)
   const [, startTransition] = useTransition()
+
+  // seenIds가 바뀔 때마다 sessionStorage에 저장
+  useEffect(() => {
+    try { sessionStorage.setItem('seenBattleIds', JSON.stringify(seenIds)) } catch {}
+  }, [seenIds])
 
   function handlePickPhoto(choice: 'A' | 'B') {
     if (phase !== 'voting') return
@@ -80,6 +96,8 @@ export function RandomBetterViewer({
     startTransition(async () => {
       const next = await getRandomBattle(seenIds)
       if (!next) {
+        // 모두 소진 → sessionStorage 초기화 후 empty 표시
+        try { sessionStorage.removeItem('seenBattleIds') } catch {}
         setPhase('empty')
         return
       }

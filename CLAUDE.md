@@ -174,18 +174,76 @@ npm run db:studio    # Drizzle Studio 열기
 
 ### 완료
 - 인증 (이메일/비밀번호 로그인·회원가입·로그아웃)
-- 배틀 생성 (이미지 2장 업로드 + 제목/설명)
+- Google OAuth 로그인 (Supabase Auth)
+- 배틀 생성 (이미지 2장 클라이언트 직접 업로드 → URL만 Server Action에 전달)
 - A/B 투표 (중복 방지, 이유 입력 옵션)
 - 실시간 투표 수 (Supabase Realtime)
-- 랜덤 탐색 (본인 배틀·이미 투표한 배틀 제외)
-- 좋아요 토글 + Hot 100 랭킹
+- 랜덤 탐색 (본인 배틀·이미 투표한 배틀 제외, sessionStorage로 중복 방지)
+- 좋아요 토글 + Hot 100 랭킹 ("Hot100에 추천하기" 문구 포함)
 - 유저 랭킹 (참여 수 / 투표 적중률)
 - 프로필 (내 배틀, 통계, 받은 투표 이유)
 - 모바일 반응형 (하단 네비게이션)
-- Supabase 미연결 시 목 데이터로 graceful degradation
+- 홈 피처 카드 전체 클릭 가능 (제목·썸네일·내용 모두 링크)
+- 이미지 업로드 시 canvas 리사이징 (1280px, JPEG 0.82) + blob URL 메모리 관리
+- 업로드 성공 후 홈 자동 리다이렉트 (메모리 해제)
 
 ### 미구현
 - 배틀 삭제 / 마감 (`closedAt` 필드 있으나 미사용)
 - 유저 검색 / 팔로우
 - 신고·모더레이션
 - 배틀 카테고리·태그
+
+---
+
+## 주요 버그 수정 이력 (Vercel 배포)
+
+### DB 연결
+- **증상**: Vercel에서 INSERT 쿼리만 `Failed query` 오류
+- **원인**: Supabase 직접 연결(5432)은 IPv6 전용 → Vercel 일부 리전 미지원
+- **해결**: Vercel `DATABASE_URL`을 Transaction 풀러 URL(포트 6543)로 교체
+- `lib/db/index.ts`에 `prepare: false` 추가 (PgBouncer 호환)
+
+### public.users FK 제약
+- **증상**: 투표·좋아요·배틀 생성 시 FK constraint 오류
+- **원인**: OAuth 로그인 시 `public.users`에 유저가 생성되지 않음
+- **해결**:
+  1. Supabase SQL Editor에서 `auth.users` INSERT 트리거 생성 (아래 참고)
+  2. `actions/battles.ts`, `actions/votes.ts`, `actions/likes.ts`에 user upsert 추가 (실패해도 non-fatal)
+  3. `app/api/auth/callback/route.ts`에서 `onConflictDoUpdate`로 name/avatarUrl 갱신
+
+### Supabase Storage RLS
+- **증상**: 이미지 업로드 시 "new row violates row-level security policy"
+- **해결**: SQL Editor에서 `storage.objects`에 정책 추가
+  ```sql
+  CREATE POLICY "authenticated users can upload" ON storage.objects
+  FOR INSERT TO authenticated WITH CHECK (bucket_id = 'battle-images');
+  CREATE POLICY "public read" ON storage.objects
+  FOR SELECT TO public USING (bucket_id = 'battle-images');
+  ```
+
+---
+
+## Supabase 트리거 (auth.users → public.users 자동 동기화)
+
+SQL Editor에서 실행:
+
+```sql
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  INSERT INTO public.users (id, email, name, avatar_url)
+  VALUES (
+    NEW.id, NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'full_name', NEW.raw_user_meta_data->>'name'),
+    COALESCE(NEW.raw_user_meta_data->>'avatar_url', NEW.raw_user_meta_data->>'picture')
+  )
+  ON CONFLICT (id) DO UPDATE SET
+    name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url;
+  RETURN NEW;
+END;
+$$;
+
+CREATE OR REPLACE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+```

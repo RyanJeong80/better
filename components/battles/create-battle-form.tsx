@@ -8,12 +8,19 @@ import { saveBattle, type BattleState } from '@/actions/battles'
 
 const MAX_DESC = 100
 const MAX_FILE_MB = 5
-const MAX_IMAGE_PX = 1920   // 이 이상이면 리사이징
-const JPEG_QUALITY = 0.85
+const MAX_IMAGE_PX = 1280
+const JPEG_QUALITY = 0.82
+const TEXT_IMAGE_SIZE = 800
+
+const TEXT_BG_COLORS = [
+  { bg: '#18181b', text: '#ffffff' },
+  { bg: '#7c3aed', text: '#ffffff' },
+  { bg: '#db2777', text: '#ffffff' },
+  { bg: '#0891b2', text: '#ffffff' },
+  { bg: '#f8fafc', text: '#18181b' },
+]
 
 // ─── 이미지 리사이징 ──────────────────────────────────────────────
-// 원본 파일을 canvas로 리사이징해 업로드 크기·메모리 절약
-// GIF는 애니메이션 보존을 위해 스킵
 async function resizeImage(file: File): Promise<File> {
   if (file.type === 'image/gif') return file
 
@@ -22,12 +29,12 @@ async function resizeImage(file: File): Promise<File> {
     const tempUrl = URL.createObjectURL(file)
 
     img.onload = () => {
-      URL.revokeObjectURL(tempUrl) // 로드 후 즉시 해제
+      URL.revokeObjectURL(tempUrl)
 
       const { naturalWidth: w, naturalHeight: h } = img
 
       if (w <= MAX_IMAGE_PX && h <= MAX_IMAGE_PX) {
-        resolve(file) // 충분히 작으면 원본 반환
+        resolve(file)
         return
       }
 
@@ -40,7 +47,7 @@ async function resizeImage(file: File): Promise<File> {
 
       canvas.toBlob(
         (blob) => {
-          canvas.width = 0   // canvas 픽셀 버퍼 즉시 해제
+          canvas.width = 0
           canvas.height = 0
           resolve(blob
             ? new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' })
@@ -57,16 +64,110 @@ async function resizeImage(file: File): Promise<File> {
   })
 }
 
+// ─── 텍스트 줄바꿈 ────────────────────────────────────────────────
+function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] {
+  const words = text.split(' ')
+  const lines: string[] = []
+  let current = ''
+
+  for (const word of words) {
+    if (!word) continue
+    // 단어 자체가 maxWidth 초과 시 글자 단위 분리
+    if (ctx.measureText(word).width > maxWidth) {
+      if (current) { lines.push(current); current = '' }
+      for (const char of word) {
+        const t = current + char
+        if (ctx.measureText(t).width > maxWidth && current) {
+          lines.push(current)
+          current = char
+        } else {
+          current = t
+        }
+      }
+    } else {
+      const test = current ? `${current} ${word}` : word
+      if (ctx.measureText(test).width > maxWidth && current) {
+        lines.push(current)
+        current = word
+      } else {
+        current = test
+      }
+    }
+  }
+  if (current) lines.push(current)
+  return lines.length ? lines : [text]
+}
+
+// ─── 텍스트 → 이미지 변환 ─────────────────────────────────────────
+async function generateTextImage(text: string, colorIdx: number): Promise<File> {
+  const { bg, text: textColor } = TEXT_BG_COLORS[colorIdx]
+  const SIZE = TEXT_IMAGE_SIZE
+  const canvas = document.createElement('canvas')
+  canvas.width = SIZE
+  canvas.height = SIZE
+  const ctx = canvas.getContext('2d')!
+
+  ctx.fillStyle = bg
+  ctx.fillRect(0, 0, SIZE, SIZE)
+
+  const PADDING = 80
+  const maxWidth = SIZE - PADDING * 2
+  const len = text.length
+  const fontSize = len <= 15 ? 64 : len <= 40 ? 52 : len <= 70 ? 42 : 34
+
+  ctx.font = `700 ${fontSize}px 'Plus Jakarta Sans', 'Pretendard Variable', sans-serif`
+  ctx.fillStyle = textColor
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'alphabetic'
+
+  const lines = wrapText(ctx, text, maxWidth)
+  const lineHeight = fontSize * 1.5
+  const totalHeight = lines.length * lineHeight
+  const startY = (SIZE - totalHeight) / 2 + fontSize
+
+  lines.forEach((line, i) => {
+    ctx.fillText(line, SIZE / 2, startY + i * lineHeight)
+  })
+
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      canvas.width = 0
+      canvas.height = 0
+      if (!blob) { reject(new Error('텍스트 이미지 생성 실패')); return }
+      resolve(new File([blob], `text-${Date.now()}.jpg`, { type: 'image/jpeg' }))
+    }, 'image/jpeg', 0.92)
+  })
+}
+
+// ─── 텍스트 이미지 Supabase 업로드 ───────────────────────────────
+async function uploadTextImage(text: string, colorIdx: number, side: 'A' | 'B'): Promise<string> {
+  const file = await generateTextImage(text, colorIdx)
+  const supabase = createClient()
+  const path = `${Date.now()}-${side}-text.jpg`
+
+  const { data, error } = await supabase.storage
+    .from('battle-images')
+    .upload(path, file, { upsert: true })
+
+  if (error) throw new Error(error.message)
+
+  const { data: { publicUrl } } = supabase.storage
+    .from('battle-images')
+    .getPublicUrl(data.path)
+
+  return publicUrl
+}
+
 // ─── 이미지 슬롯 ──────────────────────────────────────────────────
 interface SlotState {
-  preview: string | null   // blob: URL (언마운트·교체 시 revoke)
-  url: string | null       // Supabase Storage 공개 URL
+  preview: string | null
+  url: string | null
   uploading: boolean
   uploadError: string | null
   desc: string
+  selectedColor: number
 }
 
-// memo: 반대쪽 슬롯 state 변경 시 불필요한 re-render 방지
 const ImageSlot = memo(function ImageSlot({
   side,
   state,
@@ -76,6 +177,7 @@ const ImageSlot = memo(function ImageSlot({
   state: SlotState
   onChange: (patch: Partial<SlotState>) => void
 }) {
+  const hasImage = !!state.preview || state.uploading
   const nearLimit = state.desc.length >= 80
   const atLimit = state.desc.length >= MAX_DESC
 
@@ -85,16 +187,12 @@ const ImageSlot = memo(function ImageSlot({
       return
     }
 
-    // 이전 blob URL 해제 (교체 시 메모리 누수 방지)
     if (state.preview?.startsWith('blob:')) URL.revokeObjectURL(state.preview)
 
-    // 업로드 시작 상태 — 리사이징 전이라도 UI 즉시 반응
     onChange({ preview: null, uploading: true, uploadError: null, url: null })
 
     try {
       const resized = await resizeImage(file)
-
-      // 리사이징된 파일로 미리보기 (원본 File 객체는 이 시점에 참조 해제)
       const preview = URL.createObjectURL(resized)
       onChange({ preview })
 
@@ -114,7 +212,6 @@ const ImageSlot = memo(function ImageSlot({
 
       onChange({ uploading: false, url: publicUrl })
     } catch (e) {
-      // 실패 시 uploading 반드시 해제
       onChange({
         uploading: false,
         uploadError: `업로드 중 오류: ${e instanceof Error ? e.message : String(e)}`,
@@ -124,6 +221,7 @@ const ImageSlot = memo(function ImageSlot({
 
   return (
     <div className="flex-1 min-w-0 space-y-3">
+      {/* 업로드 영역 */}
       <div className="group relative aspect-square overflow-hidden rounded-2xl border-2 border-dashed border-border bg-muted/40 transition-colors hover:border-primary/50">
         <input
           type="file"
@@ -132,7 +230,7 @@ const ImageSlot = memo(function ImageSlot({
           onChange={(e) => {
             const file = e.target.files?.[0]
             if (file) handleFile(file)
-            e.target.value = '' // 같은 파일 재선택 허용
+            e.target.value = ''
           }}
         />
 
@@ -173,7 +271,7 @@ const ImageSlot = memo(function ImageSlot({
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-muted-foreground">클릭 또는 드래그</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground/60">JPG · PNG · GIF · WEBP · 최대 {MAX_FILE_MB}MB</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground/60">선택 사항 · 없으면 텍스트로 생성</p>
                 </div>
               </>
             )}
@@ -185,10 +283,39 @@ const ImageSlot = memo(function ImageSlot({
         <p className="text-xs text-rose-500">{state.uploadError}</p>
       )}
 
+      {/* 배경색 선택 — 이미지 없을 때만 표시 */}
+      {!hasImage && (
+        <div className="flex items-center gap-2.5">
+          <span className="text-xs text-muted-foreground shrink-0">배경색</span>
+          <div className="flex gap-1.5">
+            {TEXT_BG_COLORS.map((color, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => onChange({ selectedColor: i })}
+                style={{
+                  backgroundColor: color.bg,
+                  boxShadow: state.selectedColor === i ? `0 0 0 2px white, 0 0 0 3.5px ${color.bg}` : undefined,
+                  border: color.bg === '#f8fafc' ? '1px solid #e2e8f0' : undefined,
+                }}
+                className={[
+                  'h-5 w-5 rounded-full transition-transform',
+                  state.selectedColor === i ? 'scale-125' : 'hover:scale-110',
+                ].join(' ')}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 설명 / 텍스트 내용 */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label className="text-xs font-medium text-muted-foreground">
-            설명 <span className="text-muted-foreground/50">(선택)</span>
+            {hasImage
+              ? <>설명 <span className="text-muted-foreground/50">(선택)</span></>
+              : <>텍스트 내용 <span className="text-muted-foreground/50">(이미지로 변환됩니다)</span></>
+            }
           </label>
           <span className={['text-xs tabular-nums transition-colors', atLimit ? 'font-semibold text-destructive' : nearLimit ? 'text-orange-400' : 'text-muted-foreground/50'].join(' ')}>
             {state.desc.length}/{MAX_DESC}
@@ -199,7 +326,7 @@ const ImageSlot = memo(function ImageSlot({
           onChange={(e) => onChange({ desc: e.target.value.slice(0, MAX_DESC) })}
           maxLength={MAX_DESC}
           rows={2}
-          placeholder={`사진 ${side}에 대해 설명해주세요`}
+          placeholder={hasImage ? `사진 ${side}에 대해 설명해주세요` : '텍스트를 입력하면 이미지로 변환됩니다'}
           className="w-full resize-none rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
         />
       </div>
@@ -209,7 +336,8 @@ const ImageSlot = memo(function ImageSlot({
 
 const initSlot = (): SlotState => ({
   preview: null, url: null,
-  uploading: false, uploadError: null, desc: '',
+  uploading: false, uploadError: null,
+  desc: '', selectedColor: 0,
 })
 
 // ─── 메인 폼 ──────────────────────────────────────────────────────
@@ -218,8 +346,9 @@ export function CreateBattleForm() {
   const [state, formAction] = useActionState<BattleState, FormData>(saveBattle, null)
   const [slotA, setSlotA] = useState<SlotState>(initSlot)
   const [slotB, setSlotB] = useState<SlotState>(initSlot)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [generateError, setGenerateError] = useState<string | null>(null)
 
-  // 언마운트 시 blob URL 해제용 ref
   const previewRef = useRef({ a: slotA.preview, b: slotB.preview })
   useEffect(() => { previewRef.current.a = slotA.preview }, [slotA.preview])
   useEffect(() => { previewRef.current.b = slotB.preview }, [slotB.preview])
@@ -230,35 +359,58 @@ export function CreateBattleForm() {
     }
   }, [])
 
-  // 저장 성공 → 홈으로 이동 (컴포넌트 언마운트로 blob URL 자동 revoke)
   useEffect(() => {
     if (state && 'success' in state) router.push('/')
   }, [state, router])
 
-  // useCallback: ImageSlot에 안정적인 참조 전달 → memo 효과 극대화
   const handleChangeA = useCallback((p: Partial<SlotState>) => setSlotA(s => ({ ...s, ...p })), [])
   const handleChangeB = useCallback((p: Partial<SlotState>) => setSlotB(s => ({ ...s, ...p })), [])
 
+  const hasContentA = !!slotA.url || !!slotA.desc.trim()
+  const hasContentB = !!slotB.url || !!slotB.desc.trim()
   const isUploading = slotA.uploading || slotB.uploading
-  const canSubmit = !!slotA.url && !!slotB.url && !isUploading
+  const canSubmit = hasContentA && hasContentB && !isUploading && !isGenerating
 
   return (
     <form
       action={async (formData) => {
-        formData.set('imageAUrl', slotA.url ?? '')
-        formData.set('imageBUrl', slotB.url ?? '')
-        formData.set('descriptionA', slotA.desc)
-        formData.set('descriptionB', slotB.desc)
+        setGenerateError(null)
+        let urlA = slotA.url
+        let urlB = slotB.url
+
+        // 이미지 없는 슬롯은 텍스트 → 이미지 변환 후 업로드
+        if (!urlA || !urlB) {
+          setIsGenerating(true)
+          try {
+            if (!urlA && slotA.desc.trim()) {
+              urlA = await uploadTextImage(slotA.desc.trim(), slotA.selectedColor, 'A')
+            }
+            if (!urlB && slotB.desc.trim()) {
+              urlB = await uploadTextImage(slotB.desc.trim(), slotB.selectedColor, 'B')
+            }
+          } catch (e) {
+            setGenerateError(`이미지 생성 중 오류: ${e instanceof Error ? e.message : String(e)}`)
+            setIsGenerating(false)
+            return
+          }
+          setIsGenerating(false)
+        }
+
+        formData.set('imageAUrl', urlA ?? '')
+        formData.set('imageBUrl', urlB ?? '')
+        // 텍스트 전용 슬롯은 설명 생략 (텍스트가 이미지에 포함됨)
+        formData.set('descriptionA', slotA.url ? slotA.desc : '')
+        formData.set('descriptionB', slotB.url ? slotB.desc : '')
         await formAction(formData)
       }}
       className="space-y-8"
     >
-      {state && 'error' in state && (
+      {(state && 'error' in state || generateError) && (
         <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           <svg className="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-5a.75.75 0 01.75.75v4.5a.75.75 0 01-1.5 0v-4.5A.75.75 0 0110 5zm0 10a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
           </svg>
-          {(state as { error: string }).error}
+          {generateError ?? (state as { error: string }).error}
         </div>
       )}
 
@@ -289,15 +441,15 @@ export function CreateBattleForm() {
         disabled={!canSubmit}
         className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
       >
-        {isUploading ? (
+        {isUploading || isGenerating ? (
           <span className="flex items-center justify-center gap-2">
             <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            업로드 중…
+            {isGenerating ? '이미지 생성 중…' : '업로드 중…'}
           </span>
-        ) : !canSubmit ? '사진 두 장을 업로드해주세요' : '만들기'}
+        ) : !canSubmit ? 'A와 B 모두 내용을 입력해주세요' : '만들기'}
       </button>
     </form>
   )
