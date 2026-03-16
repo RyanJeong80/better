@@ -1,21 +1,31 @@
 import Link from 'next/link'
 import { Flame, Trophy, Heart } from 'lucide-react'
+import { desc } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { AnimatedWord } from '@/components/home/animated-word'
 import { RandomBattlesCard } from '@/components/home/random-battles-card'
-import { getBattleThumbnails } from '@/actions/battles'
 
 // ─── 타입 ─────────────────────────────────────────────────────────
-type HotThumb = { id: string; title: string; imageAUrl: string; imageBUrl: string; likeCount: number }
+type BattleThumb = { id: string; title: string; imageAUrl: string; imageBUrl: string }
+type HotThumb = BattleThumb & { likeCount: number }
 type Ranker = { name: string; participated: number }
 
 
 // ─── 데이터 패칭 ──────────────────────────────────────────────────
+// max:1 연결 제한 — 모든 DB 쿼리를 순차 실행
 async function fetchHomeData(): Promise<{
+  randomBattles: BattleThumb[]
   hotBattles: HotThumb[]
   rankers: Ranker[]
 }> {
   try {
+    // 랜덤 Better 카드: 최신 10개
+    const randomBattles = await db.query.betters.findMany({
+      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true },
+      orderBy: (b, { desc }) => [desc(b.createdAt)],
+      limit: 10,
+    })
+
     // Hot 5
     const allWithLikes = await db.query.betters.findMany({
       columns: { id: true, title: true, imageAUrl: true, imageBUrl: true },
@@ -46,19 +56,16 @@ async function fetchHomeData(): Promise<{
       .slice(0, 5)
       .map((r) => ({ name: r.name, participated: r.count }))
 
-    return { hotBattles, rankers }
+    return { randomBattles, hotBattles, rankers }
   } catch (e) {
     console.error('[HomePage] DB error:', e)
-    return { hotBattles: [], rankers: [] }
+    return { randomBattles: [], hotBattles: [], rankers: [] }
   }
 }
 
 // ─── 페이지 ───────────────────────────────────────────────────────
 export default async function HomePage() {
-  const [{ hotBattles, rankers }, randomBattles] = await Promise.all([
-    fetchHomeData(),
-    getBattleThumbnails(0),
-  ])
+  const { randomBattles, hotBattles, rankers } = await fetchHomeData()
 
   return (
     <div className="space-y-8 md:space-y-12">
