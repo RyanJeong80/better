@@ -271,7 +271,7 @@ const ImageSlot = memo(function ImageSlot({
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-muted-foreground">클릭 또는 드래그</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground/60">선택 사항 · 없으면 텍스트로 생성</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground/60">사진 대신 밑에 글로 적어도 됩니다</p>
                 </div>
               </>
             )}
@@ -359,8 +359,12 @@ export function CreateBattleForm() {
     }
   }, [])
 
+  // 저장 성공 → 완료 메시지 1.5초 표시 후 홈으로 이동
   useEffect(() => {
-    if (state && 'success' in state) router.push('/')
+    if (state && 'success' in state) {
+      const t = setTimeout(() => router.push('/'), 1500)
+      return () => clearTimeout(t)
+    }
   }, [state, router])
 
   const handleChangeA = useCallback((p: Partial<SlotState>) => setSlotA(s => ({ ...s, ...p })), [])
@@ -405,6 +409,15 @@ export function CreateBattleForm() {
       }}
       className="space-y-8"
     >
+      {state && 'success' in state && (
+        <div className="flex items-center gap-2.5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+          <svg className="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clipRule="evenodd" />
+          </svg>
+          Better가 생성되었습니다! 홈으로 이동합니다…
+        </div>
+      )}
+
       {(state && 'error' in state || generateError) && (
         <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
           <svg className="mt-0.5 h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor">
