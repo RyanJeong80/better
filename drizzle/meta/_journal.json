@@ -15,6 +15,13 @@
       "when": 1772745518133,
       "tag": "0001_luxuriant_unicorn",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1773855250132,
+      "tag": "0002_heavy_triathlon",
+      "breakpoints": true
     }
   ]
 }

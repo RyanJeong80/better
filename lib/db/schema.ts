@@ -2,6 +2,7 @@ import { pgTable, uuid, text, timestamp, pgEnum } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
 export const voteChoiceEnum = pgEnum('vote_choice', ['A', 'B'])
+export const betterCategoryEnum = pgEnum('better_category', ['fashion', 'appearance', 'decision'])
 
 // ─── 테이블 ───────────────────────────────────────────────────────
 
@@ -24,6 +25,7 @@ export const betters = pgTable('betters', {
   imageADescription: text('image_a_description'),
   imageBUrl: text('image_b_url').notNull(),
   imageBDescription: text('image_b_description'),
+  category: betterCategoryEnum('category').notNull().default('decision'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   closedAt: timestamp('closed_at'),
 })

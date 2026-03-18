@@ -158,12 +158,14 @@ export type BattleThumb = { id: string; title: string; imageAUrl: string; imageB
 
 export async function getBattleThumbnails(offset: number): Promise<BattleThumb[]> {
   try {
-    return await db.query.betters.findMany({
-      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true },
-      orderBy: (b, { desc }) => [desc(b.createdAt)],
-      offset,
-      limit: 10,
+    // LIMIT/OFFSET 파라미터화 회피 — 전체 조회 후 JS 슬라이스
+    const all = await db.query.betters.findMany({
+      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true, createdAt: true },
     })
+    return all
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(offset, offset + 10)
+      .map(({ id, title, imageAUrl, imageBUrl }) => ({ id, title, imageAUrl, imageBUrl }))
   } catch {
     return []
   }

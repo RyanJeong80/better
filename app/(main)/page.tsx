@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import { Flame, Trophy, Heart } from 'lucide-react'
-import { desc } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { AnimatedWord } from '@/components/home/animated-word'
 import { RandomBattlesCard } from '@/components/home/random-battles-card'
@@ -18,25 +17,31 @@ async function fetchHomeData(): Promise<{
   hotBattles: HotThumb[]
   rankers: Ranker[]
 }> {
-  try {
-    // 랜덤 Better 카드: 최신 10개
-    const randomBattles = await db.query.betters.findMany({
-      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true },
-      orderBy: (b, { desc }) => [desc(b.createdAt)],
-      limit: 10,
-    })
+  // 각 쿼리를 독립 try/catch로 분리 — 하나가 실패해도 나머지는 계속 실행
+  let randomBattles: BattleThumb[] = []
+  let hotBattles: HotThumb[] = []
+  let rankers: Ranker[] = []
 
-    // Hot 5
+  try {
     const allWithLikes = await db.query.betters.findMany({
-      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true },
+      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true, createdAt: true },
       with: { likes: { columns: { id: true } } },
     })
-    const hotBattles = allWithLikes
-      .map((b) => ({ ...b, likeCount: b.likes.length, likes: undefined }))
+
+    randomBattles = [...allWithLikes]
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, 10)
+      .map(({ id, title, imageAUrl, imageBUrl }) => ({ id, title, imageAUrl, imageBUrl }))
+
+    hotBattles = allWithLikes
+      .map((b) => ({ id: b.id, title: b.title, imageAUrl: b.imageAUrl, imageBUrl: b.imageBUrl, likeCount: b.likes.length }))
       .sort((a, b) => b.likeCount - a.likeCount)
       .slice(0, 5) as HotThumb[]
+  } catch (e) {
+    console.error('[HomePage] betters query failed:', e)
+  }
 
-    // 참가 순위 top 5
+  try {
     const allVotes = await db.query.votes.findMany({
       with: { voter: { columns: { id: true, name: true, email: true } } },
       columns: { voterId: true },
@@ -51,21 +56,25 @@ async function fetchHomeData(): Promise<{
       }
       countMap.get(v.voterId)!.count++
     }
-    const rankers = [...countMap.values()]
+    rankers = [...countMap.values()]
       .sort((a, b) => b.count - a.count)
       .slice(0, 5)
       .map((r) => ({ name: r.name, participated: r.count }))
-
-    return { randomBattles, hotBattles, rankers }
   } catch (e) {
-    console.error('[HomePage] DB error:', e)
-    return { randomBattles: [], hotBattles: [], rankers: [] }
+    console.error('[HomePage] votes query failed:', e)
   }
+
+  return { randomBattles, hotBattles, rankers }
 }
 
 // ─── 페이지 ───────────────────────────────────────────────────────
 export default async function HomePage() {
-  const { randomBattles, hotBattles, rankers } = await fetchHomeData()
+  // fetchHomeData 내부에서 각 쿼리 에러를 처리하지만 혹시 모를 전파도 막음
+  const { randomBattles, hotBattles, rankers } = await fetchHomeData().catch(() => ({
+    randomBattles: [] as BattleThumb[],
+    hotBattles: [] as HotThumb[],
+    rankers: [] as Ranker[],
+  }))
 
   return (
     <div className="space-y-8 md:space-y-12">
