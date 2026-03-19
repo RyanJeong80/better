@@ -1,6 +1,6 @@
 'use client'
 
-import { memo, useActionState, useCallback, useEffect, useRef, useState } from 'react'
+import { memo, useActionState, useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImagePlus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -349,6 +349,7 @@ export function CreateBattleForm() {
   const [slotA, setSlotA] = useState<SlotState>(initSlot)
   const [slotB, setSlotB] = useState<SlotState>(initSlot)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [generateError, setGenerateError] = useState<string | null>(null)
   const [category, setCategory] = useState<BetterCategory | null>(null)
 
@@ -376,11 +377,12 @@ export function CreateBattleForm() {
   const hasContentA = !!slotA.url || !!slotA.desc.trim()
   const hasContentB = !!slotB.url || !!slotB.desc.trim()
   const isUploading = slotA.uploading || slotB.uploading
-  const canSubmit = hasContentA && hasContentB && !isUploading && !isGenerating && !!category
+  const canSubmit = hasContentA && hasContentB && !isUploading && !isGenerating && !isPending && !!category
 
   return (
     <form
       action={async (formData) => {
+        console.log('[CreateBattleForm] submit start — category:', category, '| hasContentA:', hasContentA, '| hasContentB:', hasContentB)
         setGenerateError(null)
         let urlA = slotA.url
         let urlB = slotB.url
@@ -390,12 +392,17 @@ export function CreateBattleForm() {
           setIsGenerating(true)
           try {
             if (!urlA && slotA.desc.trim()) {
+              console.log('[CreateBattleForm] generating text image A')
               urlA = await uploadTextImage(slotA.desc.trim(), slotA.selectedColor, 'A')
+              console.log('[CreateBattleForm] text image A uploaded:', urlA)
             }
             if (!urlB && slotB.desc.trim()) {
+              console.log('[CreateBattleForm] generating text image B')
               urlB = await uploadTextImage(slotB.desc.trim(), slotB.selectedColor, 'B')
+              console.log('[CreateBattleForm] text image B uploaded:', urlB)
             }
           } catch (e) {
+            console.error('[CreateBattleForm] image generation error:', e)
             setGenerateError(`이미지 생성 중 오류: ${e instanceof Error ? e.message : String(e)}`)
             setIsGenerating(false)
             return
@@ -403,13 +410,24 @@ export function CreateBattleForm() {
           setIsGenerating(false)
         }
 
-        formData.set('imageAUrl', urlA ?? '')
-        formData.set('imageBUrl', urlB ?? '')
-        // 텍스트 전용 슬롯은 설명 생략 (텍스트가 이미지에 포함됨)
+        if (!urlA) { setGenerateError('사진 A가 없습니다. 이미지를 업로드하거나 텍스트를 입력해주세요.'); return }
+        if (!urlB) { setGenerateError('사진 B가 없습니다. 이미지를 업로드하거나 텍스트를 입력해주세요.'); return }
+
+        formData.set('imageAUrl', urlA)
+        formData.set('imageBUrl', urlB)
         formData.set('descriptionA', slotA.url ? slotA.desc : '')
         formData.set('descriptionB', slotB.url ? slotB.desc : '')
         formData.set('category', category ?? 'decision')
-        await formAction(formData)
+
+        console.log('[CreateBattleForm] calling saveBattle — imageAUrl:', urlA.slice(0, 60), '| category:', category)
+        startTransition(async () => {
+          try {
+            await formAction(formData)
+          } catch (e) {
+            console.error('[CreateBattleForm] formAction error:', e)
+            setGenerateError(`제출 중 오류: ${e instanceof Error ? e.message : String(e)}`)
+          }
+        })
       }}
       className="space-y-8"
     >
@@ -488,13 +506,13 @@ export function CreateBattleForm() {
         disabled={!canSubmit}
         className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
       >
-        {isUploading || isGenerating ? (
+        {isUploading || isGenerating || isPending ? (
           <span className="flex items-center justify-center gap-2">
             <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            {isGenerating ? '이미지 생성 중…' : '업로드 중…'}
+            {isGenerating ? '이미지 생성 중…' : isPending ? '저장 중…' : '업로드 중…'}
           </span>
         ) : !category ? '카테고리를 선택해주세요' : (!hasContentA || !hasContentB) ? 'A와 B 모두 내용을 입력해주세요' : '만들기'}
       </button>

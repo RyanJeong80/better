@@ -4,6 +4,8 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { Shuffle } from 'lucide-react'
 import { getBattleThumbnails, type BattleThumb } from '@/actions/battles'
+import { CATEGORY_FILTERS, CATEGORY_MAP } from '@/lib/constants/categories'
+import type { CategoryFilter } from '@/lib/constants/categories'
 
 export function RandomBattlesCard({
   initialBattles,
@@ -14,15 +16,16 @@ export function RandomBattlesCard({
 }) {
   const [battles, setBattles] = useState(initialBattles)
   const [offset, setOffset] = useState(initialOffset)
+  const [filter, setFilter] = useState<CategoryFilter>('all')
   const [isPending, startTransition] = useTransition()
 
-  function handleNext() {
+  function fetchBattles(cat: CategoryFilter, fromOffset: number) {
+    const category = cat === 'all' ? undefined : cat
     startTransition(async () => {
-      let next = await getBattleThumbnails(offset)
-      let newOffset = offset + 10
-      // 끝까지 봤으면 처음으로 되돌아감
+      let next = await getBattleThumbnails(fromOffset, category)
+      let newOffset = fromOffset + 10
       if (next.length === 0) {
-        next = await getBattleThumbnails(0)
+        next = await getBattleThumbnails(0, category)
         newOffset = 10
       }
       if (next.length > 0) {
@@ -32,8 +35,17 @@ export function RandomBattlesCard({
     })
   }
 
+  function handleCategoryChange(cat: CategoryFilter) {
+    setFilter(cat)
+    fetchBattles(cat, 0)
+  }
+
+  function handleNext() {
+    fetchBattles(filter, offset)
+  }
+
   return (
-    <div className="flex flex-col gap-4 rounded-3xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+    <div className="flex flex-col gap-3 rounded-3xl border border-border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
       {/* 헤더 */}
       <div className="flex items-center gap-2.5">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: '#EEF2FF' }}>
@@ -42,14 +54,33 @@ export function RandomBattlesCard({
         <h3 className="font-bold text-base">랜덤 Better 보기</h3>
       </div>
 
+      {/* 카테고리 탭 */}
+      <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+        {CATEGORY_FILTERS.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => handleCategoryChange(f.id)}
+            className={[
+              'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold transition-all',
+              filter === f.id
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'border border-border text-muted-foreground hover:bg-accent',
+            ].join(' ')}
+          >
+            {f.emoji} {f.label}
+          </button>
+        ))}
+      </div>
+
       {/* 썸네일 목록 */}
-      <ul className="flex-1 space-y-1.5">
+      <ul className={`flex-1 space-y-1.5 transition-opacity ${isPending ? 'opacity-50' : ''}`}>
         {battles.map((b) => (
           <li key={b.id}>
             <Link
               href={`/explore?id=${b.id}`}
               className="flex items-center gap-2.5 rounded-xl px-1 py-0.5 -mx-1 hover:bg-accent transition-colors"
             >
+              <span className="shrink-0 text-sm">{CATEGORY_MAP[b.category].emoji}</span>
               <div className="flex shrink-0 overflow-hidden rounded-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={b.imageAUrl} alt="" style={{ width: 28, height: 28, objectFit: 'cover' }} />
@@ -60,11 +91,18 @@ export function RandomBattlesCard({
             </Link>
           </li>
         ))}
+        {battles.length === 0 && !isPending && (
+          <li className="py-4 text-center text-xs text-muted-foreground">아직 데이터가 없어요</li>
+        )}
       </ul>
 
       {/* 푸터 */}
       <div className="flex items-center justify-between">
-        <Link href="/explore" className="text-xs font-bold" style={{ color: '#6366F1' }}>
+        <Link
+          href={filter === 'all' ? '/explore' : `/explore?category=${filter}`}
+          className="text-xs font-bold"
+          style={{ color: '#6366F1' }}
+        >
           탐색하기 →
         </Link>
         <button

@@ -1,11 +1,14 @@
 import Link from 'next/link'
-import { Flame, Trophy, Heart } from 'lucide-react'
+import { Trophy } from 'lucide-react'
 import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { betters, likes, votes, users } from '@/lib/db/schema'
 import { AnimatedWord } from '@/components/home/animated-word'
 import { RandomBattlesCard } from '@/components/home/random-battles-card'
+import { HotBattlesCard } from '@/components/home/hot-battles-card'
+import { CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory } from '@/lib/constants/categories'
+
 
 // ─── 타입 ─────────────────────────────────────────────────────────
 type BattleThumb = { id: string; title: string; imageAUrl: string; imageBUrl: string; category: BetterCategory }
@@ -152,35 +155,7 @@ export default async function HomePage() {
         <RandomBattlesCard initialBattles={randomBattles} initialOffset={10} />
 
         {/* Hot 100 */}
-        <FeatureCard
-          icon={<Flame size={20} color="#F59E0B" />}
-          iconBg="#FFFBEB"
-          title="Hot 100 Better"
-          href="/hot"
-          linkLabel="전체 보기"
-          accentColor="#F59E0B"
-        >
-          <ul className="space-y-2">
-            {hotBattles.slice(0, 5).map((b, i) => (
-              <li key={b.id} className="flex items-center gap-2.5">
-                <span className="w-4 shrink-0 text-center text-xs font-black" style={{ color: i === 0 ? '#D97706' : i === 1 ? '#9CA3AF' : '#B45309' }}>
-                  {i + 1}
-                </span>
-                <div className="flex shrink-0 overflow-hidden rounded-lg">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={b.imageAUrl} alt="" style={{ width: 30, height: 30, objectFit: 'cover' }} />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={b.imageBUrl} alt="" style={{ width: 30, height: 30, objectFit: 'cover', borderLeft: '2px solid #FFFBEB' }} />
-                </div>
-                <span className="flex-1 truncate text-sm text-muted-foreground">{b.title}</span>
-                <div className="flex shrink-0 items-center gap-0.5" style={{ color: '#F43F5E' }}>
-                  <Heart size={10} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
-                  <span className="text-xs font-bold">{b.likeCount}</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </FeatureCard>
+        <HotBattlesCard initialBattles={hotBattles} />
 
         {/* 랭킹 */}
         <FeatureCard
