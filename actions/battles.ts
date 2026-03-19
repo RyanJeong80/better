@@ -173,13 +173,25 @@ export async function getBattleThumbnails(
   category?: BetterCategory | 'all',
 ): Promise<BattleThumb[]> {
   try {
-    const all = await db.query.betters.findMany({
-      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true, category: true, createdAt: true },
-    })
-    return all
+    const all = await db.select({
+      id: betters.id,
+      title: betters.title,
+      imageAUrl: betters.imageAUrl,
+      imageBUrl: betters.imageBUrl,
+      category: betters.category,
+      createdAt: betters.createdAt,
+    }).from(betters)
+
+    const filtered = all
       .filter((b) => !category || category === 'all' || b.category === category)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-      .slice(offset, offset + 10)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+
+    if (filtered.length === 0) return []
+
+    // Better 수가 적어도 wrap-around로 항상 최대 10개 반환
+    const wrappedOffset = offset % filtered.length
+    return filtered
+      .slice(wrappedOffset, wrappedOffset + 10)
       .map(({ id, title, imageAUrl, imageBUrl, category: cat }) => ({ id, title, imageAUrl, imageBUrl, category: cat }))
   } catch {
     return []

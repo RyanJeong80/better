@@ -22,15 +22,10 @@ export function RandomBattlesCard({
   function fetchBattles(cat: CategoryFilter, fromOffset: number) {
     const category = cat === 'all' ? undefined : cat
     startTransition(async () => {
-      let next = await getBattleThumbnails(fromOffset, category)
-      let newOffset = fromOffset + 10
-      if (next.length === 0) {
-        next = await getBattleThumbnails(0, category)
-        newOffset = 10
-      }
+      const next = await getBattleThumbnails(fromOffset, category)
       if (next.length > 0) {
         setBattles(next)
-        setOffset(newOffset)
+        setOffset(fromOffset + 10)
       }
     })
   }
