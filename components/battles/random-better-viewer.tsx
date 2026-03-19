@@ -5,6 +5,8 @@ import { ChevronRight, Check, Heart } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
+import { CATEGORY_FILTERS, CATEGORY_MAP } from '@/lib/constants/categories'
+import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
 type Phase = 'voting' | 'picked' | 'submitting' | 'voted' | 'loading' | 'empty'
 
@@ -14,11 +16,19 @@ interface VoteResult {
   total: number
 }
 
+const CAT_BADGE: Record<BetterCategory, { bg: string; text: string }> = {
+  fashion:    { bg: '#EFF6FF', text: '#2563EB' },
+  appearance: { bg: '#FDF2F8', text: '#BE185D' },
+  decision:   { bg: '#F0FDF4', text: '#15803D' },
+}
+
 export function RandomBetterViewer({
   initialBattle,
+  initialCategory = 'all',
   isDemo = false,
 }: {
   initialBattle: BattleForVoting | null
+  initialCategory?: CategoryFilter
   isDemo?: boolean
 }) {
   const [battle, setBattle] = useState<BattleForVoting | null>(initialBattle)
@@ -26,8 +36,8 @@ export function RandomBetterViewer({
   const [selectedChoice, setSelectedChoice] = useState<'A' | 'B' | null>(null)
   const [reason, setReason] = useState('')
   const [voteResult, setVoteResult] = useState<VoteResult | null>(null)
+  const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(initialCategory)
   const [seenIds, setSeenIds] = useState<string[]>(() => {
-    // sessionStorage에서 이전 세션의 seenIds 복원 (같은 탭 내 중복 방지)
     if (typeof window === 'undefined') return initialBattle ? [initialBattle.id] : []
     try {
       const stored = sessionStorage.getItem('seenBattleIds')
@@ -44,7 +54,6 @@ export function RandomBetterViewer({
   const [likePending, setLikePending] = useState(false)
   const [, startTransition] = useTransition()
 
-  // seenIds가 바뀔 때마다 sessionStorage에 저장
   useEffect(() => {
     try { sessionStorage.setItem('seenBattleIds', JSON.stringify(seenIds)) } catch {}
   }, [seenIds])
@@ -94,15 +103,37 @@ export function RandomBetterViewer({
   function handleNext() {
     setPhase('loading')
     startTransition(async () => {
-      const next = await getRandomBattle(seenIds)
+      const cat = categoryFilter !== 'all' ? categoryFilter : undefined
+      const next = await getRandomBattle(seenIds, cat)
       if (!next) {
-        // 모두 소진 → sessionStorage 초기화 후 empty 표시
         try { sessionStorage.removeItem('seenBattleIds') } catch {}
         setPhase('empty')
         return
       }
       setBattle(next)
       setSeenIds((prev) => [...prev, next.id])
+      setSelectedChoice(null)
+      setReason('')
+      setVoteResult(null)
+      setError(null)
+      setLikeCount(next.likeCount)
+      setIsLiked(next.isLiked)
+      setPhase('voting')
+    })
+  }
+
+  function handleCategoryChange(newCat: CategoryFilter) {
+    if (newCat === categoryFilter) return
+    setCategoryFilter(newCat)
+    setPhase('loading')
+    const freshSeenIds: string[] = []
+    setSeenIds(freshSeenIds)
+    startTransition(async () => {
+      const cat = newCat !== 'all' ? newCat : undefined
+      const next = await getRandomBattle(freshSeenIds, cat)
+      if (!next) { setPhase('empty'); return }
+      setBattle(next)
+      setSeenIds([next.id])
       setSelectedChoice(null)
       setReason('')
       setVoteResult(null)
@@ -136,20 +167,6 @@ export function RandomBetterViewer({
     }
   }
 
-  if (phase === 'loading') return <LoadingSkeleton />
-
-  if (phase === 'empty') {
-    return (
-      <div className="flex flex-col items-center justify-center rounded-3xl border border-border bg-card px-8 py-24 text-center">
-        <div className="mb-4 text-5xl">🎉</div>
-        <p className="text-xl font-bold">모두 다 봤어요!</p>
-        <p className="mt-2 text-sm text-muted-foreground">새로운 Better가 올라오면 다시 돌아오세요.</p>
-      </div>
-    )
-  }
-
-  if (!battle) return null
-
   const pctA =
     voteResult && voteResult.total > 0
       ? Math.round((voteResult.votesA / voteResult.total) * 100)
@@ -157,108 +174,152 @@ export function RandomBetterViewer({
   const pctB = voteResult ? 100 - pctA : 0
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-      {/* 헤더 */}
-      <div className="flex items-start justify-between gap-3 px-4 py-4 md:px-6 md:py-5">
-        <div className="min-w-0">
-          <h2 className="text-base font-bold leading-snug text-foreground md:text-lg">{battle.title}</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {phase === 'voting' && '사진을 눌러 선택하세요'}
-            {(phase === 'picked' || phase === 'submitting') && '이유를 남기고 투표하세요 (선택사항)'}
-            {phase === 'voted' && '투표 완료! 결과를 확인하세요.'}
-          </p>
+    <div className="space-y-3">
+      {/* 카테고리 필터 탭 */}
+      <div className="flex gap-2 overflow-x-auto pb-0.5">
+        {CATEGORY_FILTERS.map((f) => (
+          <button
+            key={f.id}
+            onClick={() => handleCategoryChange(f.id)}
+            className={[
+              'shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+              categoryFilter === f.id
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'border border-border bg-card text-muted-foreground hover:bg-accent',
+            ].join(' ')}
+          >
+            {f.emoji} {f.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 메인 카드 */}
+      {phase === 'loading' ? (
+        <LoadingSkeleton />
+      ) : phase === 'empty' ? (
+        <div className="flex flex-col items-center justify-center rounded-3xl border border-border bg-card px-8 py-24 text-center">
+          <div className="mb-4 text-5xl">🎉</div>
+          <p className="text-xl font-bold">모두 다 봤어요!</p>
+          <p className="mt-2 text-sm text-muted-foreground">새로운 Better가 올라오면 다시 돌아오세요.</p>
         </div>
-        <button
-          onClick={handleLike}
-          disabled={likePending}
-          className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold transition-all hover:border-rose-200 hover:bg-rose-50 disabled:opacity-60 active:scale-95"
-          style={{ color: isLiked ? '#F43F5E' : undefined }}
-        >
-          <span className="text-muted-foreground" style={{ color: isLiked ? '#F43F5E' : undefined }}>Hot100에 추천하기</span>
-          <Heart
-            size={14}
-            style={{
-              fill: isLiked ? '#F43F5E' : 'transparent',
-              stroke: isLiked ? '#F43F5E' : 'currentColor',
-              transition: 'all 0.15s',
-            }}
-          />
-          <span className="tabular-nums">{likeCount}</span>
-        </button>
-      </div>
-
-      {/* 사진 두 장 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-        <PhotoCard
-          imageUrl={battle.imageAUrl}
-          description={battle.imageADescription}
-          side="A"
-          phase={phase}
-          selectedChoice={selectedChoice}
-          pct={pctA}
-          votes={voteResult?.votesA ?? 0}
-          isWinner={(voteResult?.votesA ?? 0) > (voteResult?.votesB ?? 0)}
-          onClick={() => handlePickPhoto('A')}
-        />
-        <PhotoCard
-          imageUrl={battle.imageBUrl}
-          description={battle.imageBDescription}
-          side="B"
-          phase={phase}
-          selectedChoice={selectedChoice}
-          pct={pctB}
-          votes={voteResult?.votesB ?? 0}
-          isWinner={(voteResult?.votesB ?? 0) > (voteResult?.votesA ?? 0)}
-          onClick={() => handlePickPhoto('B')}
-        />
-      </div>
-
-      {/* 이유 입력 + 투표 버튼 */}
-      {(phase === 'picked' || phase === 'submitting') && (
-        <div className="space-y-3 border-t border-border px-4 py-4 md:px-6">
-          {error && (
-            <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
-          )}
-          <textarea
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            placeholder="이유를 남겨주세요 (선택사항)"
-            maxLength={200}
-            rows={2}
-            disabled={phase === 'submitting'}
-            className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary disabled:opacity-60"
-          />
-          <div className="flex justify-end gap-2">
+      ) : !battle ? null : (
+        <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+          {/* 헤더 */}
+          <div className="flex items-start justify-between gap-3 px-4 py-4 md:px-6 md:py-5">
+            <div className="min-w-0">
+              {/* 카테고리 배지 */}
+              {(() => {
+                const cat = CATEGORY_MAP[battle.category]
+                const style = CAT_BADGE[battle.category]
+                return (
+                  <span
+                    className="mb-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+                    style={{ background: style.bg, color: style.text }}
+                  >
+                    {cat.emoji} {cat.label}
+                  </span>
+                )
+              })()}
+              <h2 className="text-base font-bold leading-snug text-foreground md:text-lg">{battle.title}</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {phase === 'voting' && '사진을 눌러 선택하세요'}
+                {(phase === 'picked' || phase === 'submitting') && '이유를 남기고 투표하세요 (선택사항)'}
+                {phase === 'voted' && '투표 완료! 결과를 확인하세요.'}
+              </p>
+            </div>
             <button
-              onClick={handleCancel}
-              disabled={phase === 'submitting'}
-              className="rounded-xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-60"
+              onClick={handleLike}
+              disabled={likePending}
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold transition-all hover:border-rose-200 hover:bg-rose-50 disabled:opacity-60 active:scale-95"
+              style={{ color: isLiked ? '#F43F5E' : undefined }}
             >
-              취소
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={phase === 'submitting'}
-              className="rounded-xl px-6 py-2 text-sm font-bold text-white shadow-sm transition-all hover:opacity-90 disabled:opacity-60 active:scale-95"
-              style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
-            >
-              {phase === 'submitting' ? '투표 중…' : '투표하기'}
+              <span className="text-muted-foreground" style={{ color: isLiked ? '#F43F5E' : undefined }}>Hot100에 추천하기</span>
+              <Heart
+                size={14}
+                style={{
+                  fill: isLiked ? '#F43F5E' : 'transparent',
+                  stroke: isLiked ? '#F43F5E' : 'currentColor',
+                  transition: 'all 0.15s',
+                }}
+              />
+              <span className="tabular-nums">{likeCount}</span>
             </button>
           </div>
-        </div>
-      )}
 
-      {/* 다음 버튼 */}
-      {phase === 'voted' && (
-        <div className="flex justify-end border-t border-border px-4 py-4 md:px-6">
-          <button
-            onClick={handleNext}
-            className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
-          >
-            다음 Better
-            <ChevronRight size={16} />
-          </button>
+          {/* 사진 두 장 */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+            <PhotoCard
+              imageUrl={battle.imageAUrl}
+              description={battle.imageADescription}
+              side="A"
+              phase={phase}
+              selectedChoice={selectedChoice}
+              pct={pctA}
+              votes={voteResult?.votesA ?? 0}
+              isWinner={(voteResult?.votesA ?? 0) > (voteResult?.votesB ?? 0)}
+              onClick={() => handlePickPhoto('A')}
+            />
+            <PhotoCard
+              imageUrl={battle.imageBUrl}
+              description={battle.imageBDescription}
+              side="B"
+              phase={phase}
+              selectedChoice={selectedChoice}
+              pct={pctB}
+              votes={voteResult?.votesB ?? 0}
+              isWinner={(voteResult?.votesB ?? 0) > (voteResult?.votesA ?? 0)}
+              onClick={() => handlePickPhoto('B')}
+            />
+          </div>
+
+          {/* 이유 입력 + 투표 버튼 */}
+          {(phase === 'picked' || phase === 'submitting') && (
+            <div className="space-y-3 border-t border-border px-4 py-4 md:px-6">
+              {error && (
+                <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+              )}
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="이유를 남겨주세요 (선택사항)"
+                maxLength={200}
+                rows={2}
+                disabled={phase === 'submitting'}
+                className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary disabled:opacity-60"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={handleCancel}
+                  disabled={phase === 'submitting'}
+                  className="rounded-xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-60"
+                >
+                  취소
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={phase === 'submitting'}
+                  className="rounded-xl px-6 py-2 text-sm font-bold text-white shadow-sm transition-all hover:opacity-90 disabled:opacity-60 active:scale-95"
+                  style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
+                >
+                  {phase === 'submitting' ? '투표 중…' : '투표하기'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 다음 버튼 */}
+          {phase === 'voted' && (
+            <div className="flex justify-end border-t border-border px-4 py-4 md:px-6">
+              <button
+                onClick={handleNext}
+                className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-95"
+                style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
+              >
+                다음 Better
+                <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

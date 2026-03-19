@@ -11,25 +11,15 @@ function getDb(): DB {
     const url = process.env.DATABASE_URL
     if (!url) throw new Error('[DB] DATABASE_URL is not set')
 
-    // URL 유효성 확인 — 특수문자가 URL 인코딩 안 됐으면 파싱 실패
-    try {
-      new URL(url)
-    } catch {
-      throw new Error(
-        `[DB] DATABASE_URL is not a valid URL. ` +
-        `Starts with: "${url.slice(0, 40)}" — ` +
-        `Make sure special chars in password are URL-encoded (! → %21, @ → %40, # → %23, $ → %24)`
-      )
-    }
-
-    console.log('[DB] connecting to:', new URL(url).hostname)
+    const parsed = new URL(url)
+    console.log('[DB] connecting to:', parsed.hostname + ':' + parsed.port, '| user:', parsed.username)
 
     const client = postgres(url, {
       ssl: { rejectUnauthorized: false },
       max: 1,
       idle_timeout: 20,
       connect_timeout: 10,
-      prepare: false, // PgBouncer(Supabase pooler) 호환 — prepared statement 비활성화
+      prepare: false,
     })
     _db = drizzle(client, { schema })
   }

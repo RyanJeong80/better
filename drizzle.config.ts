@@ -15,6 +15,7 @@ export default defineConfig({
   out: './drizzle',
   dialect: 'postgresql',
   dbCredentials: {
-    url: process.env.DATABASE_URL!,
+    // 마이그레이션은 직접 연결(5432) 필요 — Transaction Pooler(6543)는 drizzle-kit 미지원
+    url: process.env.DIRECT_DATABASE_URL ?? process.env.DATABASE_URL!,
   },
 })

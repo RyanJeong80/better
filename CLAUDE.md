@@ -28,7 +28,13 @@
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://[project].supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
-DATABASE_URL=postgresql://[user]:[password]@[host]/[db]
+
+# Transaction Pooler (로컬 + Vercel 공통)
+# 로컬 IPv6 문제로 Direct Connection(5432) 사용 불가 → 6543 사용
+DATABASE_URL=postgresql://postgres.[project-ref]:[password]@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres
+
+# Direct connection — drizzle-kit 전용 (실제 마이그레이션은 SQL Editor에서 직접 실행)
+DIRECT_DATABASE_URL=postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
 ```
 
 ---
@@ -36,7 +42,7 @@ DATABASE_URL=postgresql://[user]:[password]@[host]/[db]
 ## 초기 셋업 체크리스트
 
 - [ ] `.env.local` 값 입력
-- [ ] `npm run db:generate && npm run db:migrate` 실행
+- [ ] 마이그레이션: `drizzle/run-in-supabase-sql-editor.sql` 을 Supabase SQL Editor에서 실행
 - [ ] Supabase Storage에서 `battle-images` 버킷 생성 (public)
 - [ ] Supabase Realtime에서 `votes` 테이블 활성화
 
@@ -163,10 +169,15 @@ fallback chain: `var(--font-plus-jakarta), 'Pretendard Variable', var(--font-m-p
 ```bash
 npm run dev          # 개발 서버
 npm run build        # 프로덕션 빌드
-npm run db:generate  # Drizzle 마이그레이션 파일 생성
-npm run db:migrate   # 마이그레이션 실행
+npm run db:generate  # Drizzle 마이그레이션 파일 생성 (파일만 생성, DB 미적용)
 npm run db:studio    # Drizzle Studio 열기
 ```
+
+> **마이그레이션 실행 방법**
+> `npm run db:migrate` 는 로컬 IPv6 문제 + Transaction Pooler 제약으로 사용 불가.
+> 스키마 변경 시:
+> 1. `npm run db:generate` 로 SQL 파일 생성
+> 2. 생성된 `drizzle/NNNN_xxx.sql` 내용을 [Supabase SQL Editor](https://supabase.com/dashboard/project/bdhgfivommfztnhrrtjc/sql/new) 에서 직접 실행
 
 ---
 
@@ -198,10 +209,11 @@ npm run db:studio    # Drizzle Studio 열기
 ## 주요 버그 수정 이력 (Vercel 배포)
 
 ### DB 연결
-- **증상**: Vercel에서 INSERT 쿼리만 `Failed query` 오류
-- **원인**: Supabase 직접 연결(5432)은 IPv6 전용 → Vercel 일부 리전 미지원
-- **해결**: Vercel `DATABASE_URL`을 Transaction 풀러 URL(포트 6543)로 교체
-- `lib/db/index.ts`에 `prepare: false` 추가 (PgBouncer 호환)
+- **증상**: Vercel에서 INSERT 쿼리 `Failed query` / 로컬에서 `EHOSTUNREACH`
+- **원인**: Supabase 직접 연결(5432)은 IPv6 전용 → 로컬·Vercel 일부 리전 미지원
+- **해결**: 로컬·Vercel 모두 Transaction Pooler URL(포트 6543) 사용
+- `lib/db/index.ts` 옵션: `prepare: false`(PgBouncer 호환), `ssl: false`(Pooler는 SSL 불필요)
+- 마이그레이션만 Direct Connection 필요 → SQL Editor에서 직접 실행
 
 ### public.users FK 제약
 - **증상**: 투표·좋아요·배틀 생성 시 FK constraint 오류

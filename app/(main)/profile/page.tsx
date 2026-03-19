@@ -1,27 +1,11 @@
-import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { eq } from 'drizzle-orm'
+import { eq, inArray } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { betters, users } from '@/lib/db/schema'
+import { betters, votes, likes, users } from '@/lib/db/schema'
 import { signOut } from '@/actions/auth'
-import { MyBetterCard } from '@/components/battles/my-better-card'
 import { UsernameEditor } from '@/components/profile/username-editor'
-
-type BattleWithStats = {
-  id: string
-  title: string
-  imageAUrl: string
-  imageADescription: string | null
-  imageBUrl: string
-  imageBDescription: string | null
-  votesA: number
-  votesB: number
-  total: number
-  reasons: { choice: 'A' | 'B'; reason: string }[]
-  createdAt: Date
-  likesCount: number
-}
+import { ProfileBetterList, type BattleWithStats } from '@/components/profile/profile-better-list'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -39,23 +23,64 @@ export default async function ProfilePage() {
   let battlesWithStats: BattleWithStats[] = []
 
   try {
-    const myBetters = await db.query.betters.findMany({
-      where: eq(betters.userId, user.id),
-      orderBy: (betters, { desc }) => [desc(betters.createdAt)],
-      with: { votes: { columns: { choice: true, reason: true } }, likes: { columns: { id: true } } },
+    const myBetters = await db.select({
+      id: betters.id,
+      title: betters.title,
+      imageAUrl: betters.imageAUrl,
+      imageADescription: betters.imageADescription,
+      imageBUrl: betters.imageBUrl,
+      imageBDescription: betters.imageBDescription,
+      category: betters.category,
+      createdAt: betters.createdAt,
     })
+      .from(betters)
+      .where(eq(betters.userId, user.id))
+      .orderBy(betters.createdAt)
 
-    battlesWithStats = myBetters.map((b) => ({
-      ...b,
-      votesA: b.votes.filter((v) => v.choice === 'A').length,
-      votesB: b.votes.filter((v) => v.choice === 'B').length,
-      total: b.votes.length,
-      reasons: b.votes
-        .filter((v): v is typeof v & { reason: string } => !!v.reason)
-        .map((v) => ({ choice: v.choice, reason: v.reason })),
-      likesCount: b.likes.length,
-    }))
-  } catch {}
+    const myBetterIds = myBetters.map((b) => b.id)
+
+    const [myVotes, myLikes] = myBetterIds.length
+      ? await Promise.all([
+          db.select({ betterId: votes.betterId, choice: votes.choice, reason: votes.reason })
+            .from(votes)
+            .where(inArray(votes.betterId, myBetterIds)),
+          db.select({ betterId: likes.betterId })
+            .from(likes)
+            .where(inArray(likes.betterId, myBetterIds)),
+        ])
+      : [[], []]
+
+    const votesByBetter = new Map<string, { choice: 'A' | 'B'; reason: string | null }[]>()
+    for (const v of myVotes) {
+      if (!votesByBetter.has(v.betterId)) votesByBetter.set(v.betterId, [])
+      votesByBetter.get(v.betterId)!.push({ choice: v.choice, reason: v.reason })
+    }
+
+    const likeCountMap = new Map<string, number>()
+    for (const l of myLikes) {
+      likeCountMap.set(l.betterId, (likeCountMap.get(l.betterId) ?? 0) + 1)
+    }
+
+    battlesWithStats = myBetters
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .map((b) => {
+        const bvotes = votesByBetter.get(b.id) ?? []
+        return {
+          ...b,
+          votesA: bvotes.filter((v) => v.choice === 'A').length,
+          votesB: bvotes.filter((v) => v.choice === 'B').length,
+          total: bvotes.length,
+          reasons: bvotes
+            .filter((v): v is typeof v & { reason: string } => !!v.reason)
+            .map((v) => ({ choice: v.choice, reason: v.reason })),
+          likesCount: likeCountMap.get(b.id) ?? 0,
+          category: b.category,
+        }
+      })
+  } catch (e) {
+    const pg = e as Record<string, unknown>
+    console.error('[ProfilePage] DB error:', { message: pg.message, code: pg.code, detail: pg.detail, hint: pg.hint })
+  }
 
   const totalVotes = battlesWithStats.reduce((s, b) => s + b.total, 0)
   const totalLikes = battlesWithStats.reduce((s, b) => s + b.likesCount, 0)
@@ -101,26 +126,7 @@ export default async function ProfilePage() {
       </div>
 
       {/* Better 목록 */}
-      {battlesWithStats.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border py-20 text-center">
-          <div className="mb-3 text-4xl">📸</div>
-          <p className="font-bold">아직 Better가 없어요</p>
-          <p className="mt-1 text-sm text-muted-foreground">두 사진을 올리고 사람들의 선택을 받아보세요</p>
-          <Link
-            href="/battles/new"
-            className="mt-6 rounded-2xl px-6 py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
-            style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
-          >
-            첫 Better 만들기
-          </Link>
-        </div>
-      ) : (
-        <div className="space-y-5">
-          {battlesWithStats.map((battle) => (
-            <MyBetterCard key={battle.id} battle={battle} />
-          ))}
-        </div>
-      )}
+      <ProfileBetterList battles={battlesWithStats} />
     </div>
   )
 }

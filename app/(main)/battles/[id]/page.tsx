@@ -15,7 +15,6 @@ export default async function BattlePage({
   try {
     const better = await db.query.betters.findFirst({
       where: eq(betters.id, id),
-      with: { user: true },
     })
 
     if (!better) notFound()

@@ -1,9 +1,19 @@
 import Link from 'next/link'
 import { Heart, Flame } from 'lucide-react'
 import { db } from '@/lib/db'
+import { betters, likes } from '@/lib/db/schema'
+import { CATEGORY_FILTERS, CATEGORY_MAP } from '@/lib/constants/categories'
+import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
 
-type HotEntry = { id: string; title: string; imageAUrl: string; imageBUrl: string; likeCount: number }
+type HotEntry = {
+  id: string
+  title: string
+  imageAUrl: string
+  imageBUrl: string
+  likeCount: number
+  category: BetterCategory
+}
 
 const RANK_STYLE: Record<number, { bg: string; text: string }> = {
   1: { bg: '#FEF3C7', text: '#D97706' },
@@ -11,21 +21,48 @@ const RANK_STYLE: Record<number, { bg: string; text: string }> = {
   3: { bg: '#FDE8D8', text: '#92400E' },
 }
 
-export default async function HotPage() {
+const CAT_BADGE: Record<BetterCategory, { bg: string; text: string }> = {
+  fashion:    { bg: '#EFF6FF', text: '#2563EB' },
+  appearance: { bg: '#FDF2F8', text: '#BE185D' },
+  decision:   { bg: '#F0FDF4', text: '#15803D' },
+}
+
+export default async function HotPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>
+}) {
+  const { category } = await searchParams
+  const activeCategory: CategoryFilter =
+    (CATEGORY_FILTERS.find((f) => f.id === category)?.id) ?? 'all'
+
   let entries: HotEntry[] = []
 
   try {
-    const all = await db.query.betters.findMany({
-      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true },
-      with: { likes: { columns: { id: true } } },
-    })
-    entries = all
-      .map((b) => ({ id: b.id, title: b.title, imageAUrl: b.imageAUrl, imageBUrl: b.imageBUrl, likeCount: b.likes.length }))
+    const allBetters = await db.select({
+      id: betters.id,
+      title: betters.title,
+      imageAUrl: betters.imageAUrl,
+      imageBUrl: betters.imageBUrl,
+      category: betters.category,
+    }).from(betters)
+
+    const allLikes = await db.select({ betterId: likes.betterId }).from(likes)
+
+    const likeCountMap = new Map<string, number>()
+    for (const l of allLikes) {
+      likeCountMap.set(l.betterId, (likeCountMap.get(l.betterId) ?? 0) + 1)
+    }
+
+    entries = allBetters
+      .map((b) => ({ ...b, likeCount: likeCountMap.get(b.id) ?? 0 }))
       .filter((b) => b.likeCount > 0)
+      .filter((b) => activeCategory === 'all' || b.category === activeCategory)
       .sort((a, b) => b.likeCount - a.likeCount)
       .slice(0, 100)
   } catch (e) {
-    console.error('[HotPage] DB error:', e)
+    const pg = e as Record<string, unknown>
+    console.error('[HotPage] DB error:', { message: pg.message, code: pg.code, detail: pg.detail, hint: pg.hint })
     entries = []
   }
 
@@ -49,6 +86,24 @@ export default async function HotPage() {
         </div>
       </div>
 
+      {/* 카테고리 탭 */}
+      <div className="flex gap-2 overflow-x-auto pb-0.5">
+        {CATEGORY_FILTERS.map((f) => (
+          <Link
+            key={f.id}
+            href={f.id === 'all' ? '/hot' : `/hot?category=${f.id}`}
+            className={[
+              'shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+              activeCategory === f.id
+                ? 'bg-amber-500 text-white shadow-sm'
+                : 'border border-border bg-card text-muted-foreground hover:bg-accent',
+            ].join(' ')}
+          >
+            {f.emoji} {f.label}
+          </Link>
+        ))}
+      </div>
+
       {entries.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border py-20 text-center">
           <div className="mb-3 text-4xl">🔥</div>
@@ -61,46 +116,56 @@ export default async function HotPage() {
             {entries.map((entry, i) => {
               const rank = i + 1
               const rankStyle = RANK_STYLE[rank]
+              const cat = CATEGORY_MAP[entry.category]
+              const catStyle = CAT_BADGE[entry.category]
 
               return (
                 <li key={entry.id}>
-                <Link href={`/battles/${entry.id}`} className="flex items-center gap-3 px-4 py-3 md:px-5 md:py-3.5 hover:bg-accent transition-colors">
-                  {/* 순위 뱃지 */}
-                  {rankStyle ? (
+                  <Link href={`/battles/${entry.id}`} className="flex items-center gap-3 px-4 py-3 md:px-5 md:py-3.5 hover:bg-accent transition-colors">
+                    {/* 순위 뱃지 */}
+                    {rankStyle ? (
+                      <span
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black"
+                        style={{ background: rankStyle.bg, color: rankStyle.text }}
+                      >
+                        {rank}
+                      </span>
+                    ) : (
+                      <span className="w-7 shrink-0 text-center text-sm font-bold text-muted-foreground">
+                        {rank}
+                      </span>
+                    )}
+
+                    {/* 카테고리 배지 */}
                     <span
-                      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-black"
-                      style={{ background: rankStyle.bg, color: rankStyle.text }}
+                      className="hidden shrink-0 items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold sm:inline-flex"
+                      style={{ background: catStyle.bg, color: catStyle.text }}
                     >
-                      {rank}
+                      {cat.emoji} {cat.label}
                     </span>
-                  ) : (
-                    <span className="w-7 shrink-0 text-center text-sm font-bold text-muted-foreground">
-                      {rank}
-                    </span>
-                  )}
 
-                  {/* 미리보기 이미지 */}
-                  <div className="flex shrink-0 overflow-hidden rounded-xl">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={entry.imageAUrl} alt="A" style={{ width: 40, height: 40, objectFit: 'cover' }} />
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={entry.imageBUrl} alt="B" style={{ width: 40, height: 40, objectFit: 'cover', borderLeft: '2px solid var(--color-background)' }} />
-                  </div>
+                    {/* 미리보기 이미지 */}
+                    <div className="flex shrink-0 overflow-hidden rounded-xl">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={entry.imageAUrl} alt="A" style={{ width: 40, height: 40, objectFit: 'cover' }} />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={entry.imageBUrl} alt="B" style={{ width: 40, height: 40, objectFit: 'cover', borderLeft: '2px solid var(--color-background)' }} />
+                    </div>
 
-                  {/* 제목 */}
-                  <span className="flex-1 truncate text-sm font-semibold">{entry.title}</span>
+                    {/* 제목 */}
+                    <span className="flex-1 truncate text-sm font-semibold">{entry.title}</span>
 
-                  {/* 좋아요 */}
-                  <div
-                    className="flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1"
-                    style={{ background: '#FFF1F2', border: '1px solid #FECDD3' }}
-                  >
-                    <Heart size={12} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
-                    <span className="text-xs font-bold tabular-nums" style={{ color: '#F43F5E' }}>
-                      {entry.likeCount}
-                    </span>
-                  </div>
-                </Link>
+                    {/* 좋아요 */}
+                    <div
+                      className="flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1"
+                      style={{ background: '#FFF1F2', border: '1px solid #FECDD3' }}
+                    >
+                      <Heart size={12} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
+                      <span className="text-xs font-bold tabular-nums" style={{ color: '#F43F5E' }}>
+                        {entry.likeCount}
+                      </span>
+                    </div>
+                  </Link>
                 </li>
               )
             })}

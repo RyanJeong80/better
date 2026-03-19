@@ -1,44 +1,63 @@
 import { eq } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { votes, betters, users } from '@/lib/db/schema'
+import { votes, users, betters } from '@/lib/db/schema'
 import { RankingView, type RankEntry, type MyStats } from '@/components/ranking/ranking-view'
+import { CATEGORY_FILTERS } from '@/lib/constants/categories'
+import type { CategoryFilter } from '@/lib/constants/categories'
 
 
 // ─── 순위 계산 ─────────────────────────────────────────────────────
-async function buildRankingData(currentUserId?: string): Promise<{
+async function buildRankingData(
+  currentUserId?: string,
+  categoryFilter: CategoryFilter = 'all',
+): Promise<{
   myStats: MyStats | null
   participationRanking: RankEntry[]
   accuracyRanking: RankEntry[]
 }> {
-  const allBetters = await db.query.betters.findMany({
-    with: { votes: { columns: { voterId: true, choice: true } } },
-    columns: { id: true },
+  // votes + users + betters(카테고리 필터용) 조인
+  const allVoteRows = await db.select({
+    betterId: votes.betterId,
+    voterId: votes.voterId,
+    choice: votes.choice,
+    betterCategory: betters.category,
+    voterUsername: users.username,
+    voterName: users.name,
+    voterEmail: users.email,
   })
+    .from(votes)
+    .leftJoin(users, eq(votes.voterId, users.id))
+    .leftJoin(betters, eq(votes.betterId, betters.id))
+
+  // 카테고리 필터링
+  const filteredVotes = categoryFilter === 'all'
+    ? allVoteRows
+    : allVoteRows.filter((v) => v.betterCategory === categoryFilter)
 
   const betterWinners = new Map<string, 'A' | 'B' | null>()
-  for (const better of allBetters) {
-    const cntA = better.votes.filter((v) => v.choice === 'A').length
-    const cntB = better.votes.filter((v) => v.choice === 'B').length
-    betterWinners.set(better.id, cntA > cntB ? 'A' : cntB > cntA ? 'B' : null)
+  const votesByBetter = new Map<string, typeof filteredVotes>()
+  for (const v of filteredVotes) {
+    if (!votesByBetter.has(v.betterId)) votesByBetter.set(v.betterId, [])
+    votesByBetter.get(v.betterId)!.push(v)
   }
-
-  const allVotes = await db.query.votes.findMany({
-    with: { voter: { columns: { id: true, username: true, name: true, email: true } } },
-    columns: { betterId: true, voterId: true, choice: true },
-  })
+  for (const [betterId, bvotes] of votesByBetter) {
+    const cntA = bvotes.filter((v) => v.choice === 'A').length
+    const cntB = bvotes.filter((v) => v.choice === 'B').length
+    betterWinners.set(betterId, cntA > cntB ? 'A' : cntB > cntA ? 'B' : null)
+  }
 
   const statsMap = new Map<
     string,
     { displayName: string; participated: number; hits: number; eligibleBase: number }
   >()
 
-  for (const vote of allVotes) {
+  for (const vote of filteredVotes) {
     if (!statsMap.has(vote.voterId)) {
       const name =
-        vote.voter?.username ??
-        vote.voter?.name ??
-        vote.voter?.email?.split('@')[0] ??
+        vote.voterUsername ??
+        vote.voterName ??
+        vote.voterEmail?.split('@')[0] ??
         `사용자 ${vote.voterId.slice(0, 6)}`
       statsMap.set(vote.voterId, { displayName: name, participated: 0, hits: 0, eligibleBase: 0 })
     }
@@ -80,25 +99,42 @@ async function buildRankingData(currentUserId?: string): Promise<{
 }
 
 // ─── 페이지 ────────────────────────────────────────────────────────
-export default async function RankingPage() {
+export default async function RankingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string }>
+}) {
+  const { category } = await searchParams
+  const activeCategory: CategoryFilter =
+    (CATEGORY_FILTERS.find((f) => f.id === category)?.id) ?? 'all'
+
   const supabase = await createClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   try {
-    const { myStats, participationRanking, accuracyRanking } = await buildRankingData(user?.id)
+    const { myStats, participationRanking, accuracyRanking } = await buildRankingData(
+      user?.id,
+      activeCategory,
+    )
     return (
       <RankingView
         myStats={myStats}
         participationRanking={participationRanking}
         accuracyRanking={accuracyRanking}
         currentUserId={user?.id}
+        currentCategory={activeCategory}
       />
     )
   } catch {
     return (
-      <RankingView myStats={null} participationRanking={[]} accuracyRanking={[]} />
+      <RankingView
+        myStats={null}
+        participationRanking={[]}
+        accuracyRanking={[]}
+        currentCategory={activeCategory}
+      />
     )
   }
 }

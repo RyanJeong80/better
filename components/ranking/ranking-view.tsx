@@ -1,3 +1,7 @@
+import Link from 'next/link'
+import { CATEGORY_FILTERS } from '@/lib/constants/categories'
+import type { CategoryFilter } from '@/lib/constants/categories'
+
 export type RankEntry = {
   userId: string
   displayName: string
@@ -17,12 +21,14 @@ export function RankingView({
   participationRanking,
   accuracyRanking,
   currentUserId,
+  currentCategory = 'all',
   isDemo = false,
 }: {
   myStats: MyStats | null
   participationRanking: RankEntry[]
   accuracyRanking: RankEntry[]
   currentUserId?: string
+  currentCategory?: CategoryFilter
   isDemo?: boolean
 }) {
   return (
@@ -36,6 +42,24 @@ export function RankingView({
       <div>
         <h2 className="text-2xl font-black">Better 랭킹</h2>
         <p className="mt-1 text-sm text-muted-foreground">참여 횟수와 적중률로 순위를 확인하세요</p>
+      </div>
+
+      {/* 카테고리 탭 */}
+      <div className="flex gap-2 overflow-x-auto pb-0.5">
+        {CATEGORY_FILTERS.map((f) => (
+          <Link
+            key={f.id}
+            href={f.id === 'all' ? '/ranking' : `/ranking?category=${f.id}`}
+            className={[
+              'shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+              currentCategory === f.id
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'border border-border bg-card text-muted-foreground hover:bg-accent',
+            ].join(' ')}
+          >
+            {f.emoji} {f.label}
+          </Link>
+        ))}
       </div>
 
       {/* 나의 기록 */}

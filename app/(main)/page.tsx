@@ -1,11 +1,14 @@
 import Link from 'next/link'
 import { Flame, Trophy, Heart } from 'lucide-react'
+import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
+import { betters, likes, votes, users } from '@/lib/db/schema'
 import { AnimatedWord } from '@/components/home/animated-word'
 import { RandomBattlesCard } from '@/components/home/random-battles-card'
+import type { BetterCategory } from '@/lib/constants/categories'
 
 // ─── 타입 ─────────────────────────────────────────────────────────
-type BattleThumb = { id: string; title: string; imageAUrl: string; imageBUrl: string }
+type BattleThumb = { id: string; title: string; imageAUrl: string; imageBUrl: string; category: BetterCategory }
 type HotThumb = BattleThumb & { likeCount: number }
 type Ranker = { name: string; participated: number }
 
@@ -22,35 +25,60 @@ async function fetchHomeData(): Promise<{
   let hotBattles: HotThumb[] = []
   let rankers: Ranker[] = []
 
+  // ── betters + likes ──────────────────────────────────────────────
+  // db.query with: 절은 LATERAL join + json_agg 를 생성 →
+  // Supabase Transaction Pooler(PgBouncer)에서 실패
+  // → db.select().from() + 별도 likes 쿼리로 JS에서 조인
   try {
-    const allWithLikes = await db.query.betters.findMany({
-      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true, createdAt: true },
-      with: { likes: { columns: { id: true } } },
-    })
+    const allBetters = await db.select({
+      id: betters.id,
+      title: betters.title,
+      imageAUrl: betters.imageAUrl,
+      imageBUrl: betters.imageBUrl,
+      category: betters.category,
+      createdAt: betters.createdAt,
+    }).from(betters)
 
-    randomBattles = [...allWithLikes]
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+    console.log('[HomePage] allBetters count:', allBetters.length, '| first createdAt type:', typeof allBetters[0]?.createdAt, '| value:', allBetters[0]?.createdAt)
+
+    const allLikes = await db.select({ betterId: likes.betterId }).from(likes)
+    console.log('[HomePage] allLikes count:', allLikes.length)
+
+    const likeCountMap = new Map<string, number>()
+    for (const l of allLikes) {
+      likeCountMap.set(l.betterId, (likeCountMap.get(l.betterId) ?? 0) + 1)
+    }
+
+    randomBattles = [...allBetters]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 10)
-      .map(({ id, title, imageAUrl, imageBUrl }) => ({ id, title, imageAUrl, imageBUrl }))
+      .map(({ id, title, imageAUrl, imageBUrl, category }) => ({ id, title, imageAUrl, imageBUrl, category }))
 
-    hotBattles = allWithLikes
-      .map((b) => ({ id: b.id, title: b.title, imageAUrl: b.imageAUrl, imageBUrl: b.imageBUrl, likeCount: b.likes.length }))
+    hotBattles = allBetters
+      .map((b) => ({ id: b.id, title: b.title, imageAUrl: b.imageAUrl, imageBUrl: b.imageBUrl, category: b.category, likeCount: likeCountMap.get(b.id) ?? 0 }))
       .sort((a, b) => b.likeCount - a.likeCount)
       .slice(0, 5) as HotThumb[]
   } catch (e) {
-    console.error('[HomePage] betters query failed:', e)
+    console.error('[betters error]', e)
+    console.error('[betters error JSON]', JSON.stringify(e, Object.getOwnPropertyNames(e as any)))
   }
 
+  // ── votes + voter ─────────────────────────────────────────────────
+  // 마찬가지로 LATERAL 대신 plain LEFT JOIN 사용
   try {
-    const allVotes = await db.query.votes.findMany({
-      with: { voter: { columns: { id: true, name: true, email: true } } },
-      columns: { voterId: true },
+    const allVotes = await db.select({
+      voterId: votes.voterId,
+      voterName: users.name,
+      voterEmail: users.email,
     })
+      .from(votes)
+      .leftJoin(users, eq(votes.voterId, users.id))
+
     const countMap = new Map<string, { name: string; count: number }>()
     for (const v of allVotes) {
       if (!countMap.has(v.voterId)) {
         countMap.set(v.voterId, {
-          name: v.voter?.name ?? v.voter?.email?.split('@')[0] ?? '사용자',
+          name: v.voterName ?? v.voterEmail?.split('@')[0] ?? '사용자',
           count: 0,
         })
       }
@@ -61,8 +89,11 @@ async function fetchHomeData(): Promise<{
       .slice(0, 5)
       .map((r) => ({ name: r.name, participated: r.count }))
   } catch (e) {
-    console.error('[HomePage] votes query failed:', e)
+    console.error('[votes error]', e)
+    console.error('[votes error JSON]', JSON.stringify(e, Object.getOwnPropertyNames(e as any)))
   }
+
+  console.log('[HomePage] final: randomBattles:', randomBattles.length, '| hotBattles:', hotBattles.length, '| rankers:', rankers.length)
 
   return { randomBattles, hotBattles, rankers }
 }

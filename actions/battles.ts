@@ -5,7 +5,8 @@ import { redirect } from 'next/navigation'
 import { and, eq, ne, notInArray } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { betters, votes, users } from '@/lib/db/schema'
+import { betters, votes, users, likes } from '@/lib/db/schema'
+import type { BetterCategory } from '@/lib/constants/categories'
 
 export type BattleForVoting = {
   id: string
@@ -16,10 +17,14 @@ export type BattleForVoting = {
   imageBDescription: string | null
   likeCount: number
   isLiked: boolean
+  category: BetterCategory
 }
 
 
-export async function getRandomBattle(excludeIds: string[]): Promise<BattleForVoting | null> {
+export async function getRandomBattle(
+  excludeIds: string[],
+  category?: BetterCategory | 'all',
+): Promise<BattleForVoting | null> {
   try {
     const supabase = await createClient()
     const {
@@ -38,32 +43,31 @@ export async function getRandomBattle(excludeIds: string[]): Promise<BattleForVo
     const allExclude = [...new Set([...excludeIds, ...alreadyVotedIds])]
     const userId = user?.id
 
-    const whereClause =
-      userId && allExclude.length > 0
-        ? and(ne(betters.userId, userId), notInArray(betters.id, allExclude))
-        : userId
-          ? ne(betters.userId, userId)
-          : allExclude.length > 0
-            ? notInArray(betters.id, allExclude)
-            : undefined
+    const conditions = []
+    if (userId) conditions.push(ne(betters.userId, userId))
+    if (allExclude.length > 0) conditions.push(notInArray(betters.id, allExclude))
+    if (category && category !== 'all') conditions.push(eq(betters.category, category))
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
-    const eligible = await db.query.betters.findMany({
-      where: whereClause,
-      columns: {
-        id: true,
-        title: true,
-        imageAUrl: true,
-        imageADescription: true,
-        imageBUrl: true,
-        imageBDescription: true,
-      },
-      with: {
-        likes: { columns: { userId: true } },
-      },
+    const eligible = await db.select({
+      id: betters.id,
+      title: betters.title,
+      imageAUrl: betters.imageAUrl,
+      imageADescription: betters.imageADescription,
+      imageBUrl: betters.imageBUrl,
+      imageBDescription: betters.imageBDescription,
+      category: betters.category,
     })
+      .from(betters)
+      .where(whereClause)
 
     if (!eligible.length) return null
     const picked = eligible[Math.floor(Math.random() * eligible.length)]
+
+    const pickedLikes = await db.select({ userId: likes.userId })
+      .from(likes)
+      .where(eq(likes.betterId, picked.id))
+
     return {
       id: picked.id,
       title: picked.title,
@@ -71,8 +75,9 @@ export async function getRandomBattle(excludeIds: string[]): Promise<BattleForVo
       imageADescription: picked.imageADescription,
       imageBUrl: picked.imageBUrl,
       imageBDescription: picked.imageBDescription,
-      likeCount: picked.likes.length,
-      isLiked: userId ? picked.likes.some((l) => l.userId === userId) : false,
+      likeCount: pickedLikes.length,
+      isLiked: userId ? pickedLikes.some((l) => l.userId === userId) : false,
+      category: picked.category,
     }
   } catch (e) {
     console.error('[getRandomBattle] DB error:', e)
@@ -100,6 +105,7 @@ export async function saveBattle(
     const imageBUrl = formData.get('imageBUrl') as string
     const descriptionA = (formData.get('descriptionA') as string) || ''
     const descriptionB = (formData.get('descriptionB') as string) || ''
+    const category = (formData.get('category') as BetterCategory) || 'decision'
 
     if (!title) return { error: '제목을 입력해주세요' }
     if (!imageAUrl) return { error: '사진 A 업로드가 완료되지 않았습니다' }
@@ -128,6 +134,7 @@ export async function saveBattle(
       imageADescription: descriptionA || null,
       imageBUrl,
       imageBDescription: descriptionB || null,
+      category,
     })
 
     console.log('[saveBattle] step 4: success')
@@ -149,23 +156,31 @@ export async function saveBattle(
 
 export async function getBattles() {
   return db.query.betters.findMany({
-    orderBy: (betters, { desc }) => [desc(betters.createdAt)],
-    with: { user: true },
+    orderBy: (b, { desc }) => [desc(b.createdAt)],
   })
 }
 
-export type BattleThumb = { id: string; title: string; imageAUrl: string; imageBUrl: string }
+export type BattleThumb = {
+  id: string
+  title: string
+  imageAUrl: string
+  imageBUrl: string
+  category: BetterCategory
+}
 
-export async function getBattleThumbnails(offset: number): Promise<BattleThumb[]> {
+export async function getBattleThumbnails(
+  offset: number,
+  category?: BetterCategory | 'all',
+): Promise<BattleThumb[]> {
   try {
-    // LIMIT/OFFSET 파라미터화 회피 — 전체 조회 후 JS 슬라이스
     const all = await db.query.betters.findMany({
-      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true, createdAt: true },
+      columns: { id: true, title: true, imageAUrl: true, imageBUrl: true, category: true, createdAt: true },
     })
     return all
+      .filter((b) => !category || category === 'all' || b.category === category)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(offset, offset + 10)
-      .map(({ id, title, imageAUrl, imageBUrl }) => ({ id, title, imageAUrl, imageBUrl }))
+      .map(({ id, title, imageAUrl, imageBUrl, category: cat }) => ({ id, title, imageAUrl, imageBUrl, category: cat }))
   } catch {
     return []
   }
@@ -176,17 +191,24 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    const battle = await db.query.betters.findFirst({
-      where: eq(betters.id, id),
-      columns: {
-        id: true, title: true,
-        imageAUrl: true, imageADescription: true,
-        imageBUrl: true, imageBDescription: true,
-      },
-      with: { likes: { columns: { userId: true } } },
+    const [battle] = await db.select({
+      id: betters.id,
+      title: betters.title,
+      imageAUrl: betters.imageAUrl,
+      imageADescription: betters.imageADescription,
+      imageBUrl: betters.imageBUrl,
+      imageBDescription: betters.imageBDescription,
+      category: betters.category,
     })
+      .from(betters)
+      .where(eq(betters.id, id))
+      .limit(1)
 
     if (!battle) return null
+
+    const battleLikes = await db.select({ userId: likes.userId })
+      .from(likes)
+      .where(eq(likes.betterId, id))
 
     return {
       id: battle.id,
@@ -195,8 +217,9 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
       imageADescription: battle.imageADescription,
       imageBUrl: battle.imageBUrl,
       imageBDescription: battle.imageBDescription,
-      likeCount: battle.likes.length,
-      isLiked: user ? battle.likes.some((l) => l.userId === user.id) : false,
+      likeCount: battleLikes.length,
+      isLiked: user ? battleLikes.some((l) => l.userId === user.id) : false,
+      category: battle.category,
     }
   } catch {
     return null

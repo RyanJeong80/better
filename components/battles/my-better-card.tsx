@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { ChevronDown, Heart } from 'lucide-react'
+import type { BetterCategory } from '@/lib/constants/categories'
+import { CATEGORY_MAP } from '@/lib/constants/categories'
 
 interface Reason {
   choice: 'A' | 'B'
@@ -21,6 +23,13 @@ interface BattleStats {
   reasons: Reason[]
   createdAt: Date
   likesCount: number
+  category: BetterCategory
+}
+
+const CAT_BADGE: Record<BetterCategory, { bg: string; text: string }> = {
+  fashion:    { bg: '#EFF6FF', text: '#2563EB' },
+  appearance: { bg: '#FDF2F8', text: '#BE185D' },
+  decision:   { bg: '#F0FDF4', text: '#15803D' },
 }
 
 function ImageResult({
@@ -120,6 +129,18 @@ export function MyBetterCard({ battle }: { battle: BattleStats }) {
       {/* 헤더 */}
       <div className="flex items-start justify-between gap-3 px-4 py-4 md:px-5">
         <div className="min-w-0">
+          {(() => {
+            const cat = CATEGORY_MAP[battle.category]
+            const style = CAT_BADGE[battle.category]
+            return (
+              <span
+                className="mb-1 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
+                style={{ background: style.bg, color: style.text }}
+              >
+                {cat.emoji} {cat.label}
+              </span>
+            )
+          })()}
           <h3 className="font-bold leading-snug text-foreground">{battle.title}</h3>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {battle.total > 0 ? `총 ${battle.total}표` : '아직 투표가 없어요'}

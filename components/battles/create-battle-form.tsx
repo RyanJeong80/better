@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { ImagePlus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { saveBattle, type BattleState } from '@/actions/battles'
+import { CATEGORIES, CATEGORY_MAP } from '@/lib/constants/categories'
+import type { BetterCategory } from '@/lib/constants/categories'
 
 const MAX_DESC = 100
 const MAX_FILE_MB = 5
@@ -348,6 +350,7 @@ export function CreateBattleForm() {
   const [slotB, setSlotB] = useState<SlotState>(initSlot)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generateError, setGenerateError] = useState<string | null>(null)
+  const [category, setCategory] = useState<BetterCategory | null>(null)
 
   const previewRef = useRef({ a: slotA.preview, b: slotB.preview })
   useEffect(() => { previewRef.current.a = slotA.preview }, [slotA.preview])
@@ -373,7 +376,7 @@ export function CreateBattleForm() {
   const hasContentA = !!slotA.url || !!slotA.desc.trim()
   const hasContentB = !!slotB.url || !!slotB.desc.trim()
   const isUploading = slotA.uploading || slotB.uploading
-  const canSubmit = hasContentA && hasContentB && !isUploading && !isGenerating
+  const canSubmit = hasContentA && hasContentB && !isUploading && !isGenerating && !!category
 
   return (
     <form
@@ -405,6 +408,7 @@ export function CreateBattleForm() {
         // 텍스트 전용 슬롯은 설명 생략 (텍스트가 이미지에 포함됨)
         formData.set('descriptionA', slotA.url ? slotA.desc : '')
         formData.set('descriptionB', slotB.url ? slotB.desc : '')
+        formData.set('category', category ?? 'decision')
         await formAction(formData)
       }}
       className="space-y-8"
@@ -426,6 +430,36 @@ export function CreateBattleForm() {
           {generateError ?? (state as { error: string }).error}
         </div>
       )}
+
+      {/* 카테고리 선택 */}
+      <div className="space-y-2">
+        <label className="text-sm font-medium">
+          카테고리 <span className="text-destructive">*</span>
+        </label>
+        <div className="grid grid-cols-3 gap-2">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.id}
+              type="button"
+              onClick={() => setCategory(cat.id)}
+              className={[
+                'flex flex-col items-center gap-1.5 rounded-2xl border-2 p-3 text-center transition-all',
+                category === cat.id
+                  ? 'border-primary bg-primary/5'
+                  : 'border-border hover:border-primary/40 hover:bg-accent',
+              ].join(' ')}
+            >
+              <span className="text-2xl">{cat.emoji}</span>
+              <span className="text-xs font-semibold">{cat.label}</span>
+            </button>
+          ))}
+        </div>
+        {category ? (
+          <p className="text-xs text-muted-foreground">{CATEGORY_MAP[category].description}</p>
+        ) : (
+          <p className="text-xs text-muted-foreground/50">카테고리를 먼저 선택해주세요</p>
+        )}
+      </div>
 
       {/* 제목 */}
       <div className="space-y-1.5">
@@ -462,7 +496,7 @@ export function CreateBattleForm() {
             </svg>
             {isGenerating ? '이미지 생성 중…' : '업로드 중…'}
           </span>
-        ) : !canSubmit ? 'A와 B 모두 내용을 입력해주세요' : '만들기'}
+        ) : !category ? '카테고리를 선택해주세요' : (!hasContentA || !hasContentB) ? 'A와 B 모두 내용을 입력해주세요' : '만들기'}
       </button>
     </form>
   )
