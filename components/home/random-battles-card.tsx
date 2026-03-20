@@ -68,29 +68,32 @@ export function RandomBattlesCard({
         ))}
       </div>
 
-      {/* 썸네일 목록 */}
-      <ul className={`flex-1 space-y-2 transition-opacity ${isPending ? 'opacity-50' : ''}`}>
+      {/* 썸네일 그리드 (2×N) */}
+      <div className={`grid grid-cols-2 gap-2 transition-opacity ${isPending ? 'opacity-50' : ''}`}>
         {battles.map((b) => (
-          <li key={b.id}>
-            <Link
-              href={`/explore?id=${b.id}`}
-              className="flex items-center gap-2.5 rounded-xl px-1 py-1 -mx-1 hover:bg-accent transition-colors"
-            >
-              <span className="shrink-0 text-sm">{CATEGORY_MAP[b.category].emoji}</span>
-              <div className="flex shrink-0 overflow-hidden rounded-lg">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={b.imageAUrl} alt="" style={{ width: 54, height: 54, objectFit: 'cover' }} />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={b.imageBUrl} alt="" style={{ width: 54, height: 54, objectFit: 'cover', borderLeft: '2px solid hsl(var(--card))' }} />
-              </div>
-              <span className="truncate text-lg text-muted-foreground">{b.title}</span>
-            </Link>
-          </li>
+          <Link
+            key={b.id}
+            href={`/explore?id=${b.id}`}
+            className="flex flex-col gap-1.5 rounded-xl overflow-hidden hover:bg-accent transition-colors"
+          >
+            {/* 썸네일 */}
+            <div className="flex w-full overflow-hidden rounded-xl">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={b.imageAUrl} alt="" style={{ width: '50%', aspectRatio: '1/1', objectFit: 'cover' }} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={b.imageBUrl} alt="" style={{ width: '50%', aspectRatio: '1/1', objectFit: 'cover', borderLeft: '2px solid hsl(var(--card))' }} />
+            </div>
+            {/* 카테고리 + 제목 */}
+            <div className="flex items-center gap-1 px-0.5 pb-1">
+              <span className="shrink-0 text-xs">{CATEGORY_MAP[b.category].emoji}</span>
+              <span className="truncate text-xs font-medium text-muted-foreground">{b.title}</span>
+            </div>
+          </Link>
         ))}
         {battles.length === 0 && !isPending && (
-          <li className="py-4 text-center text-xs text-muted-foreground">아직 데이터가 없어요</li>
+          <p className="col-span-2 py-4 text-center text-xs text-muted-foreground">아직 데이터가 없어요</p>
         )}
-      </ul>
+      </div>
 
       {/* 푸터 */}
       <div className="flex items-center justify-between">
