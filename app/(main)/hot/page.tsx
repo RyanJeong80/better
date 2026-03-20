@@ -96,8 +96,9 @@ export default async function HotPage({
           <Link
             key={f.id}
             href={f.id === 'all' ? '/hot' : `/hot?category=${f.id}`}
+            style={{ fontSize: '11px' }}
             className={[
-              'rounded-full px-2 py-1.5 text-center text-xs font-semibold transition-all',
+              'rounded-full px-1.5 py-1 text-center font-semibold transition-all',
               activeCategory === f.id
                 ? 'bg-amber-500 text-white shadow-sm'
                 : 'border border-border bg-card text-muted-foreground hover:bg-accent',

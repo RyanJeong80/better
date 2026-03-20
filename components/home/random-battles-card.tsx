@@ -55,8 +55,9 @@ export function RandomBattlesCard({
           <button
             key={f.id}
             onClick={() => handleCategoryChange(f.id)}
+            style={{ fontSize: '11px' }}
             className={[
-              'rounded-full px-1.5 py-1 text-xs font-semibold transition-all',
+              'rounded-full px-1 py-0.5 font-semibold transition-all',
               filter === f.id
                 ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'border border-border text-muted-foreground hover:bg-accent',
@@ -68,19 +69,19 @@ export function RandomBattlesCard({
       </div>
 
       {/* 썸네일 목록 */}
-      <ul className={`flex-1 space-y-1.5 transition-opacity ${isPending ? 'opacity-50' : ''}`}>
+      <ul className={`flex-1 space-y-2 transition-opacity ${isPending ? 'opacity-50' : ''}`}>
         {battles.map((b) => (
           <li key={b.id}>
             <Link
               href={`/explore?id=${b.id}`}
-              className="flex items-center gap-2.5 rounded-xl px-1 py-0.5 -mx-1 hover:bg-accent transition-colors"
+              className="flex items-center gap-2.5 rounded-xl px-1 py-1 -mx-1 hover:bg-accent transition-colors"
             >
               <span className="shrink-0 text-sm">{CATEGORY_MAP[b.category].emoji}</span>
               <div className="flex shrink-0 overflow-hidden rounded-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={b.imageAUrl} alt="" style={{ width: 28, height: 28, objectFit: 'cover' }} />
+                <img src={b.imageAUrl} alt="" style={{ width: 38, height: 38, objectFit: 'cover' }} />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={b.imageBUrl} alt="" style={{ width: 28, height: 28, objectFit: 'cover', borderLeft: '2px solid hsl(var(--card))' }} />
+                <img src={b.imageBUrl} alt="" style={{ width: 38, height: 38, objectFit: 'cover', borderLeft: '2px solid hsl(var(--card))' }} />
               </div>
               <span className="truncate text-sm text-muted-foreground">{b.title}</span>
             </Link>

@@ -38,8 +38,9 @@ export function HotBattlesCard({ initialBattles }: { initialBattles: HotThumb[] 
           <button
             key={f.id}
             onClick={() => setFilter(f.id)}
+            style={{ fontSize: '11px' }}
             className={[
-              'rounded-full px-1.5 py-1 text-xs font-semibold transition-all',
+              'rounded-full px-1 py-0.5 font-semibold transition-all',
               filter === f.id
                 ? 'bg-amber-500 text-white shadow-sm'
                 : 'border border-border text-muted-foreground hover:bg-accent',
@@ -51,11 +52,11 @@ export function HotBattlesCard({ initialBattles }: { initialBattles: HotThumb[] 
       </div>
 
       {/* 목록 */}
-      <ul className="flex-1 space-y-2">
+      <ul className="flex-1 space-y-2.5">
         {filtered.slice(0, 5).map((b, i) => (
           <li key={b.id} className="flex items-center gap-2">
             <span
-              className="w-4 shrink-0 text-center text-xs font-black"
+              className="w-5 shrink-0 text-center text-sm font-black"
               style={{ color: i === 0 ? '#D97706' : i === 1 ? '#9CA3AF' : '#B45309' }}
             >
               {i + 1}
@@ -63,9 +64,9 @@ export function HotBattlesCard({ initialBattles }: { initialBattles: HotThumb[] 
             <span className="shrink-0 text-sm">{CATEGORY_MAP[b.category].emoji}</span>
             <div className="flex shrink-0 overflow-hidden rounded-lg">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={b.imageAUrl} alt="" style={{ width: 30, height: 30, objectFit: 'cover' }} />
+              <img src={b.imageAUrl} alt="" style={{ width: 40, height: 40, objectFit: 'cover' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={b.imageBUrl} alt="" style={{ width: 30, height: 30, objectFit: 'cover', borderLeft: '2px solid #FFFBEB' }} />
+              <img src={b.imageBUrl} alt="" style={{ width: 40, height: 40, objectFit: 'cover', borderLeft: '2px solid #FFFBEB' }} />
             </div>
             <span className="flex-1 truncate text-sm text-muted-foreground">{b.title}</span>
             <div className="flex shrink-0 items-center gap-0.5" style={{ color: '#F43F5E' }}>

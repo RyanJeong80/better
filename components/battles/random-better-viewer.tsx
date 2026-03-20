@@ -185,8 +185,9 @@ export function RandomBetterViewer({
           <button
             key={f.id}
             onClick={() => handleCategoryChange(f.id)}
+            style={{ fontSize: '11px' }}
             className={[
-              'rounded-full px-2 py-1.5 text-xs font-semibold transition-all',
+              'rounded-full px-1.5 py-1 font-semibold transition-all',
               categoryFilter === f.id
                 ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'border border-border bg-card text-muted-foreground hover:bg-accent',
