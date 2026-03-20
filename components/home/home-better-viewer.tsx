@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useTransition, useCallback, useEffect } from 'react'
+import { useState, useRef, useTransition, useCallback } from 'react'
 import { Heart, ChevronRight, Check } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
@@ -38,16 +38,16 @@ function createCard(b: BattleForVoting): CardData {
 
 export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVoting | null }) {
   const [card, setCard]                 = useState<CardData | null>(initialBattle ? createCard(initialBattle) : null)
-  const [isLoading, setIsLoading]       = useState(!initialBattle)
+  const [isLoading, setIsLoading]       = useState(false)
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
-  const [isEmpty, setIsEmpty]           = useState(false)
+  const [isEmpty, setIsEmpty]           = useState(!initialBattle)
 
   const seenIdsRef   = useRef<string[]>(initialBattle ? [initialBattle.id] : [])
   const isLoadingRef = useRef(false)
 
   const [, startTransition] = useTransition()
 
-  // 다음 배틀 로드
+  // 다음 배틀 로드 (사용자 액션으로만 호출)
   const loadNext = useCallback((cat: CategoryFilter, resetSeen = false) => {
     if (isLoadingRef.current) return
     isLoadingRef.current = true
@@ -74,12 +74,6 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
         setIsLoading(false)
       }
     })
-  }, [])
-
-  // 초기 로드 (initialBattle 없을 때)
-  useEffect(() => {
-    if (!initialBattle) loadNext(categoryFilter)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // 다음 카드로 넘기기
@@ -174,8 +168,10 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
           height: 360, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
           borderRadius: 20, border: '2px dashed var(--color-border)',
         }}>
-          <span style={{ fontSize: '2rem' }}>🎉</span>
-          <p style={{ fontWeight: 700, fontSize: '0.9rem' }}>모든 Better를 봤어요!</p>
+          <span style={{ fontSize: '2rem' }}>{seenIdsRef.current.length > 0 ? '🎉' : '😶'}</span>
+          <p style={{ fontWeight: 700, fontSize: '0.9rem' }}>
+            {seenIdsRef.current.length > 0 ? '모든 Better를 봤어요!' : '현재 표시할 Better가 없습니다'}
+          </p>
           <button
             onClick={() => { seenIdsRef.current = []; loadNext(categoryFilter, true) }}
             style={{
@@ -184,7 +180,7 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
               fontWeight: 700, fontSize: '0.8rem', border: 'none', cursor: 'pointer',
             }}
           >
-            다시 보기
+            {seenIdsRef.current.length > 0 ? '다시 보기' : '불러오기'}
           </button>
         </div>
       ) : (
