@@ -114,33 +114,33 @@ export default async function HomePage() {
     <div className="space-y-8 md:space-y-12">
       {/* ── 히어로 ── */}
       <section
-        className="relative overflow-hidden rounded-3xl px-6 py-14 text-center md:px-16 md:py-20"
+        className="relative overflow-hidden rounded-3xl px-6 py-5 text-center md:px-16 md:py-20"
         style={{ background: 'linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 50%, #FDF2F8 100%)' }}
       >
         <div className="pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full opacity-35" style={{ background: '#818CF8', filter: 'blur(90px)' }} />
         <div className="pointer-events-none absolute -bottom-24 -right-24 h-72 w-72 rounded-full opacity-25" style={{ background: '#C084FC', filter: 'blur(90px)' }} />
 
         <div className="relative mx-auto max-w-2xl">
-          <h1 className="flex flex-col gap-0.5 text-6xl font-black leading-tight tracking-tight text-gray-900 md:text-8xl">
+          <h1 className="flex flex-col gap-0 text-5xl font-black leading-tight tracking-tight text-gray-900 md:text-8xl">
             <span>Which</span>
             <span><AnimatedWord /></span>
             <span>is better?</span>
           </h1>
-          <p className="mt-5 text-sm font-bold text-gray-500 md:text-base">
+          <p className="mt-3 text-sm font-bold text-gray-500 md:text-base">
             AI 대신 HI(Human Intelligence)가 선택하는 당신의 고민!
           </p>
 
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <div className="mt-6 flex flex-row items-center justify-center gap-3">
             <Link
               href="/explore"
-              className="inline-flex items-center rounded-full px-14 py-5 text-base font-bold text-white transition-all hover:scale-[1.04] hover:brightness-110 active:scale-100"
+              className="inline-flex items-center rounded-full px-7 py-3 text-sm font-bold text-white transition-all hover:scale-[1.04] hover:brightness-110 active:scale-100"
               style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', boxShadow: '0 6px 20px rgba(99,102,241,0.4)' }}
             >
               랜덤 Better 보기
             </Link>
             <Link
               href="/battles/new"
-              className="inline-flex items-center rounded-full px-14 py-5 text-base font-bold transition-all hover:scale-[1.04] active:scale-100"
+              className="inline-flex items-center rounded-full px-7 py-3 text-sm font-bold transition-all hover:scale-[1.04] active:scale-100"
               style={{ background: 'rgba(255,255,255,0.7)', border: '1.5px solid rgba(99,102,241,0.25)', color: '#4F46E5', backdropFilter: 'blur(8px)', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}
             >
               내 Better 만들기
