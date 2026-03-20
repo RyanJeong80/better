@@ -1,12 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useLayoutEffect } from 'react'
 import { SplashAnimatedWord } from './animated-word'
 
 export function SplashScreen() {
   const [phase, setPhase] = useState<'visible' | 'fading' | 'gone'>('visible')
 
-  useEffect(() => {
+  // 첫 페인트 전에 실행 — 데스크탑이면 즉시 숨겨 깜빡임 없음
+  useLayoutEffect(() => {
+    if (window.innerWidth >= 768) {
+      setPhase('gone')
+      return
+    }
     const t1 = setTimeout(() => setPhase('fading'), 2300)
     const t2 = setTimeout(() => setPhase('gone'), 2800)
     return () => { clearTimeout(t1); clearTimeout(t2) }
@@ -16,11 +21,11 @@ export function SplashScreen() {
 
   return (
     <div
-      className="splash-screen"
       style={{
         position: 'fixed',
         inset: 0,
         zIndex: 100,
+        display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         overflow: 'hidden',
@@ -30,44 +35,33 @@ export function SplashScreen() {
         pointerEvents: phase === 'fading' ? 'none' : 'auto',
       }}
     >
-      {/* 히어로 섹션과 동일한 블러 orb */}
-      <div
-        className="pointer-events-none absolute"
-        style={{
-          top: '-6rem', left: '-6rem',
-          width: '18rem', height: '18rem',
-          borderRadius: '50%',
-          background: '#818CF8',
-          filter: 'blur(90px)',
-          opacity: 0.35,
-        }}
-      />
-      <div
-        className="pointer-events-none absolute"
-        style={{
-          bottom: '-6rem', right: '-6rem',
-          width: '18rem', height: '18rem',
-          borderRadius: '50%',
-          background: '#C084FC',
-          filter: 'blur(90px)',
-          opacity: 0.25,
-        }}
-      />
+      {/* 블러 orb — 히어로 섹션과 동일 */}
+      <div style={{
+        position: 'absolute', top: '-6rem', left: '-6rem',
+        width: '18rem', height: '18rem', borderRadius: '50%',
+        background: '#818CF8', filter: 'blur(90px)', opacity: 0.35,
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '-6rem', right: '-6rem',
+        width: '18rem', height: '18rem', borderRadius: '50%',
+        background: '#C084FC', filter: 'blur(90px)', opacity: 0.25,
+        pointerEvents: 'none',
+      }} />
 
-      {/* 콘텐츠 — 히어로 섹션 구조 동일 */}
+      {/* 콘텐츠 */}
       <div style={{ position: 'relative', textAlign: 'center', padding: '1.5rem' }}>
-        <h1
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 0,
-            fontSize: '4.5rem',
-            fontWeight: 900,
-            lineHeight: 1.1,
-            letterSpacing: '-0.02em',
-            color: '#111827',
-          }}
-        >
+        <h1 style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 0,
+          fontSize: '4.5rem',
+          fontWeight: 900,
+          lineHeight: 1.1,
+          letterSpacing: '-0.02em',
+          color: '#111827',
+        }}>
           <span>Which</span>
           <SplashAnimatedWord />
           <span>is <span style={{ color: '#8B5CF6' }}>Better</span>?</span>
