@@ -31,6 +31,8 @@ const CAT_BADGE: Record<BetterCategory, { bg: string; text: string }> = {
   decision:   { bg: '#F0FDF4', text: '#15803D' },
 }
 
+export const revalidate = 30 // 30초 캐시 — Hot 순위는 실시간 불필요
+
 export default async function HotPage({
   searchParams,
 }: {
@@ -43,15 +45,16 @@ export default async function HotPage({
   let entries: HotEntry[] = []
 
   try {
-    const allBetters = await db.select({
-      id: betters.id,
-      title: betters.title,
-      imageAUrl: betters.imageAUrl,
-      imageBUrl: betters.imageBUrl,
-      category: betters.category,
-    }).from(betters)
-
-    const allLikes = await db.select({ betterId: likes.betterId }).from(likes)
+    const [allBetters, allLikes] = await Promise.all([
+      db.select({
+        id: betters.id,
+        title: betters.title,
+        imageAUrl: betters.imageAUrl,
+        imageBUrl: betters.imageBUrl,
+        category: betters.category,
+      }).from(betters),
+      db.select({ betterId: likes.betterId }).from(likes),
+    ])
 
     const likeCountMap = new Map<string, number>()
     for (const l of allLikes) {

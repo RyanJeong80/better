@@ -9,9 +9,12 @@ export async function toggleLike(
   betterId: string,
 ): Promise<{ isLiked: boolean; likeCount: number } | { error: string }> {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await Promise.race([
+    supabase.auth.getUser(),
+    new Promise<{ data: { user: null } }>((resolve) =>
+      setTimeout(() => resolve({ data: { user: null } }), 3000)
+    ),
+  ])
   if (!user) return { error: '로그인이 필요합니다' }
 
   try {

@@ -9,7 +9,12 @@ import type { VoteChoice } from '@/types'
 
 export async function castVote(betterId: string, choice: VoteChoice) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user } } = await Promise.race([
+    supabase.auth.getUser(),
+    new Promise<{ data: { user: null } }>((resolve) =>
+      setTimeout(() => resolve({ data: { user: null } }), 3000)
+    ),
+  ])
   if (!user) return { error: '로그인이 필요합니다' }
 
   const existing = await db.query.votes.findFirst({
@@ -48,9 +53,12 @@ export async function submitVote(
   reason?: string,
 ): Promise<{ success: true; votesA: number; votesB: number; total: number } | { error: string }> {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await Promise.race([
+    supabase.auth.getUser(),
+    new Promise<{ data: { user: null } }>((resolve) =>
+      setTimeout(() => resolve({ data: { user: null } }), 3000)
+    ),
+  ])
   if (!user) return { error: '로그인이 필요합니다' }
 
   const existing = await db.query.votes.findFirst({

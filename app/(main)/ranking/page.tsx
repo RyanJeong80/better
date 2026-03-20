@@ -98,6 +98,8 @@ async function buildRankingData(
   return { myStats, participationRanking, accuracyRanking }
 }
 
+export const revalidate = 30 // 30초 캐시 — 랭킹은 실시간 불필요
+
 // ─── 페이지 ────────────────────────────────────────────────────────
 export default async function RankingPage({
   searchParams,
@@ -109,9 +111,13 @@ export default async function RankingPage({
     (CATEGORY_FILTERS.find((f) => f.id === category)?.id) ?? 'all'
 
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  // getUser()는 네트워크 요청 — 3초 타임아웃
+  const { data: { user } } = await Promise.race([
+    supabase.auth.getUser(),
+    new Promise<{ data: { user: null } }>((resolve) =>
+      setTimeout(() => resolve({ data: { user: null } }), 3000)
+    ),
+  ])
 
   try {
     const { myStats, participationRanking, accuracyRanking } = await buildRankingData(

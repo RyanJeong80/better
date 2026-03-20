@@ -20,6 +20,8 @@ function getDb(): DB {
       idle_timeout: 20,
       connect_timeout: 10,
       prepare: false,
+      // 쿼리 무한 hang 방지 — 8초 초과 시 DB 레벨에서 강제 종료
+      connection: { statement_timeout: 8000 },
     })
     _db = drizzle(client, { schema })
   }
