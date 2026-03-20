@@ -49,20 +49,20 @@ export async function proxy(request: NextRequest) {
   const isAuthPage = AUTH_PATHS.includes(pathname)
   const isOnboarding = pathname === '/onboarding'
 
+  function redirect(pathname: string) {
+    const url = request.nextUrl.clone()
+    url.pathname = pathname
+    const res = NextResponse.redirect(url)
+    res.headers.set('Cache-Control', 'no-store, no-cache')
+    return res
+  }
+
   if (!user) {
     // 비로그인: 보호된 경로 → 로그인 페이지
-    if (isProtected) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      return NextResponse.redirect(url)
-    }
+    if (isProtected) return redirect('/login')
   } else {
     // 로그인 상태에서 auth 페이지 접근 → 홈으로
-    if (isAuthPage) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/'
-      return NextResponse.redirect(url)
-    }
+    if (isAuthPage) return redirect('/')
   }
 
   return supabaseResponse
