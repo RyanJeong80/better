@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useTransition, useCallback } from 'react'
-import { Heart, ChevronRight, Check } from 'lucide-react'
+import { Heart, ChevronRight, Check, Shuffle } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
@@ -132,31 +132,53 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
   }
 
   return (
-    <div className="space-y-3">
-      {/* 카테고리 필터 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.375rem' }}>
-        {CATEGORY_FILTERS.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => handleCategoryChange(f.id)}
-            style={{ fontSize: '11px' }}
-            className={[
-              'rounded-full px-1 py-0.5 font-semibold transition-all',
-              categoryFilter === f.id
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'border border-border text-muted-foreground hover:bg-accent',
-            ].join(' ')}
-          >
-            {f.emoji} {f.label}
-          </button>
-        ))}
+    <div style={{
+      borderRadius: 24,
+      border: '1px solid var(--color-border)',
+      background: 'var(--color-card)',
+      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+      overflow: 'hidden',
+    }}>
+      {/* 헤더: 아이콘 + 타이틀 */}
+      <div style={{ padding: '14px 14px 10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 10, flexShrink: 0,
+            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <Shuffle size={16} color="white" />
+          </div>
+          <h2 style={{ fontWeight: 900, fontSize: '1.05rem', color: 'var(--color-foreground)', margin: 0 }}>
+            랜덤 Better 보기
+          </h2>
+        </div>
+
+        {/* 카테고리 필터 */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.375rem' }}>
+          {CATEGORY_FILTERS.map((f) => (
+            <button
+              key={f.id}
+              onClick={() => handleCategoryChange(f.id)}
+              style={{ fontSize: '11px' }}
+              className={[
+                'rounded-full px-1 py-0.5 font-semibold transition-all',
+                categoryFilter === f.id
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'border border-border text-muted-foreground hover:bg-accent',
+              ].join(' ')}
+            >
+              {f.emoji} {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* 카드 영역 */}
       {isLoading ? (
         <div style={{
           height: 360, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          borderRadius: 20, border: '2px dashed var(--color-border)',
+          borderTop: '1px solid var(--color-border)',
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
             <div className="animate-spin" style={{ width: 28, height: 28, border: '3px solid var(--color-border)', borderTopColor: 'var(--color-primary)', borderRadius: '50%' }} />
@@ -166,7 +188,7 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
       ) : isEmpty || !card ? (
         <div style={{
           height: 360, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
-          borderRadius: 20, border: '2px dashed var(--color-border)',
+          borderTop: '1px solid var(--color-border)',
         }}>
           <span style={{ fontSize: '2rem' }}>{seenIdsRef.current.length > 0 ? '🎉' : '😶'}</span>
           <p style={{ fontWeight: 700, fontSize: '0.9rem' }}>
@@ -211,13 +233,7 @@ function BattleCard({ card, onVote, onNext, onLike }: {
   const pctB = result ? 100 - pctA : 0
 
   return (
-    <div style={{
-      borderRadius: 20,
-      overflow: 'hidden',
-      border: '1px solid var(--color-border)',
-      background: 'var(--color-card)',
-      boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
-    }}>
+    <div style={{ borderTop: '1px solid var(--color-border)' }}>
       {/* 헤더 */}
       <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
         <div style={{ minWidth: 0, flex: 1 }}>

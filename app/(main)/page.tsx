@@ -15,8 +15,7 @@ export default async function HomePage() {
       <div className="space-y-8 md:space-y-12">
 
         {/* ── 랜덤 Better (히어로 위치) ── */}
-        <section className="space-y-3">
-          <h2 className="text-xl font-black text-foreground">랜덤 Better 보기</h2>
+        <section>
           <HomeBetterViewer initialBattle={initialBattle} />
         </section>
 
