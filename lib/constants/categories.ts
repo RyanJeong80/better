@@ -22,7 +22,7 @@ export const CATEGORIES = [
   },
   {
     id: 'shopping' as const,
-    label: '쇼핑/재테크',
+    label: '쇼핑/투자',
     emoji: '💰',
     description: '이거 살까 말까? 어디에 투자할까? 어느 브랜드가 나을까?',
   },
@@ -34,7 +34,7 @@ export const CATEGORIES = [
   },
   {
     id: 'it' as const,
-    label: 'IT/전자기기',
+    label: 'IT/전자',
     emoji: '📱',
     description: '아이폰 vs 갤럭시, 맥 vs 윈도우, 어떤 제품이 더 나을까?',
   },

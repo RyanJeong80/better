@@ -180,7 +180,7 @@ export function RandomBetterViewer({
   return (
     <div className="space-y-3">
       {/* 카테고리 필터 탭 */}
-      <div className="grid grid-cols-4 gap-2">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
         {CATEGORY_FILTERS.map((f) => (
           <button
             key={f.id}

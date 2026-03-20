@@ -50,13 +50,13 @@ export function RandomBattlesCard({
       </div>
 
       {/* 카테고리 탭 */}
-      <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.375rem' }}>
         {CATEGORY_FILTERS.map((f) => (
           <button
             key={f.id}
             onClick={() => handleCategoryChange(f.id)}
             className={[
-              'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold transition-all',
+              'rounded-full px-1.5 py-1 text-xs font-semibold transition-all',
               filter === f.id
                 ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'border border-border text-muted-foreground hover:bg-accent',

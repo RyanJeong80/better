@@ -91,7 +91,7 @@ export default async function HotPage({
       </div>
 
       {/* 카테고리 탭 */}
-      <div className="grid grid-cols-4 gap-2">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
         {CATEGORY_FILTERS.map((f) => (
           <Link
             key={f.id}
