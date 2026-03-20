@@ -33,14 +33,13 @@ export async function proxy(request: NextRequest) {
     },
   )
 
-  const { data, error } = await supabase.auth.getUser().catch(() => ({
-    data: { user: null },
-    error: new Error('fetch failed'),
+  // getSession(): JWT를 로컬 쿠키에서 읽음 — 네트워크 요청 없음 → 미들웨어 타임아웃 방지
+  // (보안 검증은 server action의 getUser()에서 처리)
+  const { data: { session } } = await supabase.auth.getSession().catch(() => ({
+    data: { session: null },
   }))
 
-  if (error) return supabaseResponse
-
-  const user = data.user
+  const user = session?.user ?? null
   const { pathname } = request.nextUrl
 
   const isProtected = PROTECTED_PATHS.some(

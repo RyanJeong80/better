@@ -19,68 +19,65 @@ async function fetchHomeData(): Promise<{
   hotBattles: HotThumb[]
   rankers: Ranker[]
 }> {
-  let initialBattle: BattleForVoting | null = null
-  let hotBattles: HotThumb[] = []
-  let rankers: Ranker[] = []
+  const [battleResult, hotResult, rankResult] = await Promise.allSettled([
+    // 1) 랜덤 배틀
+    getRandomBattle([], undefined),
 
-  try {
-    initialBattle = await getRandomBattle([], undefined)
-  } catch (e) {
-    console.error('[initialBattle error]', e)
-  }
-
-  try {
-    const allBetters = await db.select({
-      id: betters.id,
-      title: betters.title,
-      imageAUrl: betters.imageAUrl,
-      imageBUrl: betters.imageBUrl,
-      category: betters.category,
-    }).from(betters)
-
-    const allLikes = await db.select({ betterId: likes.betterId }).from(likes)
-    const likeCountMap = new Map<string, number>()
-    for (const l of allLikes) {
-      likeCountMap.set(l.betterId, (likeCountMap.get(l.betterId) ?? 0) + 1)
-    }
-
-    hotBattles = allBetters
-      .map((b) => ({ ...b, likeCount: likeCountMap.get(b.id) ?? 0 }))
-      .filter((b) => b.likeCount > 0)
-      .sort((a, b) => b.likeCount - a.likeCount)
-      .slice(0, 5)
-  } catch (e) {
-    console.error('[hotBattles error]', e)
-  }
-
-  try {
-    const allVotes = await db.select({
-      voterId: votes.voterId,
-      voterName: users.name,
-      voterEmail: users.email,
-    })
-      .from(votes)
-      .leftJoin(users, eq(votes.voterId, users.id))
-
-    const countMap = new Map<string, { name: string; count: number }>()
-    for (const v of allVotes) {
-      if (!countMap.has(v.voterId)) {
-        countMap.set(v.voterId, {
-          name: v.voterName ?? v.voterEmail?.split('@')[0] ?? '사용자',
-          count: 0,
-        })
+    // 2) Hot 배틀 — 좋아요 TOP 5
+    (async (): Promise<HotThumb[]> => {
+      const [allBetters, allLikes] = await Promise.all([
+        db.select({
+          id: betters.id,
+          title: betters.title,
+          imageAUrl: betters.imageAUrl,
+          imageBUrl: betters.imageBUrl,
+          category: betters.category,
+        }).from(betters),
+        db.select({ betterId: likes.betterId }).from(likes),
+      ])
+      const likeCountMap = new Map<string, number>()
+      for (const l of allLikes) {
+        likeCountMap.set(l.betterId, (likeCountMap.get(l.betterId) ?? 0) + 1)
       }
-      countMap.get(v.voterId)!.count++
-    }
-    rankers = [...countMap.values()]
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5)
-      .map((r) => ({ name: r.name, participated: r.count }))
-  } catch (e) {
-    console.error('[rankers error]', e)
-  }
+      return allBetters
+        .map((b) => ({ ...b, likeCount: likeCountMap.get(b.id) ?? 0 }))
+        .filter((b) => b.likeCount > 0)
+        .sort((a, b) => b.likeCount - a.likeCount)
+        .slice(0, 5)
+    })(),
 
-  return { initialBattle, hotBattles, rankers }
+    // 3) 랭킹 — 투표 수 TOP 5
+    (async (): Promise<Ranker[]> => {
+      const allVotes = await db.select({
+        voterId: votes.voterId,
+        voterName: users.name,
+        voterEmail: users.email,
+      })
+        .from(votes)
+        .leftJoin(users, eq(votes.voterId, users.id))
+
+      const countMap = new Map<string, { name: string; count: number }>()
+      for (const v of allVotes) {
+        if (!countMap.has(v.voterId)) {
+          countMap.set(v.voterId, {
+            name: v.voterName ?? v.voterEmail?.split('@')[0] ?? '사용자',
+            count: 0,
+          })
+        }
+        countMap.get(v.voterId)!.count++
+      }
+      return [...countMap.values()]
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5)
+        .map((r) => ({ name: r.name, participated: r.count }))
+    })(),
+  ])
+
+  return {
+    initialBattle: battleResult.status === 'fulfilled' ? battleResult.value : null,
+    hotBattles:    hotResult.status    === 'fulfilled' ? hotResult.value    : [],
+    rankers:       rankResult.status   === 'fulfilled' ? rankResult.value   : [],
+  }
 }
 
 // ─── 페이지 ───────────────────────────────────────────────────────
