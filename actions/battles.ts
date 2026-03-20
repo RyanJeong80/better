@@ -27,9 +27,13 @@ export async function getRandomBattle(
 ): Promise<BattleForVoting | null> {
   try {
     const supabase = await createClient()
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
+    // getUser()는 네트워크 요청 — hang 방지를 위해 3초 타임아웃
+    const { data: { user } } = await Promise.race([
+      supabase.auth.getUser(),
+      new Promise<{ data: { user: null } }>((resolve) =>
+        setTimeout(() => resolve({ data: { user: null } }), 3000)
+      ),
+    ])
 
     let alreadyVotedIds: string[] = []
     if (user) {

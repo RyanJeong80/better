@@ -13,6 +13,16 @@ import type { BetterCategory } from '@/lib/constants/categories'
 type HotThumb = { id: string; title: string; imageAUrl: string; imageBUrl: string; category: BetterCategory; likeCount: number }
 type Ranker = { name: string; participated: number }
 
+// ─── 타임아웃 헬퍼 ────────────────────────────────────────────────
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error(`timeout after ${ms}ms`)), ms)
+    ),
+  ])
+}
+
 // ─── 데이터 패칭 ──────────────────────────────────────────────────
 async function fetchHomeData(): Promise<{
   initialBattle: BattleForVoting | null
@@ -20,11 +30,11 @@ async function fetchHomeData(): Promise<{
   rankers: Ranker[]
 }> {
   const [battleResult, hotResult, rankResult] = await Promise.allSettled([
-    // 1) 랜덤 배틀
-    getRandomBattle([], undefined),
+    // 1) 랜덤 배틀 — 5초 타임아웃
+    withTimeout(getRandomBattle([], undefined), 5000),
 
-    // 2) Hot 배틀 — 좋아요 TOP 5
-    (async (): Promise<HotThumb[]> => {
+    // 2) Hot 배틀 — 좋아요 TOP 5, 5초 타임아웃
+    withTimeout((async (): Promise<HotThumb[]> => {
       const [allBetters, allLikes] = await Promise.all([
         db.select({
           id: betters.id,
@@ -44,10 +54,10 @@ async function fetchHomeData(): Promise<{
         .filter((b) => b.likeCount > 0)
         .sort((a, b) => b.likeCount - a.likeCount)
         .slice(0, 5)
-    })(),
+    })(), 5000),
 
-    // 3) 랭킹 — 투표 수 TOP 5
-    (async (): Promise<Ranker[]> => {
+    // 3) 랭킹 — 투표 수 TOP 5, 5초 타임아웃
+    withTimeout((async (): Promise<Ranker[]> => {
       const allVotes = await db.select({
         voterId: votes.voterId,
         voterName: users.name,
@@ -70,7 +80,7 @@ async function fetchHomeData(): Promise<{
         .sort((a, b) => b.count - a.count)
         .slice(0, 5)
         .map((r) => ({ name: r.name, participated: r.count }))
-    })(),
+    })(), 5000),
   ])
 
   return {
