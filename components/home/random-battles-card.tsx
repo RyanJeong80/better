@@ -46,7 +46,7 @@ export function RandomBattlesCard({
         <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: '#EEF2FF' }}>
           <Shuffle size={20} color="#6366F1" />
         </div>
-        <h3 className="font-bold text-base">랜덤 Better 보기</h3>
+        <h3 className="font-bold text-lg">랜덤 Better 보기</h3>
       </div>
 
       {/* 카테고리 탭 */}
@@ -79,9 +79,9 @@ export function RandomBattlesCard({
               <span className="shrink-0 text-sm">{CATEGORY_MAP[b.category].emoji}</span>
               <div className="flex shrink-0 overflow-hidden rounded-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={b.imageAUrl} alt="" style={{ width: 50, height: 50, objectFit: 'cover' }} />
+                <img src={b.imageAUrl} alt="" style={{ width: 54, height: 54, objectFit: 'cover' }} />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={b.imageBUrl} alt="" style={{ width: 50, height: 50, objectFit: 'cover', borderLeft: '2px solid hsl(var(--card))' }} />
+                <img src={b.imageBUrl} alt="" style={{ width: 54, height: 54, objectFit: 'cover', borderLeft: '2px solid hsl(var(--card))' }} />
               </div>
               <span className="truncate text-lg text-muted-foreground">{b.title}</span>
             </Link>

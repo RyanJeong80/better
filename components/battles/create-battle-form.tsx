@@ -112,10 +112,21 @@ async function generateTextImage(text: string, colorIdx: number): Promise<File> 
   ctx.fillStyle = bg
   ctx.fillRect(0, 0, SIZE, SIZE)
 
-  const PADDING = 80
+  const PADDING = 60
   const maxWidth = SIZE - PADDING * 2
-  const len = text.length
-  const fontSize = len <= 15 ? 64 : len <= 40 ? 52 : len <= 70 ? 42 : 34
+  const maxHeight = SIZE - PADDING * 2
+
+  // 캔버스에 꽉 차는 최대 폰트 크기를 이진 탐색으로 계산
+  let lo = 20, hi = 260
+  while (lo < hi - 1) {
+    const mid = Math.floor((lo + hi) / 2)
+    ctx.font = `700 ${mid}px 'Plus Jakarta Sans', 'Pretendard Variable', sans-serif`
+    const wrapped = wrapText(ctx, text, maxWidth)
+    const totalHeight = wrapped.length * mid * 1.3
+    if (totalHeight <= maxHeight) lo = mid
+    else hi = mid
+  }
+  const fontSize = lo
 
   ctx.font = `700 ${fontSize}px 'Plus Jakarta Sans', 'Pretendard Variable', sans-serif`
   ctx.fillStyle = textColor
@@ -123,7 +134,7 @@ async function generateTextImage(text: string, colorIdx: number): Promise<File> 
   ctx.textBaseline = 'alphabetic'
 
   const lines = wrapText(ctx, text, maxWidth)
-  const lineHeight = fontSize * 1.5
+  const lineHeight = fontSize * 1.3
   const totalHeight = lines.length * lineHeight
   const startY = (SIZE - totalHeight) / 2 + fontSize
 

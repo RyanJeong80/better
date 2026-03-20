@@ -29,7 +29,7 @@ export function HotBattlesCard({ initialBattles }: { initialBattles: HotThumb[] 
         <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: '#FFFBEB' }}>
           <Flame size={20} color="#F59E0B" />
         </div>
-        <h3 className="font-bold text-base">Hot 100 Better</h3>
+        <h3 className="font-bold text-lg">Hot 100 Better</h3>
       </div>
 
       {/* 카테고리 탭 */}
@@ -64,9 +64,9 @@ export function HotBattlesCard({ initialBattles }: { initialBattles: HotThumb[] 
             <span className="shrink-0 text-sm">{CATEGORY_MAP[b.category].emoji}</span>
             <div className="flex shrink-0 overflow-hidden rounded-lg">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={b.imageAUrl} alt="" style={{ width: 52, height: 52, objectFit: 'cover' }} />
+              <img src={b.imageAUrl} alt="" style={{ width: 56, height: 56, objectFit: 'cover' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={b.imageBUrl} alt="" style={{ width: 52, height: 52, objectFit: 'cover', borderLeft: '2px solid #FFFBEB' }} />
+              <img src={b.imageBUrl} alt="" style={{ width: 56, height: 56, objectFit: 'cover', borderLeft: '2px solid #FFFBEB' }} />
             </div>
             <span className="flex-1 truncate text-lg text-muted-foreground">{b.title}</span>
             <div className="flex shrink-0 items-center gap-0.5" style={{ color: '#F43F5E' }}>

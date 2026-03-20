@@ -124,7 +124,7 @@ export default async function HomePage() {
           <h1 className="flex flex-col gap-0 text-5xl font-black leading-tight tracking-tight text-gray-900 md:text-8xl">
             <span>Which</span>
             <span><AnimatedWord /></span>
-            <span>is better?</span>
+            <span>is <span style={{ color: '#8B5CF6' }}>Better</span>?</span>
           </h1>
           <p className="mt-3 text-sm font-bold text-gray-500 md:text-base">
             AI 대신 HI(Human Intelligence)가 선택하는 당신의 고민!
