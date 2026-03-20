@@ -24,6 +24,10 @@ const RANK_STYLE: Record<number, { bg: string; text: string }> = {
 const CAT_BADGE: Record<BetterCategory, { bg: string; text: string }> = {
   fashion:    { bg: '#EFF6FF', text: '#2563EB' },
   appearance: { bg: '#FDF2F8', text: '#BE185D' },
+  love:       { bg: '#FFF1F2', text: '#F43F5E' },
+  shopping:   { bg: '#FFFBEB', text: '#D97706' },
+  food:       { bg: '#FFF7ED', text: '#EA580C' },
+  it:         { bg: '#F5F3FF', text: '#7C3AED' },
   decision:   { bg: '#F0FDF4', text: '#15803D' },
 }
 
