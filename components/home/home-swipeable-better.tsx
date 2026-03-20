@@ -77,12 +77,18 @@ export function HomeSwipeableBetter({ initialBattle }: { initialBattle: BattleFo
     isLoadingRef.current = true
     const category = cat !== 'all' ? cat : undefined
     startTransition(async () => {
-      const next = await getRandomBattle(seenIdsRef.current, category)
-      isLoadingRef.current = false
-      setIsLoadingFirst(false)
-      if (!next) return
-      seenIdsRef.current = [...seenIdsRef.current, next.id]
-      setCards(prev => [...prev, createCard(next)])
+      try {
+        const next = await getRandomBattle(seenIdsRef.current, category)
+        if (next) {
+          seenIdsRef.current = [...seenIdsRef.current, next.id]
+          setCards(prev => [...prev, createCard(next)])
+        }
+      } catch {
+        // 네트워크 오류 등 — 조용히 무시
+      } finally {
+        isLoadingRef.current = false
+        setIsLoadingFirst(false)
+      }
     })
   }, [])
 
@@ -107,12 +113,17 @@ export function HomeSwipeableBetter({ initialBattle }: { initialBattle: BattleFo
     const card = cards[cardIdx]
     if (!card || card.phase === 'voted') return
     startTransition(async () => {
-      const res = await submitVote(card.battle.id, choice, undefined)
-      if ('error' in res) return
-      setCards(prev => prev.map((c, i) =>
-        i === cardIdx ? { ...c, phase: 'voted', choice, result: { votesA: res.votesA, votesB: res.votesB, total: res.total } } : c
-      ))
-      setTimeout(() => advanceToNext(), 1300)
+      try {
+        const res = await submitVote(card.battle.id, choice, undefined)
+        if (!('error' in res)) {
+          setCards(prev => prev.map((c, i) =>
+            i === cardIdx ? { ...c, phase: 'voted', choice, result: { votesA: res.votesA, votesB: res.votesB, total: res.total } } : c
+          ))
+          setTimeout(() => advanceToNext(), 1300)
+        }
+      } catch {
+        // 비로그인 등 — 무시
+      }
     })
   }
 
@@ -124,14 +135,21 @@ export function HomeSwipeableBetter({ initialBattle }: { initialBattle: BattleFo
       i === cardIdx ? { ...c, isLiked: !c.isLiked, likeCount: c.isLiked ? c.likeCount - 1 : c.likeCount + 1 } : c
     ))
     startTransition(async () => {
-      const res = await toggleLike(card.battle.id)
-      if ('error' in res) {
+      try {
+        const res = await toggleLike(card.battle.id)
+        if ('error' in res) {
+          setCards(prev => prev.map((c, i) =>
+            i === cardIdx ? { ...c, isLiked: card.isLiked, likeCount: card.likeCount } : c
+          ))
+        } else {
+          setCards(prev => prev.map((c, i) =>
+            i === cardIdx ? { ...c, isLiked: res.isLiked, likeCount: res.likeCount } : c
+          ))
+        }
+      } catch {
+        // 롤백
         setCards(prev => prev.map((c, i) =>
           i === cardIdx ? { ...c, isLiked: card.isLiked, likeCount: card.likeCount } : c
-        ))
-      } else {
-        setCards(prev => prev.map((c, i) =>
-          i === cardIdx ? { ...c, isLiked: res.isLiked, likeCount: res.likeCount } : c
         ))
       }
     })

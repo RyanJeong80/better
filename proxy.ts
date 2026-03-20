@@ -57,19 +57,10 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(url)
     }
   } else {
-    const hasUsername = !!user.user_metadata?.username
-
-    // 로그인 상태에서 auth 페이지 접근 → 적절한 곳으로
+    // 로그인 상태에서 auth 페이지 접근 → 홈으로
     if (isAuthPage) {
       const url = request.nextUrl.clone()
-      url.pathname = hasUsername ? '/' : '/onboarding'
-      return NextResponse.redirect(url)
-    }
-
-    // username 미설정 시 온보딩으로 (온보딩 페이지 자체는 제외)
-    if (!hasUsername && !isOnboarding) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/onboarding'
+      url.pathname = '/'
       return NextResponse.redirect(url)
     }
   }
