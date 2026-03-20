@@ -91,13 +91,13 @@ export default async function HotPage({
       </div>
 
       {/* 카테고리 탭 */}
-      <div className="flex gap-2 overflow-x-auto pb-0.5">
+      <div className="grid grid-cols-4 gap-2">
         {CATEGORY_FILTERS.map((f) => (
           <Link
             key={f.id}
             href={f.id === 'all' ? '/hot' : `/hot?category=${f.id}`}
             className={[
-              'shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+              'rounded-full px-2 py-1.5 text-center text-xs font-semibold transition-all',
               activeCategory === f.id
                 ? 'bg-amber-500 text-white shadow-sm'
                 : 'border border-border bg-card text-muted-foreground hover:bg-accent',

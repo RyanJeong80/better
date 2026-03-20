@@ -180,13 +180,13 @@ export function RandomBetterViewer({
   return (
     <div className="space-y-3">
       {/* 카테고리 필터 탭 */}
-      <div className="flex gap-2 overflow-x-auto pb-0.5">
+      <div className="grid grid-cols-4 gap-2">
         {CATEGORY_FILTERS.map((f) => (
           <button
             key={f.id}
             onClick={() => handleCategoryChange(f.id)}
             className={[
-              'shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+              'rounded-full px-2 py-1.5 text-xs font-semibold transition-all',
               categoryFilter === f.id
                 ? 'bg-primary text-primary-foreground shadow-sm'
                 : 'border border-border bg-card text-muted-foreground hover:bg-accent',
