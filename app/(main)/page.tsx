@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { betters, likes, votes, users } from '@/lib/db/schema'
 import { AnimatedWord } from '@/components/home/animated-word'
+import { SplashScreen } from '@/components/home/splash-screen'
 import { RandomBattlesCard } from '@/components/home/random-battles-card'
 import { HotBattlesCard } from '@/components/home/hot-battles-card'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
@@ -111,6 +112,8 @@ export default async function HomePage() {
   }))
 
   return (
+    <>
+    <SplashScreen />
     <div className="space-y-8 md:space-y-12">
       {/* ── 히어로 ── */}
       <section
@@ -182,6 +185,7 @@ export default async function HomePage() {
         </FeatureCard>
       </section>
     </div>
+    </>
   )
 }
 

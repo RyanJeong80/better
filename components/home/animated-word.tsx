@@ -20,6 +20,16 @@ const ERASE_MS  = 55
 const PAUSE_MS  = 1400
 const GAP_MS    = 250
 
+// 스플래시용 — 빠른 타이핑, 단어별 가변 PAUSE
+const S_TYPE_MS  = 35
+const S_ERASE_MS = 22
+const S_GAP_MS   = 80
+function splashPause(idx: number) {
+  if (idx < 2) return 500
+  if (idx < 4) return 200
+  return 100
+}
+
 export function AnimatedWord() {
   const [idx, setIdx]           = useState(0)
   const [displayed, setDisplayed] = useState('')
@@ -69,28 +79,58 @@ export function AnimatedWord() {
   const { color } = WORDS[idx]
 
   return (
-    <span
-      style={{
-        display: 'inline-block',
-        color,
-        fontStyle: 'italic',
-        minWidth: '2ch',
-      }}
-    >
+    <span style={{ display: 'inline-block', color, fontStyle: 'italic', minWidth: '2ch' }}>
       {displayed}
-      <span
-        style={{
-          display: 'inline-block',
-          width: '3px',
-          marginLeft: '3px',
-          background: color,
-          borderRadius: '2px',
-          verticalAlign: 'baseline',
-          height: '0.85em',
-          opacity: cursor ? 1 : 0,
-          transition: 'opacity 0.1s',
-        }}
-      />
+      <span style={{
+        display: 'inline-block', width: '3px', marginLeft: '3px',
+        background: color, borderRadius: '2px', verticalAlign: 'baseline',
+        height: '0.85em', opacity: cursor ? 1 : 0, transition: 'opacity 0.1s',
+      }} />
+    </span>
+  )
+}
+
+export function SplashAnimatedWord() {
+  const [idx, setIdx]             = useState(0)
+  const [displayed, setDisplayed] = useState('')
+  const [phase, setPhase]         = useState<'typing' | 'erasing'>('typing')
+  const [cursor, setCursor]       = useState(true)
+
+  useEffect(() => {
+    const id = setInterval(() => setCursor((v) => !v), 520)
+    return () => clearInterval(id)
+  }, [])
+
+  useEffect(() => {
+    const word = WORDS[idx].text
+    if (phase === 'typing') {
+      if (displayed.length < word.length) {
+        const t = setTimeout(() => setDisplayed(word.slice(0, displayed.length + 1)), S_TYPE_MS)
+        return () => clearTimeout(t)
+      }
+      const t = setTimeout(() => setPhase('erasing'), splashPause(idx))
+      return () => clearTimeout(t)
+    }
+    if (phase === 'erasing') {
+      if (displayed.length > 0) {
+        const t = setTimeout(() => setDisplayed(displayed.slice(0, -1)), S_ERASE_MS)
+        return () => clearTimeout(t)
+      }
+      const t = setTimeout(() => { setIdx((i) => (i + 1) % WORDS.length); setPhase('typing') }, S_GAP_MS)
+      return () => clearTimeout(t)
+    }
+  }, [phase, displayed, idx])
+
+  const { color } = WORDS[idx]
+
+  return (
+    <span style={{ display: 'inline-block', color, fontStyle: 'italic', minWidth: '2ch' }}>
+      {displayed}
+      <span style={{
+        display: 'inline-block', width: '3px', marginLeft: '3px',
+        background: color, borderRadius: '2px', verticalAlign: 'baseline',
+        height: '0.85em', opacity: cursor ? 1 : 0, transition: 'opacity 0.1s',
+      }} />
     </span>
   )
 }

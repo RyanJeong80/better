@@ -79,6 +79,16 @@
   border-color: var(--color-border);
 }
 
+.splash-screen {
+  display: flex;
+}
+
+@media (min-width: 768px) {
+  .splash-screen {
+    display: none;
+  }
+}
+
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
