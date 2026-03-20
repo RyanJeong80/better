@@ -5,7 +5,7 @@ import { db } from '@/lib/db'
 import { betters, likes, votes, users } from '@/lib/db/schema'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { HotBattlesCard } from '@/components/home/hot-battles-card'
-import { HomeSwipeableBetter } from '@/components/home/home-swipeable-better'
+import { HomeBetterViewer } from '@/components/home/home-better-viewer'
 import { SplashScreen } from '@/components/home/splash-screen'
 import type { BetterCategory } from '@/lib/constants/categories'
 
@@ -99,7 +99,7 @@ export default async function HomePage() {
         {/* ── 랜덤 Better (히어로 위치) ── */}
         <section className="space-y-3">
           <h2 className="text-xl font-black text-foreground">랜덤 Better 보기</h2>
-          <HomeSwipeableBetter initialBattle={initialBattle} />
+          <HomeBetterViewer initialBattle={initialBattle} />
         </section>
 
         {/* ── Hot 100 + 랭킹 ── */}
