@@ -64,11 +64,11 @@ export function HotBattlesCard({ initialBattles }: { initialBattles: HotThumb[] 
             <span className="shrink-0 text-sm">{CATEGORY_MAP[b.category].emoji}</span>
             <div className="flex shrink-0 overflow-hidden rounded-lg">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={b.imageAUrl} alt="" style={{ width: 40, height: 40, objectFit: 'cover' }} />
+              <img src={b.imageAUrl} alt="" style={{ width: 52, height: 52, objectFit: 'cover' }} />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={b.imageBUrl} alt="" style={{ width: 40, height: 40, objectFit: 'cover', borderLeft: '2px solid #FFFBEB' }} />
+              <img src={b.imageBUrl} alt="" style={{ width: 52, height: 52, objectFit: 'cover', borderLeft: '2px solid #FFFBEB' }} />
             </div>
-            <span className="flex-1 truncate text-sm text-muted-foreground">{b.title}</span>
+            <span className="flex-1 truncate text-base text-muted-foreground">{b.title}</span>
             <div className="flex shrink-0 items-center gap-0.5" style={{ color: '#F43F5E' }}>
               <Heart size={10} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
               <span className="text-xs font-bold">{b.likeCount}</span>

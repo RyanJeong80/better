@@ -79,11 +79,11 @@ export function RandomBattlesCard({
               <span className="shrink-0 text-sm">{CATEGORY_MAP[b.category].emoji}</span>
               <div className="flex shrink-0 overflow-hidden rounded-lg">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={b.imageAUrl} alt="" style={{ width: 38, height: 38, objectFit: 'cover' }} />
+                <img src={b.imageAUrl} alt="" style={{ width: 50, height: 50, objectFit: 'cover' }} />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={b.imageBUrl} alt="" style={{ width: 38, height: 38, objectFit: 'cover', borderLeft: '2px solid hsl(var(--card))' }} />
+                <img src={b.imageBUrl} alt="" style={{ width: 50, height: 50, objectFit: 'cover', borderLeft: '2px solid hsl(var(--card))' }} />
               </div>
-              <span className="truncate text-sm text-muted-foreground">{b.title}</span>
+              <span className="truncate text-base text-muted-foreground">{b.title}</span>
             </Link>
           </li>
         ))}
