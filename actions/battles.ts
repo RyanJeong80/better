@@ -24,28 +24,32 @@ export type BattleForVoting = {
 export async function getRandomBattle(
   excludeIds: string[],
   category?: BetterCategory | 'all',
+  options?: { skipAuth?: boolean },
 ): Promise<BattleForVoting | null> {
   try {
-    const supabase = await createClient()
-    // getUser()는 네트워크 요청 — hang 방지를 위해 3초 타임아웃
-    const { data: { user } } = await Promise.race([
-      supabase.auth.getUser(),
-      new Promise<{ data: { user: null } }>((resolve) =>
-        setTimeout(() => resolve({ data: { user: null } }), 3000)
-      ),
-    ])
-
+    let userId: string | undefined
     let alreadyVotedIds: string[] = []
-    if (user) {
-      const myVotes = await db.query.votes.findMany({
-        where: eq(votes.voterId, user.id),
-        columns: { betterId: true },
-      })
-      alreadyVotedIds = myVotes.map((v) => v.betterId)
+
+    if (!options?.skipAuth) {
+      const supabase = await createClient()
+      // getUser()는 네트워크 요청 — hang 방지를 위해 3초 타임아웃
+      const { data: { user } } = await Promise.race([
+        supabase.auth.getUser(),
+        new Promise<{ data: { user: null } }>((resolve) =>
+          setTimeout(() => resolve({ data: { user: null } }), 3000)
+        ),
+      ])
+      if (user) {
+        const myVotes = await db.query.votes.findMany({
+          where: eq(votes.voterId, user.id),
+          columns: { betterId: true },
+        })
+        alreadyVotedIds = myVotes.map((v) => v.betterId)
+        userId = user.id
+      }
     }
 
     const allExclude = [...new Set([...excludeIds, ...alreadyVotedIds])]
-    const userId = user?.id
 
     const conditions = []
     if (userId) conditions.push(ne(betters.userId, userId))
