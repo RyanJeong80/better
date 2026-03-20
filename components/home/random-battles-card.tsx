@@ -83,7 +83,7 @@ export function RandomBattlesCard({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={b.imageBUrl} alt="" style={{ width: 50, height: 50, objectFit: 'cover', borderLeft: '2px solid hsl(var(--card))' }} />
               </div>
-              <span className="truncate text-base text-muted-foreground">{b.title}</span>
+              <span className="truncate text-lg text-muted-foreground">{b.title}</span>
             </Link>
           </li>
         ))}

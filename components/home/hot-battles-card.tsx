@@ -68,7 +68,7 @@ export function HotBattlesCard({ initialBattles }: { initialBattles: HotThumb[] 
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={b.imageBUrl} alt="" style={{ width: 52, height: 52, objectFit: 'cover', borderLeft: '2px solid #FFFBEB' }} />
             </div>
-            <span className="flex-1 truncate text-base text-muted-foreground">{b.title}</span>
+            <span className="flex-1 truncate text-lg text-muted-foreground">{b.title}</span>
             <div className="flex shrink-0 items-center gap-0.5" style={{ color: '#F43F5E' }}>
               <Heart size={10} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
               <span className="text-xs font-bold">{b.likeCount}</span>
