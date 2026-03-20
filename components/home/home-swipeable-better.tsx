@@ -18,6 +18,7 @@ interface CardData {
   result: { votesA: number; votesB: number; total: number } | null
   likeCount: number
   isLiked: boolean
+  voteError?: string
 }
 
 type AnimState = 'idle' | 'dragging' | 'advancing' | 'snapping'
@@ -120,9 +121,19 @@ export function HomeSwipeableBetter({ initialBattle }: { initialBattle: BattleFo
             i === cardIdx ? { ...c, phase: 'voted', choice, result: { votesA: res.votesA, votesB: res.votesB, total: res.total } } : c
           ))
           setTimeout(() => advanceToNext(), 1300)
+        } else {
+          // 에러 메시지를 카드에 표시하고 3초 후 자동 넘김
+          setCards(prev => prev.map((c, i) =>
+            i === cardIdx ? { ...c, voteError: res.error } : c
+          ))
+          setTimeout(() => advanceToNext(), 3000)
         }
-      } catch {
-        // 비로그인 등 — 무시
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : '투표 중 오류가 발생했습니다'
+        setCards(prev => prev.map((c, i) =>
+          i === cardIdx ? { ...c, voteError: msg } : c
+        ))
+        setTimeout(() => advanceToNext(), 3000)
       }
     })
   }
@@ -348,7 +359,7 @@ function BattleCard({ card, isActive, onVote, onNext, onLike }: {
   onNext: () => void
   onLike: () => void
 }) {
-  const { battle, phase, choice, result, likeCount, isLiked } = card
+  const { battle, phase, choice, result, likeCount, isLiked, voteError } = card
   const cat      = CATEGORY_MAP[battle.category]
   const catStyle = CAT_BADGE[battle.category]
 
@@ -479,7 +490,11 @@ function BattleCard({ card, isActive, onVote, onNext, onLike }: {
 
       {/* 푸터 */}
       <div style={{ padding: '10px 14px', borderTop: '1px solid var(--color-border)' }}>
-        {phase === 'voting' ? (
+        {voteError ? (
+          <p style={{ textAlign: 'center', fontSize: '0.72rem', color: '#F43F5E', fontWeight: 600 }}>
+            ⚠️ {voteError}
+          </p>
+        ) : phase === 'voting' ? (
           <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--color-muted-foreground)' }}>
             사진을 탭하여 선택하거나, 스와이프로 넘기세요
           </p>
