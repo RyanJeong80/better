@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef, useTransition, useCallback } from 'react'
-import { Heart, ChevronRight, Check, Shuffle } from 'lucide-react'
+import { useState, useRef, useTransition, useCallback, useEffect } from 'react'
+import { Heart, ChevronRight, Check, Shuffle, X, Search } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
@@ -228,147 +228,254 @@ function BattleCard({ card, onVote, onNext, onLike }: {
   const { battle, phase, choice, result, likeCount, isLiked, voteError } = card
   const cat      = CATEGORY_MAP[battle.category]
   const catStyle = CAT_BADGE[battle.category]
+  const [modalSide, setModalSide] = useState<'A' | 'B' | null>(null)
 
   const pctA = result && result.total > 0 ? Math.round((result.votesA / result.total) * 100) : 0
   const pctB = result ? 100 - pctA : 0
 
+  // 모달 열릴 때 body 스크롤 잠금
+  useEffect(() => {
+    if (modalSide) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [modalSide])
+
+  const modalImgUrl = modalSide === 'A' ? battle.imageAUrl : battle.imageBUrl
+  const modalDesc   = modalSide === 'A' ? battle.imageADescription : battle.imageBDescription
+
   return (
-    <div style={{ borderTop: '1px solid var(--color-border)' }}>
-      {/* 헤더 */}
-      <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: 4,
-            borderRadius: 999, padding: '2px 8px', fontSize: '0.68rem', fontWeight: 700,
-            background: catStyle.bg, color: catStyle.text, marginBottom: 4,
-          }}>
-            {cat.emoji} {cat.label}
-          </span>
-          <h3 style={{
-            fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.35,
-            color: 'var(--color-foreground)',
-            overflow: 'hidden', display: '-webkit-box',
-            WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-          }}>
-            {battle.title}
-          </h3>
+    <>
+      <div style={{ borderTop: '1px solid var(--color-border)' }}>
+        {/* 헤더 */}
+        <div style={{ padding: '12px 14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              borderRadius: 999, padding: '2px 8px', fontSize: '0.68rem', fontWeight: 700,
+              background: catStyle.bg, color: catStyle.text, marginBottom: 4,
+            }}>
+              {cat.emoji} {cat.label}
+            </span>
+            <h3 style={{
+              fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.35,
+              color: 'var(--color-foreground)',
+              overflow: 'hidden', display: '-webkit-box',
+              WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+            }}>
+              {battle.title}
+            </h3>
+          </div>
+          <button
+            onClick={onLike}
+            style={{
+              flexShrink: 0, display: 'flex', alignItems: 'center', gap: 3,
+              borderRadius: 999, padding: '4px 9px',
+              border: `1px solid ${isLiked ? '#FECDD3' : 'var(--color-border)'}`,
+              background: isLiked ? '#FFF1F2' : 'transparent', cursor: 'pointer',
+            }}
+          >
+            <Heart size={12} style={{ fill: isLiked ? '#F43F5E' : 'none', stroke: '#F43F5E' }} />
+            {likeCount > 0 && (
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#F43F5E' }}>{likeCount}</span>
+            )}
+          </button>
         </div>
-        <button
-          onClick={onLike}
-          style={{
-            flexShrink: 0, display: 'flex', alignItems: 'center', gap: 3,
-            borderRadius: 999, padding: '4px 9px',
-            border: `1px solid ${isLiked ? '#FECDD3' : 'var(--color-border)'}`,
-            background: isLiked ? '#FFF1F2' : 'transparent', cursor: 'pointer',
-          }}
-        >
-          <Heart size={12} style={{ fill: isLiked ? '#F43F5E' : 'none', stroke: '#F43F5E' }} />
-          {likeCount > 0 && (
-            <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#F43F5E' }}>{likeCount}</span>
-          )}
-        </button>
-      </div>
 
-      {/* 이미지 */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '1px solid var(--color-border)' }}>
-        {(['A', 'B'] as const).map((side) => {
-          const imgUrl   = side === 'A' ? battle.imageAUrl : battle.imageBUrl
-          const desc     = side === 'A' ? battle.imageADescription : battle.imageBDescription
-          const pct      = side === 'A' ? pctA : pctB
-          const vCount   = result ? (side === 'A' ? result.votesA : result.votesB) : 0
-          const isWinner = result ? (side === 'A' ? result.votesA >= result.votesB : result.votesB > result.votesA) : false
-          const isChosen = choice === side
+        {/* 이미지 */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '1px solid var(--color-border)' }}>
+          {(['A', 'B'] as const).map((side) => {
+            const imgUrl   = side === 'A' ? battle.imageAUrl : battle.imageBUrl
+            const desc     = side === 'A' ? battle.imageADescription : battle.imageBDescription
+            const pct      = side === 'A' ? pctA : pctB
+            const vCount   = result ? (side === 'A' ? result.votesA : result.votesB) : 0
+            const isWinner = result ? (side === 'A' ? result.votesA >= result.votesB : result.votesB > result.votesA) : false
+            const isChosen = choice === side
 
-          return (
-            <div
-              key={side}
-              onClick={() => phase === 'voting' && !voteError && onVote(side)}
+            return (
+              <div
+                key={side}
+                onClick={() => phase === 'voting' && !voteError && onVote(side)}
+                style={{
+                  position: 'relative', paddingTop: '100%',
+                  cursor: phase === 'voting' && !voteError ? 'pointer' : 'default',
+                  borderLeft: side === 'B' ? '2px solid var(--color-background)' : undefined,
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={imgUrl} alt={`사진 ${side}`} draggable={false}
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+
+                {/* 상세보기 버튼 */}
+                <button
+                  onClick={(e) => { e.stopPropagation(); setModalSide(side) }}
+                  style={{
+                    position: 'absolute', top: 0, right: 0, zIndex: 10,
+                    display: 'flex', alignItems: 'center', gap: 3,
+                    background: 'rgba(0,0,0,0.5)', color: 'white',
+                    fontSize: '0.62rem', fontWeight: 600,
+                    padding: '5px 7px',
+                    borderBottomLeftRadius: 10,
+                    border: 'none', cursor: 'pointer',
+                  }}
+                >
+                  <Search size={10} />
+                  상세보기
+                </button>
+
+                {/* 투표 전 레이블 */}
+                {phase === 'voting' && !voteError && (
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)',
+                    display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: 10,
+                    pointerEvents: 'none',
+                  }}>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                      color: 'white', fontWeight: 900, fontSize: '1.1rem',
+                      width: 36, height: 36, borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 2px 8px rgba(99,102,241,0.5)',
+                    }}>{side}</span>
+                  </div>
+                )}
+
+                {/* 투표 후 결과 */}
+                {phase === 'voted' && result && (
+                  <div style={{
+                    position: 'absolute', inset: 0,
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.1) 55%, transparent 80%)',
+                    display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 10,
+                    pointerEvents: 'none',
+                  }}>
+                    <p style={{ color: 'white', fontSize: '1.6rem', fontWeight: 900, lineHeight: 1 }}>{pct}%</p>
+                    <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', marginTop: 2 }}>{vCount}명</p>
+                    <div style={{ marginTop: 5, height: 3, borderRadius: 999, background: 'rgba(255,255,255,0.25)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: 'linear-gradient(90deg,#818CF8,#A78BFA)', transition: 'width 0.7s ease' }} />
+                    </div>
+                  </div>
+                )}
+
+                {phase === 'voted' && isWinner && (
+                  <div style={{ position: 'absolute', top: 8, right: 8, background: 'linear-gradient(135deg,#6366F1,#8B5CF6)', color: 'white', fontSize: '0.6rem', fontWeight: 800, padding: '3px 8px', borderRadius: 999 }}>우세</div>
+                )}
+                {phase === 'voted' && isChosen && (
+                  <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: '0.6rem', fontWeight: 800, padding: '3px 7px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 3 }}>
+                    <Check size={9} /> 내 선택
+                  </div>
+                )}
+                {desc && (
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.55)', padding: '4px 8px' }}>
+                    <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.62rem', lineHeight: 1.3 }}>{desc}</p>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+
+        {/* 푸터 */}
+        <div style={{ padding: '10px 14px', borderTop: '1px solid var(--color-border)' }}>
+          {voteError ? (
+            <p style={{ textAlign: 'center', fontSize: '0.72rem', color: '#F43F5E', fontWeight: 600 }}>
+              ⚠️ {voteError}
+            </p>
+          ) : phase === 'voting' ? (
+            <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--color-muted-foreground)' }}>
+              사진을 탭하여 선택하세요
+            </p>
+          ) : (
+            <button
+              onClick={onNext}
               style={{
-                position: 'relative', paddingTop: '100%',
-                cursor: phase === 'voting' && !voteError ? 'pointer' : 'default',
-                borderLeft: side === 'B' ? '2px solid var(--color-background)' : undefined,
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                padding: '9px 0', borderRadius: 12, border: 'none', cursor: 'pointer',
+                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                color: 'white', fontWeight: 700, fontSize: '0.85rem',
               }}
             >
+              다음 Better <ChevronRight size={16} />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* ─── 상세 뷰어 모달 ─── */}
+      {modalSide && (
+        <div
+          onClick={() => setModalSide(null)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.75)',
+            display: 'flex', alignItems: 'flex-end',
+            animation: 'fadeIn 0.2s ease',
+          }}
+        >
+          <style>{`
+            @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+            @keyframes slideUp { from { transform: translateY(100%) } to { transform: translateY(0) } }
+          `}</style>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: '100%', maxHeight: '90dvh',
+              background: 'var(--color-card)',
+              borderTopLeftRadius: 24, borderTopRightRadius: 24,
+              overflow: 'hidden',
+              display: 'flex', flexDirection: 'column',
+              animation: 'slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
+            }}
+          >
+            {/* 모달 헤더 */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px 16px',
+              borderBottom: '1px solid var(--color-border)',
+              flexShrink: 0,
+            }}>
+              <span style={{ fontWeight: 700, fontSize: '0.9rem', color: 'var(--color-foreground)' }}>
+                사진 {modalSide} 상세보기
+              </span>
+              <button
+                onClick={() => setModalSide(null)}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: 'var(--color-muted)', border: 'none', cursor: 'pointer',
+                }}
+              >
+                <X size={16} color="var(--color-muted-foreground)" />
+              </button>
+            </div>
+
+            {/* 이미지 */}
+            <div style={{ flex: 1, overflow: 'auto', overscrollBehavior: 'contain' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={imgUrl} alt={`사진 ${side}`} draggable={false}
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                src={modalImgUrl}
+                alt={`사진 ${modalSide}`}
+                style={{ width: '100%', display: 'block', objectFit: 'contain' }}
               />
-
-              {/* 투표 전 레이블 */}
-              {phase === 'voting' && !voteError && (
-                <div style={{
-                  position: 'absolute', inset: 0,
-                  background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)',
-                  display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: 10,
-                }}>
-                  <span style={{
-                    background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-                    color: 'white', fontWeight: 900, fontSize: '1.1rem',
-                    width: 36, height: 36, borderRadius: '50%',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 2px 8px rgba(99,102,241,0.5)',
-                  }}>{side}</span>
-                </div>
-              )}
-
-              {/* 투표 후 결과 */}
-              {phase === 'voted' && result && (
-                <div style={{
-                  position: 'absolute', inset: 0,
-                  background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.1) 55%, transparent 80%)',
-                  display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', padding: 10,
-                }}>
-                  <p style={{ color: 'white', fontSize: '1.6rem', fontWeight: 900, lineHeight: 1 }}>{pct}%</p>
-                  <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', marginTop: 2 }}>{vCount}명</p>
-                  <div style={{ marginTop: 5, height: 3, borderRadius: 999, background: 'rgba(255,255,255,0.25)', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: 'linear-gradient(90deg,#818CF8,#A78BFA)', transition: 'width 0.7s ease' }} />
-                  </div>
-                </div>
-              )}
-
-              {phase === 'voted' && isWinner && (
-                <div style={{ position: 'absolute', top: 8, right: 8, background: 'linear-gradient(135deg,#6366F1,#8B5CF6)', color: 'white', fontSize: '0.6rem', fontWeight: 800, padding: '3px 8px', borderRadius: 999 }}>우세</div>
-              )}
-              {phase === 'voted' && isChosen && (
-                <div style={{ position: 'absolute', top: 8, left: 8, background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: '0.6rem', fontWeight: 800, padding: '3px 7px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <Check size={9} /> 내 선택
-                </div>
-              )}
-              {desc && (
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.55)', padding: '4px 8px' }}>
-                  <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '0.62rem', lineHeight: 1.3 }}>{desc}</p>
+              {/* 설명 */}
+              {modalDesc && (
+                <div style={{ padding: '14px 16px' }}>
+                  <p style={{
+                    fontSize: '0.9rem', lineHeight: 1.6,
+                    color: 'var(--color-foreground)',
+                  }}>
+                    {modalDesc}
+                  </p>
                 </div>
               )}
             </div>
-          )
-        })}
-      </div>
-
-      {/* 푸터 */}
-      <div style={{ padding: '10px 14px', borderTop: '1px solid var(--color-border)' }}>
-        {voteError ? (
-          <p style={{ textAlign: 'center', fontSize: '0.72rem', color: '#F43F5E', fontWeight: 600 }}>
-            ⚠️ {voteError}
-          </p>
-        ) : phase === 'voting' ? (
-          <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--color-muted-foreground)' }}>
-            사진을 탭하여 선택하세요
-          </p>
-        ) : (
-          <button
-            onClick={onNext}
-            style={{
-              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              padding: '9px 0', borderRadius: 12, border: 'none', cursor: 'pointer',
-              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-              color: 'white', fontWeight: 700, fontSize: '0.85rem',
-            }}
-          >
-            다음 Better <ChevronRight size={16} />
-          </button>
-        )}
-      </div>
-    </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
