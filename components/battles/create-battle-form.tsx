@@ -1,12 +1,13 @@
 'use client'
 
-import { memo, useCallback, useEffect, useRef, useState } from 'react'
+import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ImagePlus, ArrowLeft, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { saveBattle } from '@/actions/battles'
 import { CATEGORIES, CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory } from '@/lib/constants/categories'
+import { ImageEditor } from '@/components/battles/image-editor'
 
 const MAX_DESC = 100
 const MAX_FILE_MB = 5
@@ -149,13 +150,16 @@ interface SlotState {
   selectedColor: number
 }
 
-const ImageSlot = memo(function ImageSlot({
-  side, state, onChange,
-}: {
+interface SlotHandle {
+  upload: (file: File) => void
+}
+
+const ImageSlot = memo(forwardRef<SlotHandle, {
   side: 'A' | 'B'
   state: SlotState
   onChange: (patch: Partial<SlotState>) => void
-}) {
+  onEditFile?: (file: File) => void
+}>(function ImageSlot({ side, state, onChange, onEditFile }, ref) {
   const hasImage = !!state.preview || state.uploading
   const nearLimit = state.desc.length >= 80
   const atLimit = state.desc.length >= MAX_DESC
@@ -190,13 +194,19 @@ const ImageSlot = memo(function ImageSlot({
     }
   }
 
+  useImperativeHandle(ref, () => ({ upload: handleFile }))
+
   return (
     <div className="flex-1 min-w-0 space-y-3">
       <div className="group relative aspect-square overflow-hidden rounded-2xl border-2 border-dashed border-border bg-muted/40 transition-colors hover:border-primary/50">
         <input
           type="file" accept="image/*"
           className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); e.target.value = '' }}
+          onChange={(e) => {
+            const f = e.target.files?.[0]
+            if (f) { onEditFile ? onEditFile(f) : handleFile(f) }
+            e.target.value = ''
+          }}
         />
         {state.preview ? (
           <>
@@ -285,7 +295,7 @@ const ImageSlot = memo(function ImageSlot({
       </div>
     </div>
   )
-})
+}))
 
 const initSlot = (): SlotState => ({ preview: null, url: null, uploading: false, uploadError: null, desc: '', selectedColor: 0 })
 
@@ -427,6 +437,10 @@ export function CreateBattleForm() {
   const [category, setCategory] = useState<BetterCategory | null>(null)
   const [view, setView] = useState<'input' | 'preview'>('input')
   const [upload, setUpload] = useState<UploadState>(initUpload)
+  const [editTarget, setEditTarget] = useState<{ file: File; side: 'A' | 'B' } | null>(null)
+
+  const slotARef = useRef<SlotHandle>(null)
+  const slotBRef = useRef<SlotHandle>(null)
 
   const previewRef = useRef({ a: slotA.preview, b: slotB.preview })
   useEffect(() => { previewRef.current.a = slotA.preview }, [slotA.preview])
@@ -438,6 +452,16 @@ export function CreateBattleForm() {
 
   const handleChangeA = useCallback((p: Partial<SlotState>) => setSlotA(s => ({ ...s, ...p })), [])
   const handleChangeB = useCallback((p: Partial<SlotState>) => setSlotB(s => ({ ...s, ...p })), [])
+
+  const handleEditorDone = useCallback((blob: Blob) => {
+    if (!editTarget) return
+    const file = new File([blob], `edited-${Date.now()}.jpg`, { type: 'image/jpeg' })
+    const ref = editTarget.side === 'A' ? slotARef : slotBRef
+    ref.current?.upload(file)
+    setEditTarget(null)
+  }, [editTarget])
+
+  const handleEditorCancel = useCallback(() => setEditTarget(null), [])
 
   const hasContentA = !!slotA.url || !!slotA.desc.trim()
   const hasContentB = !!slotB.url || !!slotB.desc.trim()
@@ -571,6 +595,14 @@ export function CreateBattleForm() {
 
   // ── 입력 화면 ──────────────────────────────────────────────────
   return (
+    <>
+    {editTarget && (
+      <ImageEditor
+        file={editTarget.file}
+        onDone={handleEditorDone}
+        onCancel={handleEditorCancel}
+      />
+    )}
     <div className="space-y-8">
       {/* 카테고리 선택 */}
       <div className="space-y-2">
@@ -613,11 +645,11 @@ export function CreateBattleForm() {
 
       {/* 사진 두 장 */}
       <div className="flex items-start gap-3">
-        <ImageSlot side="A" state={slotA} onChange={handleChangeA} />
+        <ImageSlot ref={slotARef} side="A" state={slotA} onChange={handleChangeA} onEditFile={(f) => setEditTarget({ file: f, side: 'A' })} />
         <div className="flex shrink-0 flex-col items-center pt-16">
           <div className="rounded-full border border-border bg-background px-2.5 py-1 text-xs font-black tracking-widest text-muted-foreground shadow-sm">VS</div>
         </div>
-        <ImageSlot side="B" state={slotB} onChange={handleChangeB} />
+        <ImageSlot ref={slotBRef} side="B" state={slotB} onChange={handleChangeB} onEditFile={(f) => setEditTarget({ file: f, side: 'B' })} />
       </div>
 
       {/* 미리보기 버튼 */}
@@ -641,5 +673,6 @@ export function CreateBattleForm() {
           : '미리보기'}
       </button>
     </div>
+    </>
   )
 }
