@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Plus_Jakarta_Sans, M_PLUS_Rounded_1c, Noto_Sans_SC } from 'next/font/google'
 import './globals.css'
 
@@ -23,6 +23,12 @@ const notoSansSC = Noto_Sans_SC({
   display: 'swap',
   preload: false,
 })
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+}
 
 export const metadata: Metadata = {
   title: 'Better — 어떤 게 더 나아?',

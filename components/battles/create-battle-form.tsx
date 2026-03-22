@@ -306,7 +306,7 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
           onChange={(e) => onChange({ desc: e.target.value.slice(0, MAX_DESC) })}
           maxLength={MAX_DESC} rows={2}
           placeholder={hasImage ? `사진 ${side}에 대해 설명해주세요` : '텍스트를 입력하면 이미지로 변환됩니다'}
-          className="w-full resize-none rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
+          className="w-full resize-none rounded-xl border border-input bg-background px-3.5 py-2.5 text-base outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
         />
       </div>
     </div>
@@ -655,7 +655,7 @@ export function CreateBattleForm() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="어떤 걸 비교하나요? (예: 어떤 프로필 사진이 더 나아?)"
-          className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-sm outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
+          className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-base outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
         />
       </div>
 
