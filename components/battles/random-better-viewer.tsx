@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { ChevronRight, Check, Heart, ChevronUp } from 'lucide-react'
+import { ChevronRight, Check, Heart, ChevronUp, Share2 } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
@@ -176,6 +176,16 @@ export function RandomBetterViewer({
     loadNext(newCat, freshSeenIds)
   }
 
+  async function handleShare() {
+    if (!battle) return
+    const url = `${window.location.origin}/battles/${battle.id}`
+    try {
+      await navigator.share({ title: battle.title, url })
+    } catch {
+      try { await navigator.clipboard.writeText(url) } catch {}
+    }
+  }
+
   async function handleLike() {
     if (!battle || likePending) return
     if (isDemo) {
@@ -301,70 +311,114 @@ export function RandomBetterViewer({
             style={slideStyle}
           >
             {/* 헤더 */}
-            <div className="flex items-start justify-between gap-3 px-4 py-4 md:px-6 md:py-5">
-              <div className="min-w-0">
-                {(() => {
-                  const cat = CATEGORY_MAP[battle.category]
-                  const style = CAT_BADGE[battle.category]
-                  return (
-                    <span
-                      className="mb-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
-                      style={{ background: style.bg, color: style.text }}
-                    >
-                      {cat.emoji} {cat.label}
-                    </span>
-                  )
-                })()}
-                <h2 className="text-base font-bold leading-snug text-foreground md:text-lg">{battle.title}</h2>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {phase === 'voting' && '사진을 눌러 선택하세요'}
-                  {(phase === 'picked' || phase === 'submitting') && '이유를 남기고 투표하세요 (선택사항)'}
-                  {phase === 'voted' && '투표 완료! 결과를 확인하세요.'}
-                </p>
-              </div>
-              <button
-                onClick={handleLike}
-                disabled={likePending}
-                className="flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold transition-all hover:border-rose-200 hover:bg-rose-50 disabled:opacity-60 active:scale-95"
-                style={{ color: isLiked ? '#F43F5E' : undefined }}
-              >
-                <span className="text-muted-foreground" style={{ color: isLiked ? '#F43F5E' : undefined }}>Hot100</span>
-                <Heart
-                  size={14}
-                  style={{
-                    fill: isLiked ? '#F43F5E' : 'transparent',
-                    stroke: isLiked ? '#F43F5E' : 'currentColor',
-                    transition: 'all 0.15s',
-                  }}
-                />
-                <span className="tabular-nums">{likeCount}</span>
-              </button>
+            <div className="px-4 py-3 md:px-6 md:py-4">
+              {(() => {
+                const cat = CATEGORY_MAP[battle.category]
+                const style = CAT_BADGE[battle.category]
+                return (
+                  <span
+                    className="mb-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
+                    style={{ background: style.bg, color: style.text }}
+                  >
+                    {cat.emoji} {cat.label}
+                  </span>
+                )
+              })()}
+              <h2 className="text-base font-bold leading-snug text-foreground md:text-lg">{battle.title}</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                {phase === 'voting' && '사진을 눌러 선택하세요'}
+                {(phase === 'picked' || phase === 'submitting') && '이유를 남기고 투표하세요 (선택사항)'}
+                {phase === 'voted' && '투표 완료! 결과를 확인하세요.'}
+              </p>
             </div>
 
-            {/* 사진 두 장 */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-              <PhotoCard
-                imageUrl={battle.imageAUrl}
-                description={battle.imageADescription}
-                side="A"
-                phase={phase}
-                selectedChoice={selectedChoice}
-                pct={pctA}
-                votes={voteResult?.votesA ?? 0}
-                isWinner={(voteResult?.votesA ?? 0) > (voteResult?.votesB ?? 0)}
-                onClick={() => handlePickPhoto('A')}
-              />
-              <PhotoCard
-                imageUrl={battle.imageBUrl}
-                description={battle.imageBDescription}
-                side="B"
-                phase={phase}
-                selectedChoice={selectedChoice}
-                pct={pctB}
-                votes={voteResult?.votesB ?? 0}
-                isWinner={(voteResult?.votesB ?? 0) > (voteResult?.votesA ?? 0)}
-                onClick={() => handlePickPhoto('B')}
-              />
+            {/* 사진 두 장 + 우측 액션 버튼 오버레이 */}
+            <div style={{ position: 'relative' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+                <PhotoCard
+                  imageUrl={battle.imageAUrl}
+                  description={battle.imageADescription}
+                  side="A"
+                  phase={phase}
+                  selectedChoice={selectedChoice}
+                  pct={pctA}
+                  votes={voteResult?.votesA ?? 0}
+                  isWinner={(voteResult?.votesA ?? 0) > (voteResult?.votesB ?? 0)}
+                  onClick={() => handlePickPhoto('A')}
+                />
+                <PhotoCard
+                  imageUrl={battle.imageBUrl}
+                  description={battle.imageBDescription}
+                  side="B"
+                  phase={phase}
+                  selectedChoice={selectedChoice}
+                  pct={pctB}
+                  votes={voteResult?.votesB ?? 0}
+                  isWinner={(voteResult?.votesB ?? 0) > (voteResult?.votesA ?? 0)}
+                  onClick={() => handlePickPhoto('B')}
+                />
+              </div>
+
+              {/* 우측 세로 액션 버튼 */}
+              <div style={{
+                position: 'absolute', right: 10, bottom: 16,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
+                zIndex: 20,
+              }}>
+                {/* 좋아요 */}
+                <button
+                  onClick={handleLike}
+                  disabled={likePending}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                    opacity: likePending ? 0.6 : 1,
+                  }}
+                >
+                  <span style={{
+                    width: 44, height: 44, borderRadius: '50%',
+                    background: 'rgba(0,0,0,0.45)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'transform 0.15s',
+                  }}>
+                    <Heart
+                      size={20}
+                      style={{
+                        fill: isLiked ? '#F43F5E' : 'transparent',
+                        stroke: isLiked ? '#F43F5E' : 'white',
+                        transition: 'all 0.15s',
+                      }}
+                    />
+                  </span>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>
+                    {likeCount}
+                  </span>
+                </button>
+
+                {/* 공유 */}
+                <button
+                  onClick={handleShare}
+                  style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                  }}
+                >
+                  <span style={{
+                    width: 44, height: 44, borderRadius: '50%',
+                    background: 'rgba(0,0,0,0.45)',
+                    backdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <Share2 size={20} color="white" />
+                  </span>
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>
+                    공유
+                  </span>
+                </button>
+              </div>
             </div>
 
             {/* 이유 입력 + 투표 버튼 */}
@@ -488,7 +542,7 @@ function PhotoCard({
         opacity: isRejected ? 0.4 : 1,
       }}
     >
-      <div style={{ position: 'relative', width: '100%', paddingTop: '100%', overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', paddingTop: '120%', overflow: 'hidden' }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={imageUrl}
@@ -500,6 +554,14 @@ function PhotoCard({
             transition: 'transform 0.3s',
           }}
         />
+
+        {/* 기본 하단 그라데이션 오버레이 (voting / picked / submitting 단계) */}
+        {!showVoteOverlay && (
+          <div style={{
+            position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.18) 45%, transparent 70%)',
+          }} />
+        )}
 
         {canClick && (
           <div style={{
@@ -513,6 +575,21 @@ function PhotoCard({
           }}>
             {side}
           </div>
+        )}
+
+        {/* 설명 텍스트 오버레이 */}
+        {description && !showVoteOverlay && (
+          <p style={{
+            position: 'absolute', bottom: 10, left: 10, right: 10, zIndex: 3,
+            color: 'white', fontSize: '0.72rem', lineHeight: 1.45,
+            margin: 0, textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+            overflow: 'hidden',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+          }}>
+            {description}
+          </p>
         )}
 
         {(phase === 'picked' || phase === 'submitting') && isSelected && (
@@ -576,11 +653,6 @@ function PhotoCard({
         )}
       </div>
 
-      {description && (
-        <p className="border-t border-border px-3 py-2 text-xs leading-relaxed text-muted-foreground">
-          {description}
-        </p>
-      )}
     </div>
   )
 }
