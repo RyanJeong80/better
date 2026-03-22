@@ -153,6 +153,7 @@ interface SlotState {
   uploadError: string | null
   desc: string
   selectedColor: number
+  file: File | null
 }
 
 interface SlotHandle {
@@ -163,8 +164,8 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
   side: 'A' | 'B'
   state: SlotState
   onChange: (patch: Partial<SlotState>) => void
-  onEditFile?: (file: File) => void
-}>(function ImageSlot({ side, state, onChange, onEditFile }, ref) {
+  onEdit?: () => void
+}>(function ImageSlot({ side, state, onChange, onEdit }, ref) {
   const hasImage = !!state.preview || state.uploading
   const nearLimit = state.desc.length >= 80
   const atLimit = state.desc.length >= MAX_DESC
@@ -175,12 +176,12 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
       return
     }
     if (state.preview?.startsWith('blob:')) URL.revokeObjectURL(state.preview)
-    onChange({ preview: null, uploading: true, uploadError: null, url: null })
+    onChange({ preview: null, uploading: true, uploadError: null, url: null, file: null })
 
     try {
       const resized = await resizeImage(file)
       const preview = URL.createObjectURL(resized)
-      onChange({ preview })
+      onChange({ preview, file: resized })
 
       const supabase = createClient()
       const ext = resized.name.split('.').pop() ?? 'jpg'
@@ -209,7 +210,7 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
           className="absolute inset-0 z-10 h-full w-full cursor-pointer opacity-0"
           onChange={(e) => {
             const f = e.target.files?.[0]
-            if (f) { onEditFile ? onEditFile(f) : handleFile(f) }
+            if (f) handleFile(f)
             e.target.value = ''
           }}
         />
@@ -261,6 +262,16 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
 
       {state.uploadError && <p className="text-xs text-rose-500">{state.uploadError}</p>}
 
+      {state.url && !state.uploading && onEdit && (
+        <button
+          type="button"
+          onClick={onEdit}
+          className="w-full rounded-xl border border-border bg-background py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
+        >
+          ✏️ 편집
+        </button>
+      )}
+
       {!hasImage && (
         <div className="flex items-center gap-2.5">
           <span className="text-xs text-muted-foreground shrink-0">배경색</span>
@@ -302,7 +313,7 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
   )
 }))
 
-const initSlot = (): SlotState => ({ preview: null, url: null, uploading: false, uploadError: null, desc: '', selectedColor: 0 })
+const initSlot = (): SlotState => ({ preview: null, url: null, uploading: false, uploadError: null, desc: '', selectedColor: 0, file: null })
 
 // ─── 미리보기 카드 ────────────────────────────────────────────────
 const CAT_BADGE_COLORS: Record<BetterCategory, { bg: string; text: string }> = {
@@ -442,7 +453,7 @@ export function CreateBattleForm() {
   const [category, setCategory] = useState<BetterCategory | null>(null)
   const [view, setView] = useState<'input' | 'preview'>('input')
   const [upload, setUpload] = useState<UploadState>(initUpload)
-  const [editTarget, setEditTarget] = useState<{ file: File; side: 'A' | 'B' } | null>(null)
+  const [editTarget, setEditTarget] = useState<'A' | 'B' | null>(null)
 
   const slotARef = useRef<SlotHandle>(null)
   const slotBRef = useRef<SlotHandle>(null)
@@ -461,7 +472,7 @@ export function CreateBattleForm() {
   const handleEditorDone = useCallback((blob: Blob) => {
     if (!editTarget) return
     const file = new File([blob], `edited-${Date.now()}.jpg`, { type: 'image/jpeg' })
-    const ref = editTarget.side === 'A' ? slotARef : slotBRef
+    const ref = editTarget === 'A' ? slotARef : slotBRef
     ref.current?.upload(file)
     setEditTarget(null)
   }, [editTarget])
@@ -601,9 +612,9 @@ export function CreateBattleForm() {
   // ── 입력 화면 ──────────────────────────────────────────────────
   return (
     <>
-    {editTarget && (
+    {editTarget && (editTarget === 'A' ? slotA.file : slotB.file) && (
       <ImageEditor
-        file={editTarget.file}
+        file={(editTarget === 'A' ? slotA.file : slotB.file)!}
         onDone={handleEditorDone}
         onCancel={handleEditorCancel}
       />
@@ -650,11 +661,11 @@ export function CreateBattleForm() {
 
       {/* 사진 두 장 */}
       <div className="flex items-start gap-3">
-        <ImageSlot ref={slotARef} side="A" state={slotA} onChange={handleChangeA} onEditFile={(f) => setEditTarget({ file: f, side: 'A' })} />
+        <ImageSlot ref={slotARef} side="A" state={slotA} onChange={handleChangeA} onEdit={slotA.file ? () => setEditTarget('A') : undefined} />
         <div className="flex shrink-0 flex-col items-center pt-16">
           <div className="rounded-full border border-border bg-background px-2.5 py-1 text-xs font-black tracking-widest text-muted-foreground shadow-sm">VS</div>
         </div>
-        <ImageSlot ref={slotBRef} side="B" state={slotB} onChange={handleChangeB} onEditFile={(f) => setEditTarget({ file: f, side: 'B' })} />
+        <ImageSlot ref={slotBRef} side="B" state={slotB} onChange={handleChangeB} onEdit={slotB.file ? () => setEditTarget('B') : undefined} />
       </div>
 
       {/* 미리보기 버튼 */}

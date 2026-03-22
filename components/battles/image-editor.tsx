@@ -494,27 +494,47 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
       )}
 
       {/* ── 하단 툴바 ── */}
-      <div
-        className="flex justify-around items-center px-6 py-4 shrink-0"
-        style={{ background: '#0a0a0a', borderTop: '1px solid rgba(255,255,255,0.08)' }}
-      >
-        {[
-          { id: 'crop', label: '크롭',   Icon: Crop,     onClick: () => switchMode('crop') },
-          { id: 'text', label: '텍스트', Icon: Type,     onClick: () => switchMode('text') },
-          { id: 'rot',  label: '회전',   Icon: RotateCw, onClick: rotateImage              },
-        ].map(({ id, label, Icon, onClick }) => {
-          const active = (id === 'crop' && mode === 'crop') || (id === 'text' && mode === 'text')
-          return (
-            <button
-              key={id}
-              onClick={onClick}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer' }}
-            >
-              <Icon size={22} color={active ? '#818CF8' : 'rgba(255,255,255,0.65)'} />
-              <span style={{ fontSize: '0.62rem', fontWeight: 600, color: active ? '#818CF8' : 'rgba(255,255,255,0.45)' }}>{label}</span>
-            </button>
-          )
-        })}
+      <div className="shrink-0" style={{ background: '#0a0a0a', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="flex justify-around items-center px-6 pt-3 pb-2">
+          {[
+            { id: 'crop', label: '크롭',   Icon: Crop,     onClick: () => switchMode('crop') },
+            { id: 'text', label: '텍스트', Icon: Type,     onClick: () => switchMode('text') },
+            { id: 'rot',  label: '회전',   Icon: RotateCw, onClick: rotateImage              },
+          ].map(({ id, label, Icon, onClick }) => {
+            const active = (id === 'crop' && mode === 'crop') || (id === 'text' && mode === 'text')
+            return (
+              <button
+                key={id}
+                onClick={onClick}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                <Icon size={22} color={active ? '#818CF8' : 'rgba(255,255,255,0.65)'} />
+                <span style={{ fontSize: '0.62rem', fontWeight: 600, color: active ? '#818CF8' : 'rgba(255,255,255,0.45)' }}>{label}</span>
+              </button>
+            )
+          })}
+        </div>
+        {/* 완료 버튼 */}
+        <div style={{ padding: '8px 16px 20px' }}>
+          <button
+            onClick={handleDone}
+            disabled={isExporting}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              padding: '13px 0', borderRadius: 14,
+              background: isExporting ? 'rgba(99,102,241,0.6)' : '#6366F1',
+              border: 'none', cursor: isExporting ? 'default' : 'pointer',
+            }}
+          >
+            {isExporting
+              ? <div style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white', borderRadius: '50%', animation: '_spin 0.7s linear infinite' }} />
+              : <Check size={17} color="white" />
+            }
+            <span style={{ color: 'white', fontWeight: 700, fontSize: '0.95rem' }}>
+              {isExporting ? '처리 중...' : '완료'}
+            </span>
+          </button>
+        </div>
       </div>
     </div>
   )
