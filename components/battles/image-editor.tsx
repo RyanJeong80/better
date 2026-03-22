@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { X, Check, Crop, Type, RotateCw, Plus } from 'lucide-react'
+import { X, Check, Crop, Type, RotateCw, Plus, Trash2, Bold, Italic, Undo2 } from 'lucide-react'
 
 type Mode = 'crop' | 'text'
 type AspectKey = '3:4' | '1:1' | 'free'
@@ -22,10 +22,10 @@ function updateOverlay(canvas: any, crop: any, overlays: any[]) {
   const cH = crop.getScaledHeight() as number
 
   const [top, bottom, left, right] = overlays
-  top.set    ({ left: 0,    top: 0,       width: W,          height: cT          })
-  bottom.set ({ left: 0,    top: cT + cH, width: W,          height: H - cT - cH })
-  left.set   ({ left: 0,    top: cT,      width: cL,         height: cH          })
-  right.set  ({ left: cL + cW, top: cT,  width: W - cL - cW, height: cH         })
+  top.set    ({ left: 0,    top: 0,       width: W,           height: cT          })
+  bottom.set ({ left: 0,    top: cT + cH, width: W,           height: H - cT - cH })
+  left.set   ({ left: 0,    top: cT,      width: cL,          height: cH          })
+  right.set  ({ left: cL + cW, top: cT,  width: W - cL - cW, height: cH          })
   canvas.requestRenderAll()
 }
 
@@ -33,7 +33,6 @@ function updateOverlay(canvas: any, crop: any, overlays: any[]) {
 let fabricModuleCache: any = null
 async function getFabric() {
   if (!fabricModuleCache) {
-    // Load from public/vendor to avoid Turbopack static analysis of 'fabric' bare specifier
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error: URL path import not typed
     fabricModuleCache = await import(/* webpackIgnore: true */ '/vendor/fabric.mjs')
@@ -44,22 +43,41 @@ async function getFabric() {
 export function ImageEditor({ file, onDone, onCancel }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
-  const fc           = useRef<any>(null)   // fabric.Canvas
-  const imgObj       = useRef<any>(null)   // fabric.FabricImage
-  const cropObj      = useRef<any>(null)   // fabric.Rect (crop handle)
-  const overlayRefs  = useRef<any[]>([])   // 4 dark overlay rects
+  const fc           = useRef<any>(null)
+  const imgObj       = useRef<any>(null)
+  const cropObj      = useRef<any>(null)
+  const overlayRefs  = useRef<any[]>([])
+  const textHistoryRef = useRef<any[]>([])   // undo 스택
 
-  const [mode, setMode]       = useState<Mode>('crop')
-  const [aspect, setAspect]   = useState<AspectKey>('3:4')
+  const [mode, setMode]         = useState<Mode>('crop')
+  const [aspect, setAspect]     = useState<AspectKey>('3:4')
   const [fontSize, setFontSize] = useState(36)
   const [textColor, setTextColor] = useState('#ffffff')
-  const [hasBg, setHasBg]     = useState(false)
+  const [hasBg, setHasBg]       = useState(false)
+  const [isBold, setIsBold]     = useState(false)
+  const [isItalic, setIsItalic] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+
+  // 텍스트 입력 오버레이
   const [textInputShown, setTextInputShown] = useState(false)
   const [textInputValue, setTextInputValue] = useState('')
+  const [editingTextObj, setEditingTextObj] = useState<any>(null)
+
+  // 선택된 텍스트 객체
+  const [selectedTextObj, setSelectedTextObj] = useState<any>(null)
 
   const aspectRef = useRef<AspectKey>('3:4')
   aspectRef.current = aspect
+
+  // ── 선택된 텍스트에 스타일 즉시 적용 ───────────────────────────
+  const applyToSelected = useCallback((patch: Record<string, any>) => {
+    const canvas = fc.current
+    const obj = canvas?.getActiveObject()
+    if (obj?.type === 'i-text') {
+      obj.set(patch)
+      canvas.renderAll()
+    }
+  }, [])
 
   // ── 크롭 사각형 초기화 헬퍼 ────────────────────────────────────
   function buildCropRect(fabricModule: any, canvas: any, img: any, asp: AspectKey) {
@@ -73,7 +91,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     const baseH = asp === '3:4' ? 400 : asp === '1:1' ? 300 : 250
     const maxS  = Math.min((dW * 0.88) / baseW, (dH * 0.88) / baseH)
 
-    const cropRect = new Rect({
+    return new Rect({
       left:   iL + (dW - baseW * maxS) / 2,
       top:    iT + (dH - baseH * maxS) / 2,
       width:  baseW,
@@ -94,7 +112,6 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
       originX: 'left',
       originY: 'top',
     })
-    return cropRect
   }
 
   // ── Canvas 초기화 ───────────────────────────────────────────────
@@ -121,7 +138,6 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
       })
       fc.current = fabricCanvas
 
-      // 이미지 로드
       const url = URL.createObjectURL(file)
       let img: any
       try { img = await FabricImage.fromURL(url, { crossOrigin: 'anonymous' }) }
@@ -142,7 +158,6 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
       fabricCanvas.add(img)
       imgObj.current = img
 
-      // 4개 어두운 오버레이
       const overlayStyle = { fill: 'rgba(0,0,0,0.52)', selectable: false, evented: false, originX: 'left' as const, originY: 'top' as const }
       const overlays = [
         new Rect(overlayStyle), new Rect(overlayStyle),
@@ -151,17 +166,42 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
       overlays.forEach(r => fabricCanvas.add(r))
       overlayRefs.current = overlays
 
-      // 크롭 사각형
       const cropRect = buildCropRect(fm, fabricCanvas, img, '3:4')
       fabricCanvas.add(cropRect)
       fabricCanvas.setActiveObject(cropRect)
       cropObj.current = cropRect
 
-      // 오버레이 업데이트 이벤트
       const refresh = () => updateOverlay(fabricCanvas, cropRect, overlays)
       cropRect.on('moving', refresh)
       cropRect.on('scaling', refresh)
       updateOverlay(fabricCanvas, cropRect, overlays)
+
+      // ── 텍스트 객체 선택 시 패널 동기화 ──────────────────────
+      const syncSelected = (obj: any) => {
+        if (obj?.type === 'i-text') {
+          setSelectedTextObj(obj)
+          setFontSize(Number(obj.fontSize) || 36)
+          setTextColor((obj.fill as string) || '#ffffff')
+          setHasBg(!!obj.backgroundColor)
+          setIsBold(obj.fontWeight === '700' || obj.fontWeight === 'bold')
+          setIsItalic(obj.fontStyle === 'italic')
+        } else {
+          setSelectedTextObj(null)
+        }
+      }
+      fabricCanvas.on('selection:created', (e: any) => syncSelected(e.selected?.[0]))
+      fabricCanvas.on('selection:updated', (e: any) => syncSelected(e.selected?.[0]))
+      fabricCanvas.on('selection:cleared', () => setSelectedTextObj(null))
+
+      // ── 더블탭/더블클릭으로 텍스트 편집 ─────────────────────
+      fabricCanvas.on('mouse:dblclick', (e: any) => {
+        const obj = e.target
+        if (obj?.type === 'i-text') {
+          setEditingTextObj(obj)
+          setTextInputValue(obj.text || '')
+          setTextInputShown(true)
+        }
+      })
 
       fabricCanvas.requestRenderAll()
     })()
@@ -170,9 +210,27 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
       destroyed = true
       try { fabricCanvas?.dispose() } catch {}
       fc.current = null; imgObj.current = null; cropObj.current = null
-      overlayRefs.current = []
+      overlayRefs.current = []; textHistoryRef.current = []
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [file])
+
+  // ── 키보드 Delete/Backspace 로 선택된 텍스트 삭제 ─────────────
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (textInputShown) return
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        const canvas = fc.current
+        const obj = canvas?.getActiveObject()
+        if (obj?.type === 'i-text') {
+          e.preventDefault()
+          removeTextObj(obj)
+        }
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [textInputShown])
 
   // ── 핀치 줌 ────────────────────────────────────────────────────
   useEffect(() => {
@@ -213,6 +271,30 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     }
   }, [])
 
+  // ── 텍스트 객체 제거 ────────────────────────────────────────────
+  function removeTextObj(obj: any) {
+    const canvas = fc.current
+    if (!canvas) return
+    canvas.remove(obj)
+    canvas.discardActiveObject()
+    canvas.requestRenderAll()
+    setSelectedTextObj(null)
+    textHistoryRef.current = textHistoryRef.current.filter((t: any) => t !== obj)
+  }
+
+  function deleteSelected() {
+    const canvas = fc.current
+    const obj = canvas?.getActiveObject()
+    if (obj?.type === 'i-text') removeTextObj(obj)
+  }
+
+  // ── 실행취소: 마지막 추가 텍스트 제거 ───────────────────────────
+  function undoLastText() {
+    if (textHistoryRef.current.length === 0) return
+    const last = textHistoryRef.current[textHistoryRef.current.length - 1]
+    removeTextObj(last)
+  }
+
   // ── 비율 변경 ──────────────────────────────────────────────────
   const changeAspect = useCallback(async (newAsp: AspectKey) => {
     setAspect(newAsp)
@@ -222,11 +304,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     if (!canvas || !img) return
 
     const fm = await getFabric()
-
-    if (oldCrop) {
-      canvas.remove(oldCrop)
-      cropObj.current = null
-    }
+    if (oldCrop) { canvas.remove(oldCrop); cropObj.current = null }
 
     const cropRect = buildCropRect(fm, canvas, img, newAsp)
     canvas.add(cropRect)
@@ -259,8 +337,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     canvas.requestRenderAll()
   }
 
-  // ── 텍스트 추가 ────────────────────────────────────────────────
-  // 모바일에서 IText 직접 편집 시 키보드가 안 뜨는 문제 → 네이티브 입력창 경유
+  // ── 텍스트 캔버스에 배치 ─────────────────────────────────────────
   async function placeText(value: string) {
     const { IText } = await getFabric()
     const canvas = fc.current
@@ -273,7 +350,8 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
       fontSize,
       fill: textColor,
       fontFamily: "'Plus Jakarta Sans', 'Pretendard Variable', sans-serif",
-      fontWeight: '700',
+      fontWeight: isBold ? '700' : '400',
+      fontStyle:  isItalic ? 'italic' : 'normal',
       backgroundColor: hasBg ? 'rgba(0,0,0,0.55)' : '',
       selectable: true,
       evented: true,
@@ -282,6 +360,29 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     canvas.add(text)
     canvas.setActiveObject(text)
     canvas.requestRenderAll()
+    textHistoryRef.current.push(text)
+  }
+
+  // ── 텍스트 입력 확인 ─────────────────────────────────────────────
+  async function confirmText() {
+    const val = textInputValue.trim()
+    if (editingTextObj) {
+      if (val) {
+        editingTextObj.set({ text: val })
+        fc.current?.renderAll()
+      }
+      setEditingTextObj(null)
+    } else {
+      await placeText(val)
+    }
+    setTextInputShown(false)
+    setTextInputValue('')
+  }
+
+  function cancelTextInput() {
+    setTextInputShown(false)
+    setTextInputValue('')
+    setEditingTextObj(null)
   }
 
   // ── 90° 회전 ───────────────────────────────────────────────────
@@ -294,13 +395,11 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     img.set({ angle: newAngle })
     img.setCoords?.()
 
-    // 캔버스 중앙에 재배치
     const dW = img.getScaledWidth()
     const dH = img.getScaledHeight()
     img.set({ left: (canvas.width - dW) / 2, top: (canvas.height - dH) / 2 })
     img.setCoords?.()
 
-    // 크롭 박스 재배치
     const fm = await getFabric()
     const old = cropObj.current
     if (old) { canvas.remove(old); cropObj.current = null }
@@ -325,11 +424,9 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     setIsExporting(true)
 
     try {
-      // viewport 리셋 후 export (좌표계 일치)
       const savedVpt = [...(canvas.viewportTransform || [1,0,0,1,0,0])]
       canvas.setViewportTransform([1,0,0,1,0,0])
 
-      // 크롭 rect 및 오버레이 숨김
       canvas.discardActiveObject()
       overlayRefs.current.forEach(r => r.set({ visible: false }))
       if (crop) crop.set({ visible: false })
@@ -343,7 +440,6 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
 
       const dataUrl = canvas.toDataURL({ left, top, width, height, multiplier: 3, format: 'jpeg', quality: 0.92 })
 
-      // 복원
       if (crop) crop.set({ visible: true })
       overlayRefs.current.forEach(r => r.set({ visible: mode === 'crop' }))
       canvas.setViewportTransform(savedVpt)
@@ -354,26 +450,31 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
       onDone(blob)
     } catch (e) {
       console.error('[ImageEditor] export error:', e)
-      if (crop) crop.set({ visible: true })
-      canvas.requestRenderAll()
+      if (cropObj.current) cropObj.current.set({ visible: true })
+      fc.current?.requestRenderAll()
       setIsExporting(false)
     }
   }
 
   // ────────────────────────────────────────────────────────────────
 
+  const btnBase: React.CSSProperties = { border: 'none', cursor: 'pointer', fontWeight: 700 }
+  const iconBtn = (active: boolean): React.CSSProperties => ({
+    ...btnBase,
+    padding: '5px 10px', borderRadius: 8, fontSize: '0.75rem',
+    background: active ? 'white' : 'rgba(255,255,255,0.14)',
+    color: active ? '#18181b' : 'white',
+  })
+
   return (
-    <div
-      className="fixed inset-0 z-[9999] bg-black flex flex-col"
-      style={{ touchAction: 'none' }}
-    >
+    <div className="fixed inset-0 z-[9999] bg-black flex flex-col" style={{ touchAction: 'none' }}>
       <style>{`@keyframes _spin { to { transform:rotate(360deg) } }`}</style>
 
       {/* ── 상단 바 ── */}
       <div className="flex items-center justify-between px-4 h-14 shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
         <button
           onClick={onCancel}
-          style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: 'pointer' }}
+          style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', ...btnBase }}
         >
           <X size={20} color="white" />
         </button>
@@ -387,7 +488,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
             display: 'flex', alignItems: 'center', gap: 6,
             padding: '0 16px', height: 36, borderRadius: 999,
             background: isExporting ? 'rgba(99,102,241,0.6)' : '#6366F1',
-            border: 'none', cursor: isExporting ? 'default' : 'pointer',
+            ...btnBase, cursor: isExporting ? 'default' : 'pointer',
           }}
         >
           {isExporting
@@ -410,13 +511,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
             <button
               key={a}
               onClick={() => changeAspect(a)}
-              style={{
-                padding: '4px 14px', borderRadius: 999,
-                fontSize: '0.75rem', fontWeight: 700,
-                background: aspect === a ? 'white' : 'rgba(255,255,255,0.14)',
-                color: aspect === a ? '#18181b' : 'white',
-                border: 'none', cursor: 'pointer',
-              }}
+              style={{ padding: '4px 14px', borderRadius: 999, fontSize: '0.75rem', ...iconBtn(aspect === a) }}
             >
               {a === 'free' ? '자유' : a}
             </button>
@@ -426,67 +521,103 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
 
       {/* ── 텍스트 옵션 ── */}
       {mode === 'text' && (
-        <div className="shrink-0 px-4 py-3 space-y-2.5" style={{ background: 'rgba(10,10,10,0.9)' }}>
-          <div className="flex items-center gap-4 flex-wrap">
-            {/* 폰트 크기 */}
-            <div className="flex items-center gap-1.5">
-              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>크기</span>
-              {([{ label: '소', size: 20 }, { label: '중', size: 36 }, { label: '대', size: 58 }]).map(({ label, size }) => (
-                <button
-                  key={size}
-                  onClick={() => setFontSize(size)}
-                  style={{
-                    width: 34, height: 30, borderRadius: 8,
-                    fontSize: '0.75rem', fontWeight: 700,
-                    background: fontSize === size ? 'white' : 'rgba(255,255,255,0.14)',
-                    color: fontSize === size ? '#18181b' : 'white',
-                    border: 'none', cursor: 'pointer',
-                  }}
-                >{label}</button>
-              ))}
-            </div>
+        <div className="shrink-0 px-4 py-3 space-y-3" style={{ background: 'rgba(10,10,10,0.9)' }}>
 
+          {/* 1행: 폰트 크기 슬라이더 */}
+          <div className="flex items-center gap-3">
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>크기</span>
+            <input
+              type="range" min={12} max={72} step={2}
+              value={fontSize}
+              onChange={(e) => {
+                const s = Number(e.target.value)
+                setFontSize(s)
+                applyToSelected({ fontSize: s })
+              }}
+              style={{ flex: 1, accentColor: '#6366F1' }}
+            />
+            <span style={{ color: 'white', fontSize: '0.75rem', fontWeight: 700, minWidth: 28, textAlign: 'right' }}>{fontSize}</span>
+          </div>
+
+          {/* 2행: 색상 + 배경 + 굵게 + 기울임 + 삭제 */}
+          <div className="flex items-center gap-2.5 flex-wrap">
             {/* 텍스트 색상 */}
-            <div className="flex items-center gap-1.5">
-              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>색상</span>
-              {([['#ffffff', '흰색'], ['#000000', '검정'], ['#FFD600', '노랑']] as const).map(([color, label]) => (
-                <button
-                  key={color}
-                  title={label}
-                  onClick={() => setTextColor(color)}
-                  style={{
-                    width: 24, height: 24, borderRadius: '50%',
-                    background: color,
-                    border: textColor === color ? '3px solid #6366F1' : color === '#ffffff' ? '1.5px solid rgba(255,255,255,0.3)' : '1.5px solid transparent',
-                    cursor: 'pointer',
-                  }}
-                />
-              ))}
-            </div>
+            {([['#ffffff', '흰색'], ['#000000', '검정'], ['#FFD600', '노랑'], ['#FF3B30', '빨강'], ['#34C759', '초록']] as const).map(([color, label]) => (
+              <button
+                key={color}
+                title={label}
+                onClick={() => {
+                  setTextColor(color)
+                  applyToSelected({ fill: color })
+                }}
+                style={{
+                  width: 24, height: 24, borderRadius: '50%', ...btnBase,
+                  background: color,
+                  border: textColor === color ? '3px solid #6366F1' : color === '#ffffff' ? '1.5px solid rgba(255,255,255,0.3)' : '1.5px solid transparent',
+                }}
+              />
+            ))}
+
+            <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.15)' }} />
 
             {/* 배경 토글 */}
             <button
-              onClick={() => setHasBg(b => !b)}
-              style={{
-                padding: '4px 12px', borderRadius: 6,
-                fontSize: '0.72rem', fontWeight: 600,
-                background: hasBg ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.14)',
-                color: hasBg ? '#18181b' : 'white',
-                border: 'none', cursor: 'pointer',
+              onClick={() => {
+                const nb = !hasBg
+                setHasBg(nb)
+                applyToSelected({ backgroundColor: nb ? 'rgba(0,0,0,0.55)' : '' })
               }}
+              style={{ ...iconBtn(hasBg), padding: '5px 10px' }}
             >
               배경
             </button>
+
+            {/* 굵게 */}
+            <button
+              title="굵게"
+              onClick={() => {
+                const nb = !isBold
+                setIsBold(nb)
+                applyToSelected({ fontWeight: nb ? '700' : '400' })
+              }}
+              style={{ ...iconBtn(isBold), padding: '5px 8px' }}
+            >
+              <Bold size={13} />
+            </button>
+
+            {/* 기울임 */}
+            <button
+              title="기울임"
+              onClick={() => {
+                const ni = !isItalic
+                setIsItalic(ni)
+                applyToSelected({ fontStyle: ni ? 'italic' : 'normal' })
+              }}
+              style={{ ...iconBtn(isItalic), padding: '5px 8px' }}
+            >
+              <Italic size={13} />
+            </button>
+
+            {/* 선택된 텍스트 삭제 */}
+            {selectedTextObj && (
+              <button
+                onClick={deleteSelected}
+                title="선택 삭제"
+                style={{ ...btnBase, padding: '5px 8px', borderRadius: 8, background: 'rgba(255,59,48,0.25)', color: '#FF3B30' }}
+              >
+                <Trash2 size={13} />
+              </button>
+            )}
           </div>
 
+          {/* 3행: 텍스트 추가 버튼 */}
           <button
-            onClick={() => { setTextInputValue(''); setTextInputShown(true) }}
+            onClick={() => { setTextInputValue(''); setEditingTextObj(null); setTextInputShown(true) }}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
               padding: '9px 0', borderRadius: 12,
               background: '#6366F1', color: 'white',
-              fontWeight: 700, fontSize: '0.85rem',
-              border: 'none', cursor: 'pointer',
+              fontSize: '0.85rem', ...btnBase,
             }}
           >
             <Plus size={16} /> 텍스트 추가
@@ -496,21 +627,24 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
 
       {/* ── 하단 툴바 ── */}
       <div className="shrink-0" style={{ background: '#0a0a0a', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-        <div className="flex justify-around items-center px-6 pt-3 pb-2">
+        <div className="flex justify-around items-center px-4 pt-3 pb-2">
           {[
-            { id: 'crop', label: '크롭',   Icon: Crop,     onClick: () => switchMode('crop') },
-            { id: 'text', label: '텍스트', Icon: Type,     onClick: () => switchMode('text') },
-            { id: 'rot',  label: '회전',   Icon: RotateCw, onClick: rotateImage              },
+            { id: 'crop', label: '크롭',     Icon: Crop,     onClick: () => switchMode('crop') },
+            { id: 'text', label: '텍스트',   Icon: Type,     onClick: () => switchMode('text') },
+            { id: 'rot',  label: '회전',     Icon: RotateCw, onClick: rotateImage              },
+            { id: 'undo', label: '실행취소', Icon: Undo2,    onClick: undoLastText             },
           ].map(({ id, label, Icon, onClick }) => {
             const active = (id === 'crop' && mode === 'crop') || (id === 'text' && mode === 'text')
+            const disabled = id === 'undo' && textHistoryRef.current.length === 0
             return (
               <button
                 key={id}
                 onClick={onClick}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer' }}
+                disabled={disabled}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, background: 'none', ...btnBase, opacity: disabled ? 0.3 : 1 }}
               >
                 <Icon size={22} color={active ? '#818CF8' : 'rgba(255,255,255,0.65)'} />
-                <span style={{ fontSize: '0.62rem', fontWeight: 600, color: active ? '#818CF8' : 'rgba(255,255,255,0.45)' }}>{label}</span>
+                <span style={{ fontSize: '0.6rem', fontWeight: 600, color: active ? '#818CF8' : 'rgba(255,255,255,0.45)' }}>{label}</span>
               </button>
             )
           })}
@@ -524,7 +658,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               padding: '13px 0', borderRadius: 14,
               background: isExporting ? 'rgba(99,102,241,0.6)' : '#6366F1',
-              border: 'none', cursor: isExporting ? 'default' : 'pointer',
+              ...btnBase, cursor: isExporting ? 'default' : 'pointer',
             }}
           >
             {isExporting
@@ -538,17 +672,19 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
         </div>
       </div>
 
-      {/* ── 텍스트 입력 오버레이 (네이티브 키보드 보장) ── */}
+      {/* ── 텍스트 입력/편집 오버레이 ── */}
       {textInputShown && (
         <div
           style={{ position: 'absolute', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'flex-end' }}
-          onClick={() => setTextInputShown(false)}
+          onClick={cancelTextInput}
         >
           <div
             style={{ width: '100%', background: '#1c1c1e', borderRadius: '18px 18px 0 0', padding: '20px 16px 32px' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <p style={{ color: 'white', fontWeight: 700, fontSize: '0.95rem', marginBottom: 12 }}>텍스트 입력</p>
+            <p style={{ color: 'white', fontWeight: 700, fontSize: '0.95rem', marginBottom: 12 }}>
+              {editingTextObj ? '텍스트 편집' : '텍스트 입력'}
+            </p>
             <textarea
               autoFocus
               value={textInputValue}
@@ -564,20 +700,16 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
             />
             <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
               <button
-                onClick={() => setTextInputShown(false)}
-                style={{ flex: 1, padding: '13px 0', borderRadius: 12, background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}
+                onClick={cancelTextInput}
+                style={{ flex: 1, padding: '13px 0', borderRadius: 12, background: 'rgba(255,255,255,0.1)', color: 'white', ...btnBase, fontSize: '0.9rem' }}
               >
                 취소
               </button>
               <button
-                onClick={async () => {
-                  await placeText(textInputValue)
-                  setTextInputShown(false)
-                  setTextInputValue('')
-                }}
-                style={{ flex: 2, padding: '13px 0', borderRadius: 12, background: '#6366F1', color: 'white', border: 'none', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+                onClick={confirmText}
+                style={{ flex: 2, padding: '13px 0', borderRadius: 12, background: '#6366F1', color: 'white', ...btnBase, fontSize: '0.9rem' }}
               >
-                추가
+                {editingTextObj ? '저장' : '추가'}
               </button>
             </div>
           </div>
