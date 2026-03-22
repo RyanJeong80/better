@@ -10,13 +10,22 @@ export function SwipeSections({
   betterContent,
   hotContent,
   isLoggedIn,
+  targetPanel,
 }: {
   rankingContent: React.ReactNode
   betterContent: React.ReactNode
   hotContent: React.ReactNode
   isLoggedIn: boolean
+  targetPanel?: number
 }) {
   const [active, setActive] = useState(1) // 0=랭킹, 1=랜덤Better, 2=Top100
+
+  // targetPanel prop이 바뀌면 (예: /?id=X 로 이동) 해당 패널로 즉시 전환
+  useEffect(() => {
+    if (targetPanel !== undefined) {
+      setActive(targetPanel)
+    }
+  }, [targetPanel])
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
 

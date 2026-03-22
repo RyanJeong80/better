@@ -50,6 +50,7 @@ export default async function HomePage({
   return (
     <SwipeSections
       isLoggedIn={isLoggedIn}
+      targetPanel={id ? 1 : undefined}
       rankingContent={<RankingPanelClient />}
       betterContent={<BetterPanel initialBattle={initialBattle} showBack={!!id} />}
       hotContent={<HotPanelClient />}
