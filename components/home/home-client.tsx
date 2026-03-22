@@ -7,13 +7,14 @@ import { RankingPanelClient } from '@/components/home/ranking-panel-client'
 import { HotPanelClient } from '@/components/home/hot-panel-client'
 import type { BattleForVoting } from '@/actions/battles'
 import type { PanelHotEntry } from '@/app/api/panels/hot/route'
+import type { UserInfo } from '@/app/(main)/page'
 
 export function HomeClient({
   initialBattle,
-  isLoggedIn,
+  user,
 }: {
   initialBattle: BattleForVoting | null
-  isLoggedIn: boolean
+  user: UserInfo | null
 }) {
   const [activePanel, setActivePanel] = useState(1) // 0=랭킹, 1=Better, 2=Hot
   const [currentBattle, setCurrentBattle] = useState<BattleForVoting | null>(initialBattle)
@@ -38,7 +39,7 @@ export function HomeClient({
     <SwipeSections
       active={activePanel}
       onActiveChange={setActivePanel}
-      isLoggedIn={isLoggedIn}
+      user={user}
       rankingContent={<RankingPanelClient />}
       betterContent={
         <div style={{ height: '100%' }}>
