@@ -599,15 +599,13 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
             </button>
 
             {/* 선택된 텍스트 삭제 */}
-            {selectedTextObj && (
-              <button
-                onClick={deleteSelected}
-                title="선택 삭제"
-                style={{ ...btnBase, padding: '5px 8px', borderRadius: 8, background: 'rgba(255,59,48,0.25)', color: '#FF3B30' }}
-              >
-                <Trash2 size={13} />
-              </button>
-            )}
+            <button
+              onClick={deleteSelected}
+              title="선택 삭제"
+              style={{ ...btnBase, padding: '5px 8px', borderRadius: 8, background: 'rgba(255,59,48,0.25)', color: '#FF3B30' }}
+            >
+              <Trash2 size={13} />
+            </button>
           </div>
 
           {/* 3행: 텍스트 추가 버튼 */}
