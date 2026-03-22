@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { ChevronRight, Check, Heart, ChevronUp, Share2, X } from 'lucide-react'
+import { Check, Heart, ChevronRight, ChevronUp, Share2, X } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
@@ -58,10 +58,15 @@ export function RandomBetterViewer({
   const [likeCount, setLikeCount] = useState(initialBattle?.likeCount ?? 0)
   const [isLiked, setIsLiked] = useState(initialBattle?.isLiked ?? false)
   const [likePending, setLikePending] = useState(false)
-
-  // ── 제스처 힌트 ────────────────────────────────────────────────────
   const [showHint, setShowHint] = useState(false)
   const [detailPhoto, setDetailPhoto] = useState<DetailPhoto | null>(null)
+  const [historyStack, setHistoryStack] = useState<BattleForVoting[]>([])
+  const [slideDir, setSlideDir] = useState<SlideDir>('none')
+
+  const touchStartX = useRef(0)
+  const touchStartY = useRef(0)
+  const swipeAxis = useRef<'none' | 'vertical' | 'horizontal'>('none')
+  const [, startTransition] = useTransition()
 
   useEffect(() => {
     try {
@@ -71,25 +76,13 @@ export function RandomBetterViewer({
         return () => clearTimeout(t)
       }
     } catch {}
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function dismissHint() {
     setShowHint(false)
     try { localStorage.setItem('betterHintDone', '1') } catch {}
   }
-
-  // ── 세로 스와이프를 위한 히스토리 ──────────────────────────────────
-  const [historyStack, setHistoryStack] = useState<BattleForVoting[]>([])
-  const [slideDir, setSlideDir] = useState<SlideDir>('none')
-
-  // ── 터치 상태 ──────────────────────────────────────────────────────
-  const touchStartX = useRef(0)
-  const touchStartY = useRef(0)
-  // 스와이프 중 수직 방향으로 확정된 경우 가로 방향 전파 차단
-  const swipeAxis = useRef<'none' | 'vertical' | 'horizontal'>('none')
-
-  const [, startTransition] = useTransition()
 
   useEffect(() => {
     try { sessionStorage.setItem('seenBattleIds', JSON.stringify(seenIds)) } catch {}
@@ -137,7 +130,6 @@ export function RandomBetterViewer({
     })
   }
 
-  // ── 다음 Better 로드 (공통 로직) ──────────────────────────────────
   function loadNext(cat: CategoryFilter, currentSeenIds: string[]) {
     setPhase('loading')
     startTransition(async () => {
@@ -157,24 +149,20 @@ export function RandomBetterViewer({
       setLikeCount(next.likeCount)
       setIsLiked(next.isLiked)
       setPhase('voting')
-      // 새 카드 진입 애니메이션
       setSlideDir('enter-up')
       setTimeout(() => setSlideDir('none'), 320)
     })
   }
 
   function handleNext() {
-    // 현재 battle을 히스토리에 저장
     if (battle) setHistoryStack(h => [...h.slice(-9), battle])
     loadNext(categoryFilter, seenIds)
   }
 
-  // ── 이전 Better로 복귀 ────────────────────────────────────────────
   function handlePrev() {
     if (historyStack.length === 0) return
     const prev = historyStack[historyStack.length - 1]
     setHistoryStack(h => h.slice(0, -1))
-    // 현재 battle을 seen에서 제거 (다시 나올 수 있도록)
     if (battle) setSeenIds(ids => ids.filter(id => id !== battle.id))
     setBattle(prev)
     setSelectedChoice(null)
@@ -191,7 +179,7 @@ export function RandomBetterViewer({
   function handleCategoryChange(newCat: CategoryFilter) {
     if (newCat === categoryFilter) return
     setCategoryFilter(newCat)
-    setHistoryStack([]) // 카테고리 변경 시 히스토리 초기화
+    setHistoryStack([])
     const freshSeenIds: string[] = []
     setSeenIds(freshSeenIds)
     loadNext(newCat, freshSeenIds)
@@ -230,7 +218,6 @@ export function RandomBetterViewer({
     }
   }
 
-  // ── 세로 스와이프 핸들러 ──────────────────────────────────────────
   const onTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX
     touchStartY.current = e.touches[0].clientY
@@ -245,7 +232,6 @@ export function RandomBetterViewer({
         swipeAxis.current = dy > dx ? 'vertical' : 'horizontal'
       }
     }
-    // 세로로 확정된 경우 기본 스크롤 차단 (passive:false 필요 → DOM 이벤트로 처리)
   }
 
   const onTouchEnd = (e: React.TouchEvent) => {
@@ -254,20 +240,11 @@ export function RandomBetterViewer({
     const absDx = Math.abs(dx)
     const absDy = Math.abs(dy)
 
-    // 세로 스와이프 조건: 수직 이동이 수평보다 크고 40px 이상
     if (absDy > absDx * 1.2 && absDy > 40) {
-      // 다른 컴포넌트(SwipeSections)로 이벤트 전파 차단
       e.stopPropagation()
-
       if (phase === 'submitting') return
-
-      if (dy < 0) {
-        // 위로 스와이프 → 다음 Better (TikTok/Reels 방향)
-        handleNext()
-      } else {
-        // 아래로 스와이프 → 이전 Better
-        handlePrev()
-      }
+      if (dy < 0) handleNext()
+      else handlePrev()
     }
   }
 
@@ -275,7 +252,6 @@ export function RandomBetterViewer({
     ? Math.round((voteResult.votesA / voteResult.total) * 100) : 0
   const pctB = voteResult ? 100 - pctA : 0
 
-  // 슬라이드 애니메이션 스타일
   const slideStyle: React.CSSProperties =
     slideDir === 'enter-up'
       ? { animation: '_slideUp 0.28s cubic-bezier(0.25,1,0.5,1)' }
@@ -283,12 +259,28 @@ export function RandomBetterViewer({
         ? { animation: '_slideDown 0.28s cubic-bezier(0.25,1,0.5,1)' }
         : {}
 
+  const dimA = (phase === 'picked' || phase === 'submitting') && selectedChoice === 'B'
+  const dimB = (phase === 'picked' || phase === 'submitting') && selectedChoice === 'A'
+
   return (
-    <div className="space-y-3">
+    <div
+      style={{
+        height: '100%',
+        overflow: 'hidden',
+        position: 'relative',
+        background: '#000',
+        userSelect: 'none',
+        touchAction: 'pan-x',
+      }}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
       <style>{`
-        @keyframes _slideUp      { from { transform: translateY(28px); opacity:0 } to { transform: translateY(0); opacity:1 } }
-        @keyframes _slideDown    { from { transform: translateY(-28px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+        @keyframes _slideUp      { from { transform: translateY(28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+        @keyframes _slideDown    { from { transform: translateY(-28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
         @keyframes _slideUpModal { from { transform: translateY(100%) } to { transform: translateY(0) } }
+        .better-cat-filter::-webkit-scrollbar { display: none; }
       `}</style>
 
       {/* ── 제스처 힌트 오버레이 ── */}
@@ -341,418 +333,514 @@ export function RandomBetterViewer({
         />
       )}
 
-      {/* 카테고리 필터 탭 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
-        {CATEGORY_FILTERS.map((f) => (
-          <button
-            key={f.id}
-            onClick={() => handleCategoryChange(f.id)}
-            style={{ fontSize: '11px' }}
-            className={[
-              'rounded-full px-1.5 py-1 font-semibold transition-all',
-              categoryFilter === f.id
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'border border-border bg-card text-muted-foreground hover:bg-accent',
-            ].join(' ')}
-          >
-            {f.emoji} {f.label}
-          </button>
-        ))}
-      </div>
+      {/* ── 로딩 ── */}
+      {phase === 'loading' && (
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ flex: 1, background: '#1a1a1a' }} />
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.15)' }} />
+          <div style={{ flex: 1, background: '#141414' }} />
+        </div>
+      )}
 
-      {/* 메인 카드 — 세로 스와이프 영역 */}
-      <div
-        onTouchStart={onTouchStart}
-        onTouchMove={onTouchMove}
-        onTouchEnd={onTouchEnd}
-        // pan-x: 브라우저는 수평 스크롤만 처리, 수직은 JS가 처리
-        // 가로 스와이프는 이벤트 버블링으로 SwipeSections에 전달
-        style={{ touchAction: 'pan-x', userSelect: 'none' }}
-      >
-        {phase === 'loading' ? (
-          <LoadingSkeleton />
-        ) : phase === 'empty' ? (
-          <div className="flex flex-col items-center justify-center rounded-3xl border border-border bg-card px-8 py-24 text-center">
-            <div className="mb-4 text-5xl">🎉</div>
-            <p className="text-xl font-bold">모두 다 봤어요!</p>
-            <p className="mt-2 text-sm text-muted-foreground">새로운 Better가 올라오면 다시 돌아오세요.</p>
-          </div>
-        ) : !battle ? null : (
-          <div
-            className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm"
-            style={slideStyle}
-          >
-            {/* 헤더 */}
-            <div className="px-4 py-3 md:px-6 md:py-4">
+      {/* ── Empty ── */}
+      {phase === 'empty' && (
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          color: 'white', textAlign: 'center', padding: 32,
+        }}>
+          <div style={{ fontSize: '3.5rem', marginBottom: 20 }}>🎉</div>
+          <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>모두 다 봤어요!</p>
+          <p style={{ margin: '10px 0 0', color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+            새로운 Better가 올라오면 다시 돌아오세요.
+          </p>
+        </div>
+      )}
+
+      {/* ── 메인 배틀 콘텐츠 ── */}
+      {phase !== 'loading' && phase !== 'empty' && battle && (
+        <>
+          {/* ── 애니메이션 래퍼: 사진 A + VS + 사진 B + 제목 ── */}
+          <div style={{ position: 'absolute', inset: 0, zIndex: 10, ...slideStyle }}>
+
+            {/* 사진 A (상단 50%) */}
+            <div
+              onClick={phase === 'voting' ? () => handlePickPhoto('A') : undefined}
+              style={{
+                position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
+                overflow: 'hidden',
+                cursor: phase === 'voting' ? 'pointer' : 'default',
+                opacity: dimA ? 0.45 : 1,
+                transition: 'opacity 0.25s',
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={battle.imageAUrl}
+                alt="사진 A"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+              {/* 상단 그라데이션 (제목 가독성) */}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 45%)', pointerEvents: 'none' }} />
+              {/* 하단 그라데이션 (설명 가독성) */}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)', pointerEvents: 'none' }} />
+
+              {/* A 배지 */}
+              <div style={{
+                position: 'absolute', bottom: 14, left: 12, zIndex: 3,
+                background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                color: 'white', fontSize: '0.7rem', fontWeight: 900,
+                padding: '3px 10px', borderRadius: 999,
+                border: '1px solid rgba(255,255,255,0.3)',
+              }}>A</div>
+
+              {/* 설명 텍스트 */}
+              {battle.imageADescription && (
+                <p style={{
+                  position: 'absolute', bottom: 14, left: 36, right: 16, zIndex: 3,
+                  margin: 0, color: 'white', fontSize: '0.78rem', lineHeight: 1.4,
+                  textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                }}>
+                  {battle.imageADescription}
+                </p>
+              )}
+
+              {/* 상세보기 버튼 */}
+              {phase === 'voting' && (
+                <button
+                  onTouchEnd={e => { e.stopPropagation(); e.preventDefault(); setDetailPhoto({ url: battle.imageAUrl, description: battle.imageADescription, side: 'A' }) }}
+                  onClick={e => { e.stopPropagation(); setDetailPhoto({ url: battle.imageAUrl, description: battle.imageADescription, side: 'A' }) }}
+                  style={{
+                    position: 'absolute', top: 50, right: 8, zIndex: 5,
+                    background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                    color: 'white', fontSize: '0.65rem', fontWeight: 700,
+                    padding: '5px 10px', borderRadius: 999,
+                    border: '1px solid rgba(255,255,255,0.25)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  상세보기
+                </button>
+              )}
+
+              {/* 선택됨 오버레이 */}
+              {(phase === 'picked' || phase === 'submitting') && selectedChoice === 'A' && (
+                <>
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.28)', pointerEvents: 'none' }} />
+                  <div style={{
+                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+                    background: '#6366F1', borderRadius: '50%',
+                    width: 52, height: 52,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 4px 24px rgba(99,102,241,0.7)',
+                  }}>
+                    <Check size={26} color="white" strokeWidth={3} />
+                  </div>
+                </>
+              )}
+
+              {/* 투표 결과 오버레이 */}
+              {phase === 'voted' && voteResult && (
+                <>
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.42)', pointerEvents: 'none' }} />
+                  {selectedChoice === 'A' && (
+                    <div style={{
+                      position: 'absolute', top: 50, left: 12, zIndex: 4,
+                      background: '#6366F1', color: 'white',
+                      fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999,
+                    }}>내 선택</div>
+                  )}
+                  {voteResult.votesA > voteResult.votesB && (
+                    <div style={{
+                      position: 'absolute', top: 50, right: 8, zIndex: 4,
+                      background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)',
+                      color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+                    }}>우세</div>
+                  )}
+                  <div style={{ position: 'absolute', bottom: 14, left: 0, right: 0, textAlign: 'center', zIndex: 4 }}>
+                    <p style={{ margin: 0, color: 'white', fontSize: '2.8rem', fontWeight: 900, lineHeight: 1, textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}>{pctA}%</p>
+                    <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.75rem' }}>{voteResult.votesA}명 선택</p>
+                    <div style={{ margin: '8px 24px 0', height: 3, borderRadius: 999, background: 'rgba(255,255,255,0.22)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pctA}%`, borderRadius: 999, background: 'linear-gradient(90deg,#818CF8,#A78BFA)', transition: 'width 0.7s ease' }} />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* ── VS 구분선 ── */}
+            <div style={{
+              position: 'absolute', top: '50%', left: 0, right: 0,
+              transform: 'translateY(-50%)', zIndex: 5,
+              display: 'flex', alignItems: 'center',
+              pointerEvents: 'none',
+            }}>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.3)' }} />
+              <div style={{
+                width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                background: 'rgba(0,0,0,0.75)',
+                backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                border: '1.5px solid rgba(255,255,255,0.32)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'white', fontWeight: 900, fontSize: '0.72rem', letterSpacing: '0.05em',
+              }}>VS</div>
+              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.3)' }} />
+            </div>
+
+            {/* 사진 B (하단 50%) */}
+            <div
+              onClick={phase === 'voting' ? () => handlePickPhoto('B') : undefined}
+              style={{
+                position: 'absolute', top: '50%', left: 0, right: 0, bottom: 0,
+                overflow: 'hidden',
+                cursor: phase === 'voting' ? 'pointer' : 'default',
+                opacity: dimB ? 0.45 : 1,
+                transition: 'opacity 0.25s',
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={battle.imageBUrl}
+                alt="사진 B"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              />
+              {/* 상단 그라데이션 */}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 40%)', pointerEvents: 'none' }} />
+              {/* 하단 그라데이션 */}
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)', pointerEvents: 'none' }} />
+
+              {/* B 배지 */}
+              <div style={{
+                position: 'absolute', bottom: 14, left: 12, zIndex: 3,
+                background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                color: 'white', fontSize: '0.7rem', fontWeight: 900,
+                padding: '3px 10px', borderRadius: 999,
+                border: '1px solid rgba(255,255,255,0.3)',
+              }}>B</div>
+
+              {/* 설명 텍스트 */}
+              {battle.imageBDescription && (
+                <p style={{
+                  position: 'absolute', bottom: 14, left: 36, right: 16, zIndex: 3,
+                  margin: 0, color: 'white', fontSize: '0.78rem', lineHeight: 1.4,
+                  textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                }}>
+                  {battle.imageBDescription}
+                </p>
+              )}
+
+              {/* 상세보기 버튼 */}
+              {phase === 'voting' && (
+                <button
+                  onTouchEnd={e => { e.stopPropagation(); e.preventDefault(); setDetailPhoto({ url: battle.imageBUrl, description: battle.imageBDescription, side: 'B' }) }}
+                  onClick={e => { e.stopPropagation(); setDetailPhoto({ url: battle.imageBUrl, description: battle.imageBDescription, side: 'B' }) }}
+                  style={{
+                    position: 'absolute', top: 8, right: 8, zIndex: 5,
+                    background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                    color: 'white', fontSize: '0.65rem', fontWeight: 700,
+                    padding: '5px 10px', borderRadius: 999,
+                    border: '1px solid rgba(255,255,255,0.25)', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}
+                >
+                  상세보기
+                </button>
+              )}
+
+              {/* 선택됨 오버레이 */}
+              {(phase === 'picked' || phase === 'submitting') && selectedChoice === 'B' && (
+                <>
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.28)', pointerEvents: 'none' }} />
+                  <div style={{
+                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+                    background: '#6366F1', borderRadius: '50%',
+                    width: 52, height: 52,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 4px 24px rgba(99,102,241,0.7)',
+                  }}>
+                    <Check size={26} color="white" strokeWidth={3} />
+                  </div>
+                </>
+              )}
+
+              {/* 투표 결과 오버레이 */}
+              {phase === 'voted' && voteResult && (
+                <>
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.42)', pointerEvents: 'none' }} />
+                  {selectedChoice === 'B' && (
+                    <div style={{
+                      position: 'absolute', top: 8, left: 12, zIndex: 4,
+                      background: '#6366F1', color: 'white',
+                      fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999,
+                    }}>내 선택</div>
+                  )}
+                  {voteResult.votesB > voteResult.votesA && (
+                    <div style={{
+                      position: 'absolute', top: 8, right: 8, zIndex: 4,
+                      background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)',
+                      color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+                    }}>우세</div>
+                  )}
+                  <div style={{ position: 'absolute', bottom: 14, left: 0, right: 0, textAlign: 'center', zIndex: 4 }}>
+                    <p style={{ margin: 0, color: 'white', fontSize: '2.8rem', fontWeight: 900, lineHeight: 1, textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}>{pctB}%</p>
+                    <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.75rem' }}>{voteResult.votesB}명 선택</p>
+                    <div style={{ margin: '8px 24px 0', height: 3, borderRadius: 999, background: 'rgba(255,255,255,0.22)', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pctB}%`, borderRadius: 999, background: 'linear-gradient(90deg,#818CF8,#A78BFA)', transition: 'width 0.7s ease' }} />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* 배틀 제목 + 카테고리 배지 (A 사진 상단 오버레이) */}
+            <div style={{
+              position: 'absolute', top: 44, left: 12, right: 76, zIndex: 8,
+              pointerEvents: 'none',
+            }}>
               {(() => {
                 const cat = CATEGORY_MAP[battle.category]
-                const style = CAT_BADGE[battle.category]
+                const badge = CAT_BADGE[battle.category]
                 return (
-                  <span
-                    className="mb-1.5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold"
-                    style={{ background: style.bg, color: style.text }}
-                  >
-                    {cat.emoji} {cat.label}
-                  </span>
+                  <>
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 3,
+                      background: badge.bg, color: badge.text,
+                      fontSize: '0.62rem', fontWeight: 700,
+                      padding: '2px 8px', borderRadius: 999,
+                      marginBottom: 5,
+                    }}>
+                      {cat.emoji} {cat.label}
+                    </span>
+                    <h2 style={{
+                      margin: 0, color: 'white', fontWeight: 800,
+                      fontSize: '0.92rem', lineHeight: 1.35,
+                      textShadow: '0 1px 8px rgba(0,0,0,0.9)',
+                    }}>
+                      {battle.title}
+                    </h2>
+                    <p style={{
+                      margin: '4px 0 0', color: 'rgba(255,255,255,0.7)',
+                      fontSize: '0.72rem',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+                    }}>
+                      {phase === 'voting' && '사진을 눌러 선택하세요'}
+                      {(phase === 'picked' || phase === 'submitting') && '이유를 남기고 투표하세요'}
+                      {phase === 'voted' && '투표 완료!'}
+                    </p>
+                  </>
                 )
               })()}
-              <h2 className="text-base font-bold leading-snug text-foreground md:text-lg">{battle.title}</h2>
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {phase === 'voting' && '사진을 눌러 선택하세요'}
-                {(phase === 'picked' || phase === 'submitting') && '이유를 남기고 투표하세요 (선택사항)'}
-                {phase === 'voted' && '투표 완료! 결과를 확인하세요.'}
-              </p>
             </div>
-
-            {/* 사진 두 장 + 우측 액션 버튼 오버레이 */}
-            <div style={{ position: 'relative' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-                <PhotoCard
-                  imageUrl={battle.imageAUrl}
-                  description={battle.imageADescription}
-                  side="A"
-                  phase={phase}
-                  selectedChoice={selectedChoice}
-                  pct={pctA}
-                  votes={voteResult?.votesA ?? 0}
-                  isWinner={(voteResult?.votesA ?? 0) > (voteResult?.votesB ?? 0)}
-                  onClick={() => handlePickPhoto('A')}
-                  onDetail={() => setDetailPhoto({ url: battle.imageAUrl, description: battle.imageADescription, side: 'A' })}
-                />
-                <PhotoCard
-                  imageUrl={battle.imageBUrl}
-                  description={battle.imageBDescription}
-                  side="B"
-                  phase={phase}
-                  selectedChoice={selectedChoice}
-                  pct={pctB}
-                  votes={voteResult?.votesB ?? 0}
-                  isWinner={(voteResult?.votesB ?? 0) > (voteResult?.votesA ?? 0)}
-                  onClick={() => handlePickPhoto('B')}
-                  onDetail={() => setDetailPhoto({ url: battle.imageBUrl, description: battle.imageBDescription, side: 'B' })}
-                />
-              </div>
-
-              {/* 우측 세로 액션 버튼 */}
-              <div style={{
-                position: 'absolute', right: 10, bottom: 16,
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
-                zIndex: 20,
-              }}>
-                {/* 좋아요 */}
-                <button
-                  onClick={handleLike}
-                  disabled={likePending}
-                  style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                    opacity: likePending ? 0.6 : 1,
-                  }}
-                >
-                  <span style={{
-                    width: 44, height: 44, borderRadius: '50%',
-                    background: 'rgba(0,0,0,0.45)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    transition: 'transform 0.15s',
-                  }}>
-                    <Heart
-                      size={20}
-                      style={{
-                        fill: isLiked ? '#F43F5E' : 'transparent',
-                        stroke: isLiked ? '#F43F5E' : 'white',
-                        transition: 'all 0.15s',
-                      }}
-                    />
-                  </span>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>
-                    {likeCount}
-                  </span>
-                </button>
-
-                {/* 공유 */}
-                <button
-                  onClick={handleShare}
-                  style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                    background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                  }}
-                >
-                  <span style={{
-                    width: 44, height: 44, borderRadius: '50%',
-                    background: 'rgba(0,0,0,0.45)',
-                    backdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <Share2 size={20} color="white" />
-                  </span>
-                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>
-                    공유
-                  </span>
-                </button>
-              </div>
-            </div>
-
-            {/* 이유 입력 + 투표 버튼 */}
-            {(phase === 'picked' || phase === 'submitting') && (
-              <div className="space-y-3 border-t border-border px-4 py-4 md:px-6">
-                {error && (
-                  <p className="rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
-                )}
-                <textarea
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="이유를 남겨주세요 (선택사항)"
-                  maxLength={200}
-                  rows={2}
-                  disabled={phase === 'submitting'}
-                  className="w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition-colors focus:border-primary disabled:opacity-60"
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    onClick={handleCancel}
-                    disabled={phase === 'submitting'}
-                    className="rounded-xl border border-border px-4 py-2 text-sm font-medium transition-colors hover:bg-accent disabled:opacity-60"
-                  >
-                    취소
-                  </button>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={phase === 'submitting'}
-                    className="rounded-xl px-6 py-2 text-sm font-bold text-white shadow-sm transition-all hover:opacity-90 disabled:opacity-60 active:scale-95"
-                    style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
-                  >
-                    {phase === 'submitting' ? '투표 중…' : '투표하기'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* 투표 완료 후: 다음 버튼 + 스와이프 힌트 */}
-            {phase === 'voted' && (
-              <div className="flex items-center justify-between border-t border-border px-4 py-4 md:px-6">
-                {/* 이전 버튼 */}
-                <button
-                  onClick={handlePrev}
-                  disabled={historyStack.length === 0}
-                  className="flex items-center gap-1.5 rounded-xl border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-accent disabled:opacity-30"
-                >
-                  <ChevronUp size={15} />
-                  이전
-                </button>
-
-                {/* 스와이프 힌트 */}
-                <span className="text-xs text-muted-foreground/60 select-none">
-                  ↑ 위로 스와이프
-                </span>
-
-                {/* 다음 버튼 */}
-                <button
-                  onClick={handleNext}
-                  className="flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:opacity-90 active:scale-95"
-                  style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
-                >
-                  다음
-                  <ChevronRight size={16} />
-                </button>
-              </div>
-            )}
-
-            {/* voting 단계: 스와이프 힌트 (최초 1회) */}
-            {phase === 'voting' && (
-              <div className="flex justify-center border-t border-border/50 py-2">
-                <span className="text-xs text-muted-foreground/40 select-none">
-                  ↑ 스와이프로 넘기기
-                </span>
-              </div>
-            )}
           </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
-// ─── PhotoCard ──────────────────────────────────────────────────────────────
-
-function PhotoCard({
-  imageUrl,
-  description,
-  side,
-  phase,
-  selectedChoice,
-  pct,
-  votes,
-  isWinner,
-  onClick,
-  onDetail,
-}: {
-  imageUrl: string
-  description: string | null
-  side: 'A' | 'B'
-  phase: Phase
-  selectedChoice: 'A' | 'B' | null
-  pct: number
-  votes: number
-  isWinner: boolean
-  onClick: () => void
-  onDetail: () => void
-}) {
-  const isSelected = selectedChoice === side
-  const isRejected = selectedChoice !== null && !isSelected
-  const canClick = phase === 'voting'
-  const showVoteOverlay = phase === 'voted'
-
-  return (
-    <div
-      onClick={canClick ? onClick : undefined}
-      style={{
-        position: 'relative',
-        display: 'flex',
-        flexDirection: 'column',
-        cursor: canClick ? 'pointer' : 'default',
-        borderLeft: side === 'B' ? '1px solid var(--color-border)' : undefined,
-        transition: 'opacity 0.25s',
-        opacity: isRejected ? 0.4 : 1,
-      }}
-    >
-      <div style={{ position: 'relative', width: '100%', paddingTop: '120%', overflow: 'hidden' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={imageUrl}
-          alt={`사진 ${side}`}
-          style={{
-            position: 'absolute', inset: 0,
-            width: '100%', height: '100%',
-            objectFit: 'cover',
-            transition: 'transform 0.3s',
-          }}
-        />
-
-        {/* 기본 하단 그라데이션 오버레이 (voting / picked / submitting 단계) */}
-        {!showVoteOverlay && (
-          <div style={{
-            position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none',
-            background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.18) 45%, transparent 70%)',
-          }} />
-        )}
-
-        {canClick && (
-          <div style={{
-            position: 'absolute', top: 10, left: 10, zIndex: 2,
-            background: 'rgba(255,255,255,0.9)',
-            backdropFilter: 'blur(8px)',
-            color: '#6366F1',
-            fontSize: '0.7rem', fontWeight: 800,
-            padding: '2px 10px', borderRadius: 999,
-            letterSpacing: '0.05em',
-          }}>
-            {side}
-          </div>
-        )}
-
-        {/* 상세보기 버튼 (voting 단계) */}
-        {canClick && (
-          <button
-            onTouchEnd={e => { e.stopPropagation(); e.preventDefault(); onDetail() }}
-            onClick={e => { e.stopPropagation(); onDetail() }}
+          {/* ── 카테고리 필터 (최상단 고정 오버레이) ── */}
+          <div
+            className="better-cat-filter"
             style={{
-              position: 'absolute', top: 8, right: 8, zIndex: 10,
-              background: 'rgba(0,0,0,0.55)',
-              backdropFilter: 'blur(8px)',
-              WebkitBackdropFilter: 'blur(8px)',
-              color: 'white',
-              fontSize: '0.65rem', fontWeight: 700,
-              padding: '5px 10px', borderRadius: 999,
-              border: '1px solid rgba(255,255,255,0.25)',
-              cursor: 'pointer', lineHeight: 1.4,
-              minWidth: 48, minHeight: 28,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              pointerEvents: 'auto',
+              position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30,
+              display: 'flex', overflowX: 'auto', gap: 6, padding: '8px 12px 10px',
+              scrollbarWidth: 'none',
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%)',
+              WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],
             }}
           >
-            상세보기
-          </button>
-        )}
+            {CATEGORY_FILTERS.map((f) => (
+              <button
+                key={f.id}
+                onClick={() => handleCategoryChange(f.id)}
+                style={{
+                  flexShrink: 0,
+                  fontSize: '0.7rem', fontWeight: 700,
+                  padding: '4px 10px', borderRadius: 999,
+                  border: categoryFilter === f.id ? 'none' : '1px solid rgba(255,255,255,0.28)',
+                  cursor: 'pointer',
+                  background: categoryFilter === f.id ? '#6366F1' : 'rgba(255,255,255,0.12)',
+                  backdropFilter: 'blur(8px)',
+                  WebkitBackdropFilter: 'blur(8px)',
+                  color: 'white',
+                  transition: 'all 0.18s',
+                  lineHeight: 1.5,
+                }}
+              >
+                {f.emoji} {f.label}
+              </button>
+            ))}
+          </div>
 
-        {/* 설명 텍스트 오버레이 */}
-        {description && !showVoteOverlay && (
-          <p style={{
-            position: 'absolute', bottom: 10, left: 10, right: 10, zIndex: 3,
-            color: 'white', fontSize: '0.72rem', lineHeight: 1.45,
-            margin: 0, textShadow: '0 1px 4px rgba(0,0,0,0.9)',
-            overflow: 'hidden',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
+          {/* ── 우측 액션 버튼 (좋아요 + 공유, VS 선 기준 중앙 배치) ── */}
+          <div style={{
+            position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+            zIndex: 25,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
+            marginTop: -10,
           }}>
-            {description}
-          </p>
-        )}
-
-        {(phase === 'picked' || phase === 'submitting') && isSelected && (
-          <>
-            <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to top, rgba(99,102,241,0.6) 0%, transparent 60%)' }} />
-            <div style={{
-              position: 'absolute', top: 10, right: 10, zIndex: 2,
-              background: '#6366F1', borderRadius: '50%',
-              width: 30, height: 30,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 2px 12px rgba(99,102,241,0.5)',
-            }}>
-              <Check size={16} color="white" strokeWidth={3} />
-            </div>
-            <div style={{ position: 'absolute', bottom: 10, left: 0, right: 0, zIndex: 2, textAlign: 'center' }}>
+            {/* 좋아요 */}
+            <button
+              onClick={e => { e.stopPropagation(); handleLike() }}
+              disabled={likePending}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                opacity: likePending ? 0.6 : 1,
+              }}
+            >
               <span style={{
-                background: 'white', color: '#6366F1',
-                fontSize: '0.7rem', fontWeight: 800,
-                padding: '3px 12px', borderRadius: 999,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                width: 44, height: 44, borderRadius: '50%',
+                background: 'rgba(0,0,0,0.55)',
+                backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'transform 0.15s',
               }}>
-                내 선택
+                <Heart size={20} style={{ fill: isLiked ? '#F43F5E' : 'transparent', stroke: isLiked ? '#F43F5E' : 'white', transition: 'all 0.15s' }} />
+              </span>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>
+                {likeCount}
+              </span>
+            </button>
+
+            {/* 공유 */}
+            <button
+              onClick={e => { e.stopPropagation(); handleShare() }}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+              }}
+            >
+              <span style={{
+                width: 44, height: 44, borderRadius: '50%',
+                background: 'rgba(0,0,0,0.55)',
+                backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <Share2 size={20} color="white" />
+              </span>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>
+                공유
+              </span>
+            </button>
+          </div>
+
+          {/* ── 투표 이유 입력 하단 시트 (picked / submitting) ── */}
+          {(phase === 'picked' || phase === 'submitting') && (
+            <div style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 40,
+              background: 'rgba(255,255,255,0.97)',
+              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+              borderRadius: '20px 20px 0 0',
+              padding: '12px 16px 28px',
+              boxShadow: '0 -8px 40px rgba(0,0,0,0.3)',
+              animation: '_slideUpModal 0.25s cubic-bezier(0.25,1,0.5,1)',
+            }}>
+              <div style={{ width: 36, height: 4, borderRadius: 999, background: '#E5E7EB', margin: '0 auto 12px' }} />
+              {error && (
+                <p style={{ color: '#EF4444', fontSize: '0.85rem', margin: '0 0 8px' }}>{error}</p>
+              )}
+              <p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#6B7280', fontWeight: 600 }}>
+                {selectedChoice} 선택 · 이유를 남겨주세요 (선택사항)
+              </p>
+              <textarea
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="이유를 남겨주세요..."
+                maxLength={200}
+                rows={2}
+                disabled={phase === 'submitting'}
+                style={{
+                  width: '100%', resize: 'none', borderRadius: 12,
+                  border: '1px solid #E5E7EB', background: '#F9FAFB',
+                  padding: '10px 12px', fontSize: '0.9rem', outline: 'none',
+                  boxSizing: 'border-box', fontFamily: 'inherit',
+                }}
+              />
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 10 }}>
+                <button
+                  onClick={handleCancel}
+                  disabled={phase === 'submitting'}
+                  style={{
+                    padding: '9px 18px', borderRadius: 12,
+                    border: '1px solid #E5E7EB', background: 'white',
+                    fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer',
+                  }}
+                >취소</button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={phase === 'submitting'}
+                  style={{
+                    padding: '9px 22px', borderRadius: 12, border: 'none',
+                    background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
+                    color: 'white', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer',
+                  }}
+                >
+                  {phase === 'submitting' ? '투표 중…' : '투표하기'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── 투표 완료: 이전 / 다음 네비게이션 ── */}
+          {phase === 'voted' && (
+            <div style={{
+              position: 'absolute', bottom: 16, left: 0, right: 0, zIndex: 35,
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '0 16px',
+            }}>
+              <button
+                onClick={handlePrev}
+                disabled={historyStack.length === 0}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '9px 16px', borderRadius: 12,
+                  background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  color: 'white', fontSize: '0.85rem', fontWeight: 700,
+                  cursor: 'pointer',
+                  opacity: historyStack.length === 0 ? 0.3 : 1,
+                }}
+              >
+                <ChevronUp size={16} /> 이전
+              </button>
+
+              <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem' }}>↑ 위로 스와이프</span>
+
+              <button
+                onClick={handleNext}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '9px 20px', borderRadius: 12, border: 'none',
+                  background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
+                  color: 'white', fontSize: '0.85rem', fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 16px rgba(99,102,241,0.45)',
+                }}
+              >
+                다음 <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
+
+          {/* ── voting: 스와이프 힌트 ── */}
+          {phase === 'voting' && (
+            <div style={{
+              position: 'absolute', bottom: 12, left: 0, right: 0, zIndex: 25,
+              textAlign: 'center', pointerEvents: 'none',
+            }}>
+              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.72rem' }}>
+                ↑ 스와이프로 넘기기
               </span>
             </div>
-          </>
-        )}
-
-        {showVoteOverlay && (
-          <>
-            <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.15) 55%, transparent 80%)' }} />
-            {isSelected && (
-              <div style={{
-                position: 'absolute', top: 10, left: 10, zIndex: 3,
-                background: '#6366F1', color: 'white',
-                fontSize: '0.65rem', fontWeight: 800,
-                padding: '3px 10px', borderRadius: 999,
-              }}>
-                내 선택
-              </div>
-            )}
-            {isWinner && (
-              <div style={{
-                position: 'absolute', top: 10, right: 10, zIndex: 3,
-                background: 'rgba(255,255,255,0.22)',
-                backdropFilter: 'blur(8px)',
-                color: 'white',
-                fontSize: '0.65rem', fontWeight: 700,
-                padding: '3px 10px', borderRadius: 999,
-              }}>
-                우세
-              </div>
-            )}
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 2, padding: '12px' }}>
-              <p style={{ color: 'white', fontSize: '2rem', fontWeight: 900, lineHeight: 1, margin: 0 }}>{pct}%</p>
-              <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.7rem', marginTop: 2 }}>{votes}명 선택</p>
-              <div style={{ marginTop: 8, height: 4, width: '100%', borderRadius: 999, background: 'rgba(255,255,255,0.25)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${pct}%`, borderRadius: 999, background: 'linear-gradient(90deg, #818CF8, #A78BFA)', transition: 'width 0.7s ease' }} />
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
+          )}
+        </>
+      )}
     </div>
   )
 }
@@ -772,10 +860,8 @@ function PhotoDetailModal({
       onClick={onClose}
       style={{
         position: 'fixed',
-        top: 0,
-        left: 0,
-        width: '100vw',
-        height: '100dvh',
+        top: 0, left: 0,
+        width: '100vw', height: '100dvh',
         background: 'rgba(0,0,0,0.9)',
         zIndex: 9999,
         display: 'flex',
@@ -785,11 +871,8 @@ function PhotoDetailModal({
     >
       {/* 상단 바 — 56px 고정 */}
       <div style={{
-        height: 56,
-        flexShrink: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
+        height: 56, flexShrink: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'flex-end',
         paddingRight: 8,
       }}>
         <button
@@ -804,7 +887,7 @@ function PhotoDetailModal({
         </button>
       </div>
 
-      {/* 사진 영역 — 나머지 전체 높이 */}
+      {/* 사진 영역 */}
       <div style={{
         position: 'relative',
         width: '100%',
@@ -817,15 +900,12 @@ function PhotoDetailModal({
           src={url}
           alt={`사진 ${side}`}
           style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'contain',
-            objectPosition: 'center',
+            width: '100%', height: '100%',
+            objectFit: 'contain', objectPosition: 'center',
             display: 'block',
           }}
         />
 
-        {/* 설명 — 사진 아래 여백(letterbox)에 오버레이 */}
         {description && (
           <div style={{
             position: 'absolute',
@@ -835,28 +915,14 @@ function PhotoDetailModal({
             pointerEvents: 'none',
           }}>
             <p style={{
-              margin: 0,
-              color: 'white',
-              fontSize: '0.9rem',
-              lineHeight: 1.6,
+              margin: 0, color: 'white',
+              fontSize: '0.9rem', lineHeight: 1.6,
               textShadow: '0 1px 4px rgba(0,0,0,0.8)',
             }}>
               {description}
             </p>
           </div>
         )}
-      </div>
-    </div>
-  )
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
-      <div className="h-[74px] animate-pulse border-b border-border bg-muted" />
-      <div className="grid grid-cols-2">
-        <div className="aspect-square animate-pulse bg-muted" />
-        <div className="aspect-square animate-pulse border-l border-border bg-muted" />
       </div>
     </div>
   )

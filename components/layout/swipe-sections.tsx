@@ -142,7 +142,7 @@ export function SwipeSections({
               style={{
                 width: `${100 / 3}%`,
                 height: '100%',
-                overflowY: 'auto',
+                overflowY: i === 1 ? 'hidden' : 'auto',
                 overflowX: 'hidden',
                 // iOS 모멘텀 스크롤
                 WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],

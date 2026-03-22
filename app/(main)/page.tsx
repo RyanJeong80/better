@@ -9,7 +9,7 @@ import { HotPanelClient } from '@/components/home/hot-panel-client'
 
 function BetterPanel({ initialBattle }: { initialBattle: BattleForVoting | null }) {
   return (
-    <div style={{ paddingTop: 8, paddingBottom: 40 }}>
+    <div style={{ height: '100%' }}>
       <RandomBetterViewer initialBattle={initialBattle} />
     </div>
   )
