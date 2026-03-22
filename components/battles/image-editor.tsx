@@ -406,9 +406,23 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     img.set({ angle: newAngle })
     img.setCoords?.()
 
-    const dW = img.getScaledWidth()
-    const dH = img.getScaledHeight()
-    img.set({ left: (canvas.width - dW) / 2, top: (canvas.height - dH) / 2 })
+    // getBoundingRect()는 회전 후의 실제 시각적 바운딩 박스를 반환
+    // getScaledWidth/Height()는 회전 전 크기여서 사용 불가
+    const b1 = img.getBoundingRect()
+
+    // 캔버스를 벗어날 경우 축소
+    const overflow = Math.max(b1.width / (canvas.width * 0.92), b1.height / (canvas.height * 0.92))
+    if (overflow > 1) {
+      img.set({ scaleX: (img.scaleX as number) / overflow, scaleY: (img.scaleY as number) / overflow })
+      img.setCoords?.()
+    }
+
+    // 실제 바운딩 박스 기준으로 캔버스 중앙 재배치
+    const b2 = img.getBoundingRect()
+    img.set({
+      left: (img.left as number) + (canvas.width  - b2.width)  / 2 - b2.left,
+      top:  (img.top  as number) + (canvas.height - b2.height) / 2 - b2.top,
+    })
     img.setCoords?.()
 
     const fm = await getFabric()
