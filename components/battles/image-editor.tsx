@@ -29,6 +29,16 @@ function updateOverlay(canvas: any, crop: any, overlays: any[]) {
   canvas.requestRenderAll()
 }
 
+// fabric를 한 번만 동적 import하여 캐싱
+let fabricModuleCache: any = null
+async function getFabric() {
+  if (!fabricModuleCache) {
+    const mod = await import('fabric')
+    fabricModuleCache = mod
+  }
+  return fabricModuleCache
+}
+
 export function ImageEditor({ file, onDone, onCancel }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef    = useRef<HTMLCanvasElement>(null)
@@ -89,7 +99,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     let fabricCanvas: any
 
     ;(async () => {
-      const fm = await import('fabric')
+      const fm = await getFabric()
       const { Canvas, FabricImage, Rect } = fm
       if (destroyed || !canvasRef.current || !containerRef.current) return
 
@@ -207,7 +217,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     const oldCrop = cropObj.current
     if (!canvas || !img) return
 
-    const fm = await import('fabric')
+    const fm = await getFabric()
 
     if (oldCrop) {
       canvas.remove(oldCrop)
@@ -247,7 +257,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
 
   // ── 텍스트 추가 ────────────────────────────────────────────────
   async function addText() {
-    const { IText } = await import('fabric')
+    const { IText } = await getFabric()
     const canvas = fc.current
     if (!canvas) return
     const text = new IText('텍스트 입력', {
@@ -288,7 +298,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     img.setCoords?.()
 
     // 크롭 박스 재배치
-    const fm = await import('fabric')
+    const fm = await getFabric()
     const old = cropObj.current
     if (old) { canvas.remove(old); cropObj.current = null }
 
