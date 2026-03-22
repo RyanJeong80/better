@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Heart, Flame } from 'lucide-react'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
@@ -53,9 +53,13 @@ function Skeleton() {
   )
 }
 
+const PAGE_SIZE = 10
+
 export function HotPanelClient() {
   const [entries, setEntries] = useState<PanelHotEntry[]>([])
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
+  const sentinelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch('/api/panels/hot')
@@ -63,6 +67,23 @@ export function HotPanelClient() {
       .then((data: PanelHotEntry[]) => { setEntries(data); setStatus('done') })
       .catch(() => setStatus('error'))
   }, [])
+
+  // 스크롤 감지: sentinel이 뷰포트에 들어오면 더 렌더링
+  useEffect(() => {
+    if (status !== 'done' || visibleCount >= entries.length) return
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisibleCount(prev => Math.min(prev + PAGE_SIZE, entries.length))
+        }
+      },
+      { rootMargin: '300px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [status, visibleCount, entries.length])
 
   if (status === 'loading') return <Skeleton />
 
@@ -99,7 +120,7 @@ export function HotPanelClient() {
         </div>
       ) : (
         <div>
-          {entries.map((entry, i) => {
+          {entries.slice(0, visibleCount).map((entry, i) => {
             const rank = i + 1
             const cat = CATEGORY_MAP[entry.category]
             const catColor = CAT_COLOR[entry.category]
@@ -225,21 +246,32 @@ export function HotPanelClient() {
               </Link>
             )
           })}
+          {/* 스크롤 sentinel + 로딩 인디케이터 */}
+          {visibleCount < entries.length ? (
+            <div ref={sentinelRef} style={{ padding: '16px 0', display: 'flex', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                {[0, 1, 2].map(i => (
+                  <div
+                    key={i}
+                    className="animate-pulse"
+                    style={{
+                      width: 6, height: 6, borderRadius: '50%',
+                      background: '#F59E0B',
+                      animationDelay: `${i * 0.15}s`,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div style={{ padding: '16px 0', textAlign: 'center' }}>
+              <p style={{ fontSize: '0.78rem', color: 'var(--color-muted-foreground)' }}>
+                🔥 전체 {entries.length}개 확인 완료
+              </p>
+            </div>
+          )}
         </div>
       )}
-
-      <Link
-        href="/hot"
-        style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          marginTop: 4, padding: '12px 0',
-          borderRadius: 12, border: '1.5px solid var(--color-border)',
-          fontSize: '0.85rem', fontWeight: 700, color: '#F59E0B',
-          textDecoration: 'none',
-        }}
-      >
-        전체 Hot 100 보기 →
-      </Link>
     </div>
   )
 }
