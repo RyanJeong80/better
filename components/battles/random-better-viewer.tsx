@@ -62,6 +62,8 @@ export function RandomBetterViewer({
   const [detailPhoto, setDetailPhoto] = useState<DetailPhoto | null>(null)
   const [historyStack, setHistoryStack] = useState<BattleForVoting[]>([])
   const [slideDir, setSlideDir] = useState<SlideDir>('none')
+  const [barFilled, setBarFilled] = useState(false)
+  const autoNextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
@@ -95,6 +97,25 @@ export function RandomBetterViewer({
   useEffect(() => {
     try { sessionStorage.setItem('seenBattleIds', JSON.stringify(seenIds)) } catch {}
   }, [seenIds])
+
+  // 퍼센트 바 채우기 애니메이션: voted가 되면 한 프레임 후 fill 트리거
+  useEffect(() => {
+    if (phase === 'voted') {
+      const id = requestAnimationFrame(() => setBarFilled(true))
+      return () => cancelAnimationFrame(id)
+    }
+    setBarFilled(false)
+  }, [phase])
+
+  // 투표 완료 1.5초 후 자동 다음 이동
+  useEffect(() => {
+    if (phase !== 'voted') return
+    autoNextTimerRef.current = setTimeout(() => handleNext(), 1500)
+    return () => {
+      if (autoNextTimerRef.current) clearTimeout(autoNextTimerRef.current)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase])
 
   // 백그라운드에서 다음 Better를 미리 로드
   async function fillPrefetchQueue() {
@@ -215,7 +236,7 @@ export function RandomBetterViewer({
       if (!isDemo) fillPrefetchQueue()
     } else {
       // 큐가 비어있으면 네트워크 로딩 (드문 케이스)
-      loadNext(categoryFilter, seenIdsRef.current)
+      loadNext(categoryRef.current, seenIdsRef.current)
     }
   }
 
@@ -346,6 +367,7 @@ export function RandomBetterViewer({
         @keyframes _slideUp      { from { transform: translateY(28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
         @keyframes _slideDown    { from { transform: translateY(-28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
         @keyframes _slideUpModal { from { transform: translateY(100%) } to { transform: translateY(0) } }
+        @keyframes _checkPop     { 0% { transform: translate(-50%,-50%) scale(0); opacity:0 } 65% { transform: translate(-50%,-50%) scale(1.3); opacity:1 } 100% { transform: translate(-50%,-50%) scale(1); opacity:1 } }
         .better-cat-filter::-webkit-scrollbar { display: none; }
       `}</style>
 
@@ -437,7 +459,9 @@ export function RandomBetterViewer({
                 overflow: 'hidden',
                 cursor: phase === 'voting' ? 'pointer' : 'default',
                 opacity: dimA ? 0.45 : 1,
-                transition: 'opacity 0.25s',
+                filter: !dimA && (phase === 'picked' || phase === 'submitting') && selectedChoice === 'A'
+                  ? 'brightness(1.18)' : undefined,
+                transition: 'opacity 0.25s, filter 0.25s',
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -496,15 +520,16 @@ export function RandomBetterViewer({
               {/* 선택됨 오버레이 */}
               {(phase === 'picked' || phase === 'submitting') && selectedChoice === 'A' && (
                 <>
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.28)', pointerEvents: 'none' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.22)', pointerEvents: 'none' }} />
                   <div style={{
-                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+                    position: 'absolute', top: '50%', left: '50%',
                     background: '#6366F1', borderRadius: '50%',
-                    width: 52, height: 52,
+                    width: 56, height: 56,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 4px 24px rgba(99,102,241,0.7)',
+                    boxShadow: '0 4px 28px rgba(99,102,241,0.75)',
+                    animation: '_checkPop 0.38s cubic-bezier(0.25,1,0.5,1) forwards',
                   }}>
-                    <Check size={26} color="white" strokeWidth={3} />
+                    <Check size={28} color="white" strokeWidth={3} />
                   </div>
                 </>
               )}
@@ -538,23 +563,69 @@ export function RandomBetterViewer({
               )}
             </div>
 
-            {/* ── VS 구분선 ── */}
+            {/* ── VS 구분선 / 결과 퍼센트 바 ── */}
             <div style={{
               position: 'absolute', top: '50%', left: 0, right: 0,
               transform: 'translateY(-50%)', zIndex: 5,
-              display: 'flex', alignItems: 'center',
               pointerEvents: 'none',
             }}>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.3)' }} />
-              <div style={{
-                width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-                background: 'rgba(0,0,0,0.75)',
-                backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                border: '1.5px solid rgba(255,255,255,0.32)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'white', fontWeight: 900, fontSize: '0.72rem', letterSpacing: '0.05em',
-              }}>VS</div>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.3)' }} />
+              {phase === 'voted' && voteResult ? (
+                /* 투표 결과 퍼센트 바 */
+                <div style={{ position: 'relative', height: 38, overflow: 'hidden' }}>
+                  {/* A 채우기 (왼쪽 → 중앙) */}
+                  <div style={{
+                    position: 'absolute', left: 0, top: 0, bottom: 0,
+                    width: barFilled ? `${pctA}%` : '0%',
+                    background: 'linear-gradient(to right, #4338CA, #6366F1)',
+                    transition: 'width 0.75s cubic-bezier(0.25,1,0.5,1)',
+                  }} />
+                  {/* B 채우기 (오른쪽 → 중앙) */}
+                  <div style={{
+                    position: 'absolute', right: 0, top: 0, bottom: 0,
+                    width: barFilled ? `${pctB}%` : '0%',
+                    background: 'linear-gradient(to left, #BE185D, #EC4899)',
+                    transition: 'width 0.75s cubic-bezier(0.25,1,0.5,1)',
+                  }} />
+                  {/* 미채워진 중앙 (애니메이션 중 빈 공간) */}
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} />
+                  {/* 라벨 */}
+                  <div style={{
+                    position: 'absolute', inset: 0, zIndex: 2,
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '0 14px',
+                  }}>
+                    <span style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', textShadow: '0 1px 6px rgba(0,0,0,0.8)', letterSpacing: '-0.02em' }}>
+                      A&nbsp;&nbsp;{pctA}%
+                    </span>
+                    <span style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', textShadow: '0 1px 6px rgba(0,0,0,0.8)', letterSpacing: '-0.02em' }}>
+                      {pctB}%&nbsp;&nbsp;B
+                    </span>
+                  </div>
+                  {/* 자동 이동 카운트다운 바 */}
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, background: 'rgba(255,255,255,0.15)', zIndex: 3 }}>
+                    <div style={{
+                      height: '100%',
+                      width: barFilled ? '0%' : '100%',
+                      background: 'rgba(255,255,255,0.55)',
+                      transition: barFilled ? 'width 1.4s linear' : 'none',
+                    }} />
+                  </div>
+                </div>
+              ) : (
+                /* 기본 VS 구분선 */
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.3)' }} />
+                  <div style={{
+                    width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+                    background: 'rgba(0,0,0,0.75)',
+                    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                    border: '1.5px solid rgba(255,255,255,0.32)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'white', fontWeight: 900, fontSize: '0.72rem', letterSpacing: '0.05em',
+                  }}>VS</div>
+                  <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.3)' }} />
+                </div>
+              )}
             </div>
 
             {/* 사진 B (하단 50%) */}
@@ -565,7 +636,9 @@ export function RandomBetterViewer({
                 overflow: 'hidden',
                 cursor: phase === 'voting' ? 'pointer' : 'default',
                 opacity: dimB ? 0.45 : 1,
-                transition: 'opacity 0.25s',
+                filter: !dimB && (phase === 'picked' || phase === 'submitting') && selectedChoice === 'B'
+                  ? 'brightness(1.18)' : undefined,
+                transition: 'opacity 0.25s, filter 0.25s',
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -624,15 +697,16 @@ export function RandomBetterViewer({
               {/* 선택됨 오버레이 */}
               {(phase === 'picked' || phase === 'submitting') && selectedChoice === 'B' && (
                 <>
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.28)', pointerEvents: 'none' }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.22)', pointerEvents: 'none' }} />
                   <div style={{
-                    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
+                    position: 'absolute', top: '50%', left: '50%',
                     background: '#6366F1', borderRadius: '50%',
-                    width: 52, height: 52,
+                    width: 56, height: 56,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 4px 24px rgba(99,102,241,0.7)',
+                    boxShadow: '0 4px 28px rgba(99,102,241,0.75)',
+                    animation: '_checkPop 0.38s cubic-bezier(0.25,1,0.5,1) forwards',
                   }}>
-                    <Check size={26} color="white" strokeWidth={3} />
+                    <Check size={28} color="white" strokeWidth={3} />
                   </div>
                 </>
               )}
