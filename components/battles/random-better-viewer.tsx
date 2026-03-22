@@ -656,17 +656,21 @@ function PhotoCard({
         {/* 상세보기 버튼 (voting 단계) */}
         {canClick && (
           <button
+            onTouchEnd={e => { e.stopPropagation(); e.preventDefault(); onDetail() }}
             onClick={e => { e.stopPropagation(); onDetail() }}
             style={{
-              position: 'absolute', top: 10, right: 10, zIndex: 4,
-              background: 'rgba(0,0,0,0.52)',
+              position: 'absolute', top: 8, right: 8, zIndex: 10,
+              background: 'rgba(0,0,0,0.55)',
               backdropFilter: 'blur(8px)',
               WebkitBackdropFilter: 'blur(8px)',
               color: 'white',
-              fontSize: '0.62rem', fontWeight: 700,
-              padding: '3px 9px', borderRadius: 999,
-              border: '1px solid rgba(255,255,255,0.2)',
-              cursor: 'pointer', lineHeight: 1.6,
+              fontSize: '0.65rem', fontWeight: 700,
+              padding: '5px 10px', borderRadius: 999,
+              border: '1px solid rgba(255,255,255,0.25)',
+              cursor: 'pointer', lineHeight: 1.4,
+              minWidth: 48, minHeight: 28,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              pointerEvents: 'auto',
             }}
           >
             상세보기
