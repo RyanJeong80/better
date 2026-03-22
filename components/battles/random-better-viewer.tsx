@@ -6,7 +6,7 @@ import { ArrowLeft, Check, Heart, ChevronRight, ChevronUp, Share2, X } from 'luc
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
-import { CATEGORY_FILTERS, CATEGORY_MAP } from '@/lib/constants/categories'
+import { CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
 type Phase = 'voting' | 'picked' | 'submitting' | 'voted' | 'loading' | 'empty'
@@ -18,6 +18,17 @@ interface VoteResult {
   votesB: number
   total: number
 }
+
+const SIDEBAR_FILTERS: { id: CategoryFilter; emoji: string; label: string }[] = [
+  { id: 'all',        emoji: '👀', label: '전체' },
+  { id: 'fashion',    emoji: '👗', label: '패션' },
+  { id: 'appearance', emoji: '💄', label: '외모' },
+  { id: 'love',       emoji: '💕', label: '연애' },
+  { id: 'shopping',   emoji: '💰', label: '쇼핑' },
+  { id: 'food',       emoji: '🍽️', label: '맛집' },
+  { id: 'it',         emoji: '📱', label: 'IT' },
+  { id: 'decision',   emoji: '🤔', label: '결정' },
+]
 
 const CAT_BADGE: Record<BetterCategory, { bg: string; text: string }> = {
   fashion:    { bg: '#EFF6FF', text: '#2563EB' },
@@ -389,6 +400,7 @@ export function RandomBetterViewer({
         @keyframes _slideUpModal { from { transform: translateY(100%) } to { transform: translateY(0) } }
         @keyframes _checkPop     { 0% { transform: translate(-50%,-50%) scale(0); opacity:0 } 65% { transform: translate(-50%,-50%) scale(1.3); opacity:1 } 100% { transform: translate(-50%,-50%) scale(1); opacity:1 } }
         .better-cat-filter::-webkit-scrollbar { display: none; }
+        .better-cat-sidebar::-webkit-scrollbar { display: none; }
       `}</style>
 
       {/* ── 제스처 힌트 오버레이 ── */}
@@ -781,9 +793,14 @@ export function RandomBetterViewer({
               )}
             </div>
 
-            {/* 배틀 제목 + 카테고리 배지 (A 사진 상단 오버레이) */}
+            {/* 배틀 제목 + 카테고리 배지 — A 사진 상단 중앙 오버레이 */}
             <div style={{
-              position: 'absolute', top: 44, left: 12, right: 76, zIndex: 8,
+              position: 'absolute', top: 0, left: 0, right: 0, zIndex: 8,
+              background: 'linear-gradient(to bottom, rgba(0,0,0,0.62) 0%, transparent 100%)',
+              paddingTop: 10, paddingBottom: 26,
+              paddingLeft: handleClose ? 52 : 64,
+              paddingRight: 76,
+              textAlign: 'center',
               pointerEvents: 'none',
             }}>
               {(() => {
@@ -822,7 +839,7 @@ export function RandomBetterViewer({
             </div>
           </div>
 
-          {/* ── 카테고리 필터 (일반 모드) / 뒤로가기 버튼 ── */}
+          {/* ── 좌측 카테고리 사이드바 (일반 모드) / 뒤로가기 버튼 (handleClose 모드) ── */}
           {handleClose ? (
             <button
               onClick={handleClose}
@@ -840,36 +857,48 @@ export function RandomBetterViewer({
             </button>
           ) : (
             <div
-              className="better-cat-filter"
+              className="better-cat-sidebar"
               style={{
-                position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30,
-                display: 'flex', overflowX: 'auto', gap: 6, padding: '8px 12px 10px',
+                position: 'absolute', top: 0, left: 0, bottom: 0,
+                width: 56, zIndex: 30,
+                background: 'rgba(0,0,0,0.42)',
+                backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+                overflowY: 'auto', overflowX: 'hidden',
                 scrollbarWidth: 'none',
-                background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%)',
-                WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],
+                touchAction: 'pan-y',
+                display: 'flex', flexDirection: 'column',
               }}
+              onTouchStart={e => e.stopPropagation()}
+              onTouchEnd={e => e.stopPropagation()}
             >
-              {CATEGORY_FILTERS.map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => handleCategoryChange(f.id)}
-                  style={{
-                    flexShrink: 0,
-                    fontSize: '0.7rem', fontWeight: 700,
-                    padding: '4px 10px', borderRadius: 999,
-                    border: categoryFilter === f.id ? 'none' : '1px solid rgba(255,255,255,0.28)',
-                    cursor: 'pointer',
-                    background: categoryFilter === f.id ? '#6366F1' : 'rgba(255,255,255,0.12)',
-                    backdropFilter: 'blur(8px)',
-                    WebkitBackdropFilter: 'blur(8px)',
-                    color: 'white',
-                    transition: 'all 0.18s',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {f.emoji} {f.label}
-                </button>
-              ))}
+              {SIDEBAR_FILTERS.map((f) => {
+                const isActive = categoryFilter === f.id
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => handleCategoryChange(f.id)}
+                    style={{
+                      width: '100%', flexShrink: 0,
+                      padding: '11px 0',
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                      background: isActive ? 'rgba(99,102,241,0.45)' : 'transparent',
+                      border: 'none',
+                      borderLeft: isActive ? '3px solid #6366F1' : '3px solid transparent',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <span style={{ fontSize: '1.25rem', lineHeight: 1 }}>{f.emoji}</span>
+                    <span style={{
+                      fontSize: '0.56rem', fontWeight: isActive ? 800 : 600,
+                      color: isActive ? 'white' : 'rgba(255,255,255,0.7)',
+                      lineHeight: 1,
+                    }}>
+                      {f.label}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
           )}
 
