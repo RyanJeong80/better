@@ -68,6 +68,14 @@ export function RandomBetterViewer({
   const swipeAxis = useRef<'none' | 'vertical' | 'horizontal'>('none')
   const [, startTransition] = useTransition()
 
+  // ── 프리로드 ──────────────────────────────────────────────────────────
+  const PREFETCH_SIZE = 3
+  const prefetchQueue = useRef<BattleForVoting[]>([])
+  const queuedIds = useRef<string[]>([])          // 큐에 있는 ID (중복 제외용)
+  const isPrefetching = useRef(false)
+  const seenIdsRef = useRef<string[]>(seenIds)    // seenIds 최신값 ref (async 클로저용)
+  const categoryRef = useRef<CategoryFilter>(initialCategory)
+
   useEffect(() => {
     try {
       if (!localStorage.getItem('betterHintDone')) {
@@ -87,6 +95,31 @@ export function RandomBetterViewer({
   useEffect(() => {
     try { sessionStorage.setItem('seenBattleIds', JSON.stringify(seenIds)) } catch {}
   }, [seenIds])
+
+  // 백그라운드에서 다음 Better를 미리 로드
+  async function fillPrefetchQueue() {
+    if (isPrefetching.current) return
+    if (prefetchQueue.current.length >= PREFETCH_SIZE) return
+    isPrefetching.current = true
+    try {
+      while (prefetchQueue.current.length < PREFETCH_SIZE) {
+        const cat = categoryRef.current !== 'all' ? categoryRef.current : undefined
+        const excludeIds = [...seenIdsRef.current, ...queuedIds.current]
+        const next = await getRandomBattle(excludeIds, cat)
+        if (!next) break
+        prefetchQueue.current.push(next)
+        queuedIds.current.push(next.id)
+      }
+    } finally {
+      isPrefetching.current = false
+    }
+  }
+
+  // 초기 마운트 시 프리로드 시작
+  useEffect(() => {
+    if (initialBattle && !isDemo) fillPrefetchQueue()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   function handlePickPhoto(choice: 'A' | 'B') {
     if (phase !== 'voting') return
@@ -140,8 +173,10 @@ export function RandomBetterViewer({
         setPhase('empty')
         return
       }
+      const newSeenIds = [...currentSeenIds, next.id]
+      seenIdsRef.current = newSeenIds
       setBattle(next)
-      setSeenIds(prev => [...prev, next.id])
+      setSeenIds(newSeenIds)
       setSelectedChoice(null)
       setReason('')
       setVoteResult(null)
@@ -151,12 +186,37 @@ export function RandomBetterViewer({
       setPhase('voting')
       setSlideDir('enter-up')
       setTimeout(() => setSlideDir('none'), 320)
+      if (!isDemo) fillPrefetchQueue()
     })
   }
 
   function handleNext() {
     if (battle) setHistoryStack(h => [...h.slice(-9), battle])
-    loadNext(categoryFilter, seenIds)
+
+    const prefetched = prefetchQueue.current.shift()
+    if (prefetched) {
+      // 큐에서 제거된 ID를 queuedIds에서도 제거
+      queuedIds.current = queuedIds.current.filter(id => id !== prefetched.id)
+      // seenIds ref를 즉시 갱신 (다음 프리로드가 정확한 excludeIds 사용)
+      const newSeenIds = [...seenIdsRef.current, prefetched.id]
+      seenIdsRef.current = newSeenIds
+      setSeenIds(newSeenIds)
+      setBattle(prefetched)
+      setSelectedChoice(null)
+      setReason('')
+      setVoteResult(null)
+      setError(null)
+      setLikeCount(prefetched.likeCount)
+      setIsLiked(prefetched.isLiked)
+      setPhase('voting')
+      setSlideDir('enter-up')
+      setTimeout(() => setSlideDir('none'), 320)
+      // 소비된 만큼 큐를 다시 채움
+      if (!isDemo) fillPrefetchQueue()
+    } else {
+      // 큐가 비어있으면 네트워크 로딩 (드문 케이스)
+      loadNext(categoryFilter, seenIdsRef.current)
+    }
   }
 
   function handlePrev() {
@@ -178,9 +238,15 @@ export function RandomBetterViewer({
 
   function handleCategoryChange(newCat: CategoryFilter) {
     if (newCat === categoryFilter) return
+    // 카테고리 변경: ref 즉시 동기화 + 큐 초기화
+    categoryRef.current = newCat
+    prefetchQueue.current = []
+    queuedIds.current = []
+    isPrefetching.current = false
     setCategoryFilter(newCat)
     setHistoryStack([])
     const freshSeenIds: string[] = []
+    seenIdsRef.current = freshSeenIds
     setSeenIds(freshSeenIds)
     loadNext(newCat, freshSeenIds)
   }
