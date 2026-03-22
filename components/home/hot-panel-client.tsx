@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
 import { Heart, Flame, ArrowUpDown } from 'lucide-react'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 import type { PanelHotEntry } from '@/app/api/panels/hot/route'
+import { BetterDetailModal } from '@/components/battles/better-detail-modal'
 
 const CAT_COLOR: Record<BetterCategory, { bg: string; text: string }> = {
   fashion:    { bg: '#DBEAFE', text: '#1D4ED8' },
@@ -72,6 +72,7 @@ export function HotPanelClient() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [sortOrder, setSortOrder] = useState<SortOrder>('popular')
+  const [selectedEntry, setSelectedEntry] = useState<PanelHotEntry | null>(null)
   const sentinelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -115,6 +116,13 @@ export function HotPanelClient() {
   if (status === 'loading') return <Skeleton />
 
   return (
+    <>
+    {selectedEntry && (
+      <BetterDetailModal
+        entry={selectedEntry}
+        onClose={() => setSelectedEntry(null)}
+      />
+    )}
     <div style={{ padding: '12px 12px 40px' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -200,10 +208,10 @@ export function HotPanelClient() {
             const rankStyle = RANK_STYLE[rank]
 
             return (
-              <Link
+              <div
                 key={entry.id}
-                href={`/battles/${entry.id}`}
-                style={{ display: 'block', textDecoration: 'none', color: 'inherit', marginBottom: 20 }}
+                onClick={() => setSelectedEntry(entry)}
+                style={{ display: 'block', marginBottom: 20, cursor: 'pointer' }}
               >
                 {/* 썸네일 */}
                 <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 12, overflow: 'hidden', background: '#000' }}>
@@ -316,7 +324,7 @@ export function HotPanelClient() {
                     </p>
                   </div>
                 </div>
-              </Link>
+              </div>
             )
           })}
           {/* 스크롤 sentinel + 로딩 인디케이터 */}
@@ -346,5 +354,6 @@ export function HotPanelClient() {
         </div>
       )}
     </div>
+    </>
   )
 }
