@@ -584,24 +584,12 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
                 style={{
                   width: 24, height: 24, borderRadius: '50%', ...btnBase,
                   background: color,
-                  border: textColor === color ? '3px solid #6366F1' : color === '#ffffff' ? '1.5px solid rgba(255,255,255,0.3)' : '1.5px solid transparent',
+                  border: textColor === color ? '3px solid #6366F1' : '1.5px solid rgba(255,255,255,0.4)',
                 }}
               />
             ))}
 
             <div style={{ width: 1, height: 20, background: 'rgba(255,255,255,0.15)' }} />
-
-            {/* 배경 토글 */}
-            <button
-              onClick={() => {
-                const nb = !hasBg
-                setHasBg(nb)
-                applyToSelected({ backgroundColor: nb ? 'rgba(0,0,0,0.55)' : '' })
-              }}
-              style={{ ...iconBtn(hasBg), padding: '5px 10px' }}
-            >
-              배경
-            </button>
 
             {/* 굵게 */}
             <button
