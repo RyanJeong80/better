@@ -1,25 +1,39 @@
-import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
+import { getBattleById, getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { createClient } from '@/lib/supabase/server'
 import { SwipeSections } from '@/components/layout/swipe-sections'
 import { RandomBetterViewer } from '@/components/battles/random-better-viewer'
 import { RankingPanelClient } from '@/components/home/ranking-panel-client'
 import { HotPanelClient } from '@/components/home/hot-panel-client'
 
-// ─── 랜덤 Better 패널 래퍼 (서버 → 클라이언트 컴포넌트에 initialBattle 전달) ──
-
-function BetterPanel({ initialBattle }: { initialBattle: BattleForVoting | null }) {
+function BetterPanel({
+  initialBattle,
+  showBack,
+}: {
+  initialBattle: BattleForVoting | null
+  showBack?: boolean
+}) {
   return (
     <div style={{ height: '100%' }}>
-      <RandomBetterViewer initialBattle={initialBattle} />
+      <RandomBetterViewer initialBattle={initialBattle} showBack={showBack} />
     </div>
   )
 }
 
-// ─── 홈 페이지 (SSR: random battle + isLoggedIn만, 나머지는 클라이언트 lazy 로딩) ──
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ id?: string }>
+}) {
+  const { id } = await searchParams
 
-export default async function HomePage() {
-  // getRandomBattle만 SSR — 사이드 패널은 클라이언트에서 API 호출
-  const initialBattle = await getRandomBattle([], undefined, { skipAuth: true }).catch(() => null)
+  // id 파라미터가 있으면 해당 Better를, 없으면 랜덤 Better 로드
+  let initialBattle: BattleForVoting | null = null
+  if (id) {
+    initialBattle = await getBattleById(id).catch(() => null)
+  }
+  if (!initialBattle) {
+    initialBattle = await getRandomBattle([], undefined, { skipAuth: true }).catch(() => null)
+  }
 
   let isLoggedIn = false
   try {
@@ -37,7 +51,7 @@ export default async function HomePage() {
     <SwipeSections
       isLoggedIn={isLoggedIn}
       rankingContent={<RankingPanelClient />}
-      betterContent={<BetterPanel initialBattle={initialBattle} />}
+      betterContent={<BetterPanel initialBattle={initialBattle} showBack={!!id} />}
       hotContent={<HotPanelClient />}
     />
   )

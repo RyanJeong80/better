@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import Link from 'next/link'
 import { Heart, Flame, ArrowUpDown } from 'lucide-react'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 import type { PanelHotEntry } from '@/app/api/panels/hot/route'
-import { RandomBetterViewer } from '@/components/battles/random-better-viewer'
 
 const CAT_COLOR: Record<BetterCategory, { bg: string; text: string }> = {
   fashion:    { bg: '#DBEAFE', text: '#1D4ED8' },
@@ -72,8 +72,6 @@ export function HotPanelClient() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [sortOrder, setSortOrder] = useState<SortOrder>('popular')
-  const [selectedEntry, setSelectedEntry] = useState<PanelHotEntry | null>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const sentinelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -117,32 +115,6 @@ export function HotPanelClient() {
   if (status === 'loading') return <Skeleton />
 
   return (
-    <>
-    {selectedEntry && (
-      <div style={{
-        position: 'fixed', inset: 0, zIndex: 300,
-        transform: isModalOpen ? 'translateY(0)' : 'translateY(100%)',
-        transition: 'transform 0.3s cubic-bezier(0.25, 1, 0.5, 1)',
-      }}>
-        <RandomBetterViewer
-          initialBattle={{
-            id: selectedEntry.id,
-            title: selectedEntry.title,
-            imageAUrl: selectedEntry.imageAUrl,
-            imageADescription: null,
-            imageBUrl: selectedEntry.imageBUrl,
-            imageBDescription: null,
-            likeCount: selectedEntry.likeCount,
-            isLiked: false,
-            category: selectedEntry.category,
-          }}
-          onClose={() => {
-            setIsModalOpen(false)
-            setTimeout(() => setSelectedEntry(null), 320)
-          }}
-        />
-      </div>
-    )}
     <div style={{ padding: '12px 12px 40px' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
@@ -228,13 +200,10 @@ export function HotPanelClient() {
             const rankStyle = RANK_STYLE[rank]
 
             return (
-              <div
+              <Link
                 key={entry.id}
-                onClick={() => {
-                  setSelectedEntry(entry)
-                  requestAnimationFrame(() => setIsModalOpen(true))
-                }}
-                style={{ display: 'block', marginBottom: 20, cursor: 'pointer' }}
+                href={`/?id=${entry.id}`}
+                style={{ display: 'block', textDecoration: 'none', color: 'inherit', marginBottom: 20 }}
               >
                 {/* 썸네일 */}
                 <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 12, overflow: 'hidden', background: '#000' }}>
@@ -347,7 +316,7 @@ export function HotPanelClient() {
                     </p>
                   </div>
                 </div>
-              </div>
+              </Link>
             )
           })}
           {/* 스크롤 sentinel + 로딩 인디케이터 */}
@@ -377,6 +346,5 @@ export function HotPanelClient() {
         </div>
       )}
     </div>
-    </>
   )
 }

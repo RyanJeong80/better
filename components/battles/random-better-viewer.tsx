@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, Check, Heart, ChevronRight, ChevronUp, Share2, X } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
@@ -33,12 +34,18 @@ export function RandomBetterViewer({
   initialCategory = 'all',
   isDemo = false,
   onClose,
+  showBack = false,
 }: {
   initialBattle: BattleForVoting | null
   initialCategory?: CategoryFilter
   isDemo?: boolean
   onClose?: () => void
+  showBack?: boolean
 }) {
+  const router = useRouter()
+  // onClose 우선, 없으면 showBack 시 router.back()
+  const handleClose = onClose ?? (showBack ? () => router.back() : undefined)
+
   const [battle, setBattle] = useState<BattleForVoting | null>(initialBattle)
   const [phase, setPhase] = useState<Phase>(initialBattle ? 'voting' : 'empty')
   const [selectedChoice, setSelectedChoice] = useState<'A' | 'B' | null>(null)
@@ -111,7 +118,7 @@ export function RandomBetterViewer({
 
   // 투표 완료 3초 후 자동 다음 이동 (모달 모드에서는 비활성화)
   useEffect(() => {
-    if (phase !== 'voted' || onClose) return
+    if (phase !== 'voted' || handleClose) return
     autoNextTimerRef.current = setTimeout(() => handleNext(), 3000)
     return () => {
       if (autoNextTimerRef.current) clearTimeout(autoNextTimerRef.current)
@@ -140,7 +147,7 @@ export function RandomBetterViewer({
 
   // 초기 마운트 시 프리로드 시작 (모달 모드에서는 스킵)
   useEffect(() => {
-    if (initialBattle && !isDemo && !onClose) fillPrefetchQueue()
+    if (initialBattle && !isDemo && !handleClose) fillPrefetchQueue()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -324,7 +331,7 @@ export function RandomBetterViewer({
   }
 
   const onTouchEnd = (e: React.TouchEvent) => {
-    if (onClose) return // 모달 모드: 스와이프 네비게이션 비활성화
+    if (handleClose) return // 뒤로가기 모드: 스와이프 네비게이션 비활성화
     const dx = e.changedTouches[0].clientX - touchStartX.current
     const dy = e.changedTouches[0].clientY - touchStartY.current
     const absDx = Math.abs(dx)
@@ -815,10 +822,10 @@ export function RandomBetterViewer({
             </div>
           </div>
 
-          {/* ── 카테고리 필터 (일반 모드) / 닫기 버튼 (모달 모드) ── */}
-          {onClose ? (
+          {/* ── 카테고리 필터 (일반 모드) / 뒤로가기 버튼 ── */}
+          {handleClose ? (
             <button
-              onClick={onClose}
+              onClick={handleClose}
               style={{
                 position: 'absolute', top: 8, left: 8, zIndex: 35,
                 width: 40, height: 40, borderRadius: '50%',
@@ -980,14 +987,14 @@ export function RandomBetterViewer({
 
           {/* ── 투표 완료: 이전 / 다음 네비게이션 ── */}
           {phase === 'voted' && (
-            onClose ? (
-              /* 모달 모드: 닫기 버튼만 */
+            handleClose ? (
+              /* 뒤로가기 모드: 목록으로 버튼만 */
               <div style={{
                 position: 'absolute', bottom: 16, left: 0, right: 0, zIndex: 35,
                 display: 'flex', justifyContent: 'center',
               }}>
                 <button
-                  onClick={onClose}
+                  onClick={handleClose}
                   style={{
                     display: 'flex', alignItems: 'center', gap: 6,
                     padding: '10px 28px', borderRadius: 12,
@@ -1042,7 +1049,7 @@ export function RandomBetterViewer({
           )}
 
           {/* ── voting: 스와이프 힌트 (일반 모드에서만) ── */}
-          {phase === 'voting' && !onClose && (
+          {phase === 'voting' && !handleClose && (
             <div style={{
               position: 'absolute', bottom: 12, left: 0, right: 0, zIndex: 25,
               textAlign: 'center', pointerEvents: 'none',
