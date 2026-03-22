@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { Check, Heart, ChevronRight, ChevronUp, Share2, X } from 'lucide-react'
+import { ArrowLeft, Check, Heart, ChevronRight, ChevronUp, Share2, X } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
@@ -32,10 +32,12 @@ export function RandomBetterViewer({
   initialBattle,
   initialCategory = 'all',
   isDemo = false,
+  onClose,
 }: {
   initialBattle: BattleForVoting | null
   initialCategory?: CategoryFilter
   isDemo?: boolean
+  onClose?: () => void
 }) {
   const [battle, setBattle] = useState<BattleForVoting | null>(initialBattle)
   const [phase, setPhase] = useState<Phase>(initialBattle ? 'voting' : 'empty')
@@ -107,9 +109,9 @@ export function RandomBetterViewer({
     setBarFilled(false)
   }, [phase])
 
-  // 투표 완료 1.5초 후 자동 다음 이동
+  // 투표 완료 3초 후 자동 다음 이동 (모달 모드에서는 비활성화)
   useEffect(() => {
-    if (phase !== 'voted') return
+    if (phase !== 'voted' || onClose) return
     autoNextTimerRef.current = setTimeout(() => handleNext(), 3000)
     return () => {
       if (autoNextTimerRef.current) clearTimeout(autoNextTimerRef.current)
@@ -136,9 +138,9 @@ export function RandomBetterViewer({
     }
   }
 
-  // 초기 마운트 시 프리로드 시작
+  // 초기 마운트 시 프리로드 시작 (모달 모드에서는 스킵)
   useEffect(() => {
-    if (initialBattle && !isDemo) fillPrefetchQueue()
+    if (initialBattle && !isDemo && !onClose) fillPrefetchQueue()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -322,6 +324,7 @@ export function RandomBetterViewer({
   }
 
   const onTouchEnd = (e: React.TouchEvent) => {
+    if (onClose) return // 모달 모드: 스와이프 네비게이션 비활성화
     const dx = e.changedTouches[0].clientX - touchStartX.current
     const dy = e.changedTouches[0].clientY - touchStartY.current
     const absDx = Math.abs(dx)
@@ -812,39 +815,56 @@ export function RandomBetterViewer({
             </div>
           </div>
 
-          {/* ── 카테고리 필터 (최상단 고정 오버레이) ── */}
-          <div
-            className="better-cat-filter"
-            style={{
-              position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30,
-              display: 'flex', overflowX: 'auto', gap: 6, padding: '8px 12px 10px',
-              scrollbarWidth: 'none',
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%)',
-              WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],
-            }}
-          >
-            {CATEGORY_FILTERS.map((f) => (
-              <button
-                key={f.id}
-                onClick={() => handleCategoryChange(f.id)}
-                style={{
-                  flexShrink: 0,
-                  fontSize: '0.7rem', fontWeight: 700,
-                  padding: '4px 10px', borderRadius: 999,
-                  border: categoryFilter === f.id ? 'none' : '1px solid rgba(255,255,255,0.28)',
-                  cursor: 'pointer',
-                  background: categoryFilter === f.id ? '#6366F1' : 'rgba(255,255,255,0.12)',
-                  backdropFilter: 'blur(8px)',
-                  WebkitBackdropFilter: 'blur(8px)',
-                  color: 'white',
-                  transition: 'all 0.18s',
-                  lineHeight: 1.5,
-                }}
-              >
-                {f.emoji} {f.label}
-              </button>
-            ))}
-          </div>
+          {/* ── 카테고리 필터 (일반 모드) / 닫기 버튼 (모달 모드) ── */}
+          {onClose ? (
+            <button
+              onClick={onClose}
+              style={{
+                position: 'absolute', top: 8, left: 8, zIndex: 35,
+                width: 40, height: 40, borderRadius: '50%',
+                background: 'rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer',
+              }}
+            >
+              <ArrowLeft size={20} color="white" />
+            </button>
+          ) : (
+            <div
+              className="better-cat-filter"
+              style={{
+                position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30,
+                display: 'flex', overflowX: 'auto', gap: 6, padding: '8px 12px 10px',
+                scrollbarWidth: 'none',
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%)',
+                WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],
+              }}
+            >
+              {CATEGORY_FILTERS.map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => handleCategoryChange(f.id)}
+                  style={{
+                    flexShrink: 0,
+                    fontSize: '0.7rem', fontWeight: 700,
+                    padding: '4px 10px', borderRadius: 999,
+                    border: categoryFilter === f.id ? 'none' : '1px solid rgba(255,255,255,0.28)',
+                    cursor: 'pointer',
+                    background: categoryFilter === f.id ? '#6366F1' : 'rgba(255,255,255,0.12)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    color: 'white',
+                    transition: 'all 0.18s',
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {f.emoji} {f.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* ── 우측 액션 버튼 (좋아요 + 공유, VS 선 기준 중앙 배치) ── */}
           <div style={{
@@ -960,47 +980,69 @@ export function RandomBetterViewer({
 
           {/* ── 투표 완료: 이전 / 다음 네비게이션 ── */}
           {phase === 'voted' && (
-            <div style={{
-              position: 'absolute', bottom: 16, left: 0, right: 0, zIndex: 35,
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '0 16px',
-            }}>
-              <button
-                onClick={handlePrev}
-                disabled={historyStack.length === 0}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '9px 16px', borderRadius: 12,
-                  background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255,255,255,0.25)',
-                  color: 'white', fontSize: '0.85rem', fontWeight: 700,
-                  cursor: 'pointer',
-                  opacity: historyStack.length === 0 ? 0.3 : 1,
-                }}
-              >
-                <ChevronUp size={16} /> 이전
-              </button>
+            onClose ? (
+              /* 모달 모드: 닫기 버튼만 */
+              <div style={{
+                position: 'absolute', bottom: 16, left: 0, right: 0, zIndex: 35,
+                display: 'flex', justifyContent: 'center',
+              }}>
+                <button
+                  onClick={onClose}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '10px 28px', borderRadius: 12,
+                    background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    color: 'white', fontSize: '0.88rem', fontWeight: 700, cursor: 'pointer',
+                  }}
+                >
+                  목록으로
+                </button>
+              </div>
+            ) : (
+              /* 일반 모드: 이전 / 다음 */
+              <div style={{
+                position: 'absolute', bottom: 16, left: 0, right: 0, zIndex: 35,
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '0 16px',
+              }}>
+                <button
+                  onClick={handlePrev}
+                  disabled={historyStack.length === 0}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '9px 16px', borderRadius: 12,
+                    background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+                    border: '1px solid rgba(255,255,255,0.25)',
+                    color: 'white', fontSize: '0.85rem', fontWeight: 700,
+                    cursor: 'pointer',
+                    opacity: historyStack.length === 0 ? 0.3 : 1,
+                  }}
+                >
+                  <ChevronUp size={16} /> 이전
+                </button>
 
-              <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem' }}>↑ 위로 스와이프</span>
+                <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem' }}>↑ 위로 스와이프</span>
 
-              <button
-                onClick={handleNext}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 6,
-                  padding: '9px 20px', borderRadius: 12, border: 'none',
-                  background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
-                  color: 'white', fontSize: '0.85rem', fontWeight: 700,
-                  cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(99,102,241,0.45)',
-                }}
-              >
-                다음 <ChevronRight size={16} />
-              </button>
-            </div>
+                <button
+                  onClick={handleNext}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 6,
+                    padding: '9px 20px', borderRadius: 12, border: 'none',
+                    background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
+                    color: 'white', fontSize: '0.85rem', fontWeight: 700,
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 16px rgba(99,102,241,0.45)',
+                  }}
+                >
+                  다음 <ChevronRight size={16} />
+                </button>
+              </div>
+            )
           )}
 
-          {/* ── voting: 스와이프 힌트 ── */}
-          {phase === 'voting' && (
+          {/* ── voting: 스와이프 힌트 (일반 모드에서만) ── */}
+          {phase === 'voting' && !onClose && (
             <div style={{
               position: 'absolute', bottom: 12, left: 0, right: 0, zIndex: 25,
               textAlign: 'center', pointerEvents: 'none',
