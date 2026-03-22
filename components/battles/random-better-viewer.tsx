@@ -767,75 +767,79 @@ function PhotoDetailModal({
     <div
       onClick={onClose}
       style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(0,0,0,0.72)',
-        display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'flex-end',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100dvh',
+        background: 'rgba(0,0,0,0.9)',
+        zIndex: 9999,
+        display: 'flex',
+        flexDirection: 'column',
+        animation: '_slideUpModal 0.32s cubic-bezier(0.25,1,0.5,1)',
       }}
     >
-      <div
-        onClick={e => e.stopPropagation()}
-        style={{
-          width: '100%', maxWidth: 520,
-          maxHeight: 'calc(100dvh - 48px)',
-          background: 'var(--color-card)',
-          borderRadius: '20px 20px 0 0',
-          display: 'flex', flexDirection: 'column',
-          overflow: 'hidden',
-          animation: '_slideUpModal 0.32s cubic-bezier(0.25,1,0.5,1)',
-        }}
-      >
-        {/* 상단 바 */}
-        <div style={{
-          flexShrink: 0,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '12px 14px 8px',
-        }}>
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--color-muted-foreground)' }}>
-            사진 {side}
-          </span>
-          <button
-            onClick={onClose}
-            style={{
-              width: 30, height: 30, borderRadius: '50%',
-              background: 'var(--color-muted)',
-              border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'var(--color-muted-foreground)',
-            }}
-          >
-            <X size={15} />
-          </button>
-        </div>
+      {/* 상단 바 — 56px 고정 */}
+      <div style={{
+        height: 56,
+        flexShrink: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        paddingRight: 8,
+      }}>
+        <button
+          onClick={onClose}
+          style={{
+            width: 44, height: 44,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'none', border: 'none', cursor: 'pointer',
+          }}
+        >
+          <X size={24} color="white" />
+        </button>
+      </div>
 
-        {/* 사진 — 최대 50vh로 제한해 상하 여백 확보 */}
+      {/* 사진 영역 — 나머지 전체 높이 */}
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: 'calc(100dvh - 56px)',
+        flexShrink: 0,
+        overflow: 'hidden',
+      }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={url}
           alt={`사진 ${side}`}
           style={{
-            flexShrink: 1,
             width: '100%',
-            maxHeight: '50vh',
+            height: '100%',
             objectFit: 'contain',
+            objectPosition: 'center',
             display: 'block',
-            background: 'var(--color-muted)',
           }}
         />
 
-        {/* 설명 */}
-        {description ? (
-          <p style={{
-            flexShrink: 0,
-            padding: '12px 18px 28px',
-            margin: 0,
-            fontSize: '0.85rem', lineHeight: 1.6,
-            color: 'var(--color-muted-foreground)',
+        {/* 설명 — 사진 아래 여백(letterbox)에 오버레이 */}
+        {description && (
+          <div style={{
+            position: 'absolute',
+            bottom: 0, left: 0, right: 0,
+            padding: '20px 20px 36px',
+            background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 100%)',
+            pointerEvents: 'none',
           }}>
-            {description}
-          </p>
-        ) : (
-          <div style={{ flexShrink: 0, height: 20 }} />
+            <p style={{
+              margin: 0,
+              color: 'white',
+              fontSize: '0.9rem',
+              lineHeight: 1.6,
+              textShadow: '0 1px 4px rgba(0,0,0,0.8)',
+            }}>
+              {description}
+            </p>
+          </div>
         )}
       </div>
     </div>
