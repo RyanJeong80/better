@@ -110,7 +110,7 @@ export function RandomBetterViewer({
   // 투표 완료 1.5초 후 자동 다음 이동
   useEffect(() => {
     if (phase !== 'voted') return
-    autoNextTimerRef.current = setTimeout(() => handleNext(), 1500)
+    autoNextTimerRef.current = setTimeout(() => handleNext(), 3000)
     return () => {
       if (autoNextTimerRef.current) clearTimeout(autoNextTimerRef.current)
     }
@@ -338,6 +338,8 @@ export function RandomBetterViewer({
   const pctA = voteResult && voteResult.total > 0
     ? Math.round((voteResult.votesA / voteResult.total) * 100) : 0
   const pctB = voteResult ? 100 - pctA : 0
+  const isAWinning = voteResult ? voteResult.votesA > voteResult.votesB : false
+  const isBWinning = voteResult ? voteResult.votesB > voteResult.votesA : false
 
   const slideStyle: React.CSSProperties =
     slideDir === 'enter-up'
@@ -348,6 +350,14 @@ export function RandomBetterViewer({
 
   const dimA = (phase === 'picked' || phase === 'submitting') && selectedChoice === 'B'
   const dimB = (phase === 'picked' || phase === 'submitting') && selectedChoice === 'A'
+
+  // voted 시 패배 쪽 어둡게, 승리 쪽 밝게
+  const opacityA = dimA ? 0.45
+    : phase === 'voted' && voteResult && !isAWinning ? 0.52
+    : 1
+  const opacityB = dimB ? 0.45
+    : phase === 'voted' && voteResult && !isBWinning ? 0.52
+    : 1
 
   return (
     <div
@@ -458,10 +468,11 @@ export function RandomBetterViewer({
                 position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
                 overflow: 'hidden',
                 cursor: phase === 'voting' ? 'pointer' : 'default',
-                opacity: dimA ? 0.45 : 1,
+                opacity: opacityA,
                 filter: !dimA && (phase === 'picked' || phase === 'submitting') && selectedChoice === 'A'
-                  ? 'brightness(1.18)' : undefined,
-                transition: 'opacity 0.25s, filter 0.25s',
+                  ? 'brightness(1.18)'
+                  : phase === 'voted' && isAWinning ? 'brightness(1.08)' : undefined,
+                transition: 'opacity 0.5s, filter 0.5s',
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -537,27 +548,38 @@ export function RandomBetterViewer({
               {/* 투표 결과 오버레이 */}
               {phase === 'voted' && voteResult && (
                 <>
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.42)', pointerEvents: 'none' }} />
-                  {selectedChoice === 'A' && (
-                    <div style={{
-                      position: 'absolute', top: 50, left: 12, zIndex: 4,
-                      background: '#6366F1', color: 'white',
-                      fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999,
-                    }}>내 선택</div>
-                  )}
-                  {voteResult.votesA > voteResult.votesB && (
-                    <div style={{
-                      position: 'absolute', top: 50, right: 8, zIndex: 4,
-                      background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)',
-                      color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999,
-                    }}>우세</div>
-                  )}
-                  <div style={{ position: 'absolute', bottom: 14, left: 0, right: 0, textAlign: 'center', zIndex: 4 }}>
-                    <p style={{ margin: 0, color: 'white', fontSize: '2.8rem', fontWeight: 900, lineHeight: 1, textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}>{pctA}%</p>
-                    <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.75rem' }}>{voteResult.votesA}명 선택</p>
-                    <div style={{ margin: '8px 24px 0', height: 3, borderRadius: 999, background: 'rgba(255,255,255,0.22)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pctA}%`, borderRadius: 999, background: 'linear-gradient(90deg,#818CF8,#A78BFA)', transition: 'width 0.7s ease' }} />
-                    </div>
+                  {/* 배경 오버레이: 이기는 쪽은 얇게, 지는 쪽은 두껍게 */}
+                  <div style={{
+                    position: 'absolute', inset: 0, pointerEvents: 'none',
+                    background: isAWinning ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.5)',
+                    transition: 'background 0.5s',
+                  }} />
+                  {/* 배지 */}
+                  <div style={{ position: 'absolute', top: 50, left: 12, right: 12, zIndex: 4, display: 'flex', gap: 6 }}>
+                    {selectedChoice === 'A' && (
+                      <span style={{ background: '#6366F1', color: 'white', fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999 }}>내 선택</span>
+                    )}
+                    {isAWinning && (
+                      <span style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999 }}>🏆 우세</span>
+                    )}
+                  </div>
+                  {/* 퍼센트 — 중앙 */}
+                  <div style={{
+                    position: 'absolute', inset: 0, zIndex: 4,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    opacity: barFilled ? 1 : 0,
+                    transition: 'opacity 0.4s ease',
+                  }}>
+                    <p style={{
+                      margin: 0, color: 'white', lineHeight: 1,
+                      fontSize: isAWinning ? '3.8rem' : '2.8rem',
+                      fontWeight: 900,
+                      textShadow: isAWinning ? '0 2px 20px rgba(99,102,241,0.6)' : '0 2px 8px rgba(0,0,0,0.6)',
+                      transition: 'font-size 0.4s',
+                    }}>{pctA}%</p>
+                    <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.78rem', fontWeight: 600 }}>
+                      {voteResult.votesA}명 선택
+                    </p>
                   </div>
                 </>
               )}
@@ -607,7 +629,7 @@ export function RandomBetterViewer({
                       height: '100%',
                       width: barFilled ? '0%' : '100%',
                       background: 'rgba(255,255,255,0.55)',
-                      transition: barFilled ? 'width 1.4s linear' : 'none',
+                      transition: barFilled ? 'width 2.9s linear' : 'none',
                     }} />
                   </div>
                 </div>
@@ -635,10 +657,11 @@ export function RandomBetterViewer({
                 position: 'absolute', top: '50%', left: 0, right: 0, bottom: 0,
                 overflow: 'hidden',
                 cursor: phase === 'voting' ? 'pointer' : 'default',
-                opacity: dimB ? 0.45 : 1,
+                opacity: opacityB,
                 filter: !dimB && (phase === 'picked' || phase === 'submitting') && selectedChoice === 'B'
-                  ? 'brightness(1.18)' : undefined,
-                transition: 'opacity 0.25s, filter 0.25s',
+                  ? 'brightness(1.18)'
+                  : phase === 'voted' && isBWinning ? 'brightness(1.08)' : undefined,
+                transition: 'opacity 0.5s, filter 0.5s',
               }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -714,27 +737,35 @@ export function RandomBetterViewer({
               {/* 투표 결과 오버레이 */}
               {phase === 'voted' && voteResult && (
                 <>
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.42)', pointerEvents: 'none' }} />
-                  {selectedChoice === 'B' && (
-                    <div style={{
-                      position: 'absolute', top: 8, left: 12, zIndex: 4,
-                      background: '#6366F1', color: 'white',
-                      fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999,
-                    }}>내 선택</div>
-                  )}
-                  {voteResult.votesB > voteResult.votesA && (
-                    <div style={{
-                      position: 'absolute', top: 8, right: 8, zIndex: 4,
-                      background: 'rgba(255,255,255,0.2)', backdropFilter: 'blur(8px)',
-                      color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999,
-                    }}>우세</div>
-                  )}
-                  <div style={{ position: 'absolute', bottom: 14, left: 0, right: 0, textAlign: 'center', zIndex: 4 }}>
-                    <p style={{ margin: 0, color: 'white', fontSize: '2.8rem', fontWeight: 900, lineHeight: 1, textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}>{pctB}%</p>
-                    <p style={{ margin: '4px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.75rem' }}>{voteResult.votesB}명 선택</p>
-                    <div style={{ margin: '8px 24px 0', height: 3, borderRadius: 999, background: 'rgba(255,255,255,0.22)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pctB}%`, borderRadius: 999, background: 'linear-gradient(90deg,#818CF8,#A78BFA)', transition: 'width 0.7s ease' }} />
-                    </div>
+                  <div style={{
+                    position: 'absolute', inset: 0, pointerEvents: 'none',
+                    background: isBWinning ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.5)',
+                    transition: 'background 0.5s',
+                  }} />
+                  <div style={{ position: 'absolute', top: 8, left: 12, right: 12, zIndex: 4, display: 'flex', gap: 6 }}>
+                    {selectedChoice === 'B' && (
+                      <span style={{ background: '#6366F1', color: 'white', fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999 }}>내 선택</span>
+                    )}
+                    {isBWinning && (
+                      <span style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999 }}>🏆 우세</span>
+                    )}
+                  </div>
+                  <div style={{
+                    position: 'absolute', inset: 0, zIndex: 4,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    opacity: barFilled ? 1 : 0,
+                    transition: 'opacity 0.4s ease',
+                  }}>
+                    <p style={{
+                      margin: 0, color: 'white', lineHeight: 1,
+                      fontSize: isBWinning ? '3.8rem' : '2.8rem',
+                      fontWeight: 900,
+                      textShadow: isBWinning ? '0 2px 20px rgba(99,102,241,0.6)' : '0 2px 8px rgba(0,0,0,0.6)',
+                      transition: 'font-size 0.4s',
+                    }}>{pctB}%</p>
+                    <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.78rem', fontWeight: 600 }}>
+                      {voteResult.votesB}명 선택
+                    </p>
                   </div>
                 </>
               )}
