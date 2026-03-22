@@ -7,7 +7,12 @@ import { createClient } from '@/lib/supabase/client'
 import { saveBattle } from '@/actions/battles'
 import { CATEGORIES, CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory } from '@/lib/constants/categories'
-import { ImageEditor } from '@/components/battles/image-editor'
+import dynamic from 'next/dynamic'
+
+const ImageEditor = dynamic(
+  () => import('@/components/battles/image-editor').then(m => ({ default: m.ImageEditor })),
+  { ssr: false },
+)
 
 const MAX_DESC = 100
 const MAX_FILE_MB = 5
