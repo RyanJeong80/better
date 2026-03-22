@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 import Link from 'next/link'
 
 const SECTION_LABELS = ['랭킹', 'Better', 'Hot']
@@ -10,22 +10,16 @@ export function SwipeSections({
   betterContent,
   hotContent,
   isLoggedIn,
-  targetPanel,
+  active,
+  onActiveChange,
 }: {
   rankingContent: React.ReactNode
   betterContent: React.ReactNode
   hotContent: React.ReactNode
   isLoggedIn: boolean
-  targetPanel?: number
+  active: number
+  onActiveChange: (v: number) => void
 }) {
-  const [active, setActive] = useState(1) // 0=랭킹, 1=랜덤Better, 2=Top100
-
-  // targetPanel prop이 바뀌면 (예: /?id=X 로 이동) 해당 패널로 즉시 전환
-  useEffect(() => {
-    if (targetPanel !== undefined) {
-      setActive(targetPanel)
-    }
-  }, [targetPanel])
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
 
@@ -44,10 +38,9 @@ export function SwipeSections({
   const onTouchEnd = (e: React.TouchEvent) => {
     const dx = e.changedTouches[0].clientX - touchStartX.current
     const dy = e.changedTouches[0].clientY - touchStartY.current
-    // 수평 이동이 수직보다 크고, 50px 이상일 때만 스와이프
     if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return
-    if (dx < 0 && active < 2) setActive(v => v + 1)
-    if (dx > 0 && active > 0) setActive(v => v - 1)
+    if (dx < 0 && active < 2) onActiveChange(active + 1)
+    if (dx > 0 && active > 0) onActiveChange(active - 1)
   }
 
   const panels = [rankingContent, betterContent, hotContent]
@@ -96,7 +89,7 @@ export function SwipeSections({
           {panels.map((_, i) => (
             <button
               key={i}
-              onClick={() => setActive(i)}
+              onClick={() => onActiveChange(i)}
               aria-label={SECTION_LABELS[i]}
               style={{
                 width: active === i ? 20 : 7,
@@ -153,11 +146,9 @@ export function SwipeSections({
                 height: '100%',
                 overflowY: i === 1 ? 'hidden' : 'auto',
                 overflowX: 'hidden',
-                // iOS 모멘텀 스크롤
                 WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],
               }}
             >
-              {/* 패딩은 각 패널 콘텐츠에서 직접 처리 */}
               {content}
             </div>
           ))}

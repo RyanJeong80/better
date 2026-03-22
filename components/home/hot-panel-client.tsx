@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import Link from 'next/link'
 import { Heart, Flame, ArrowUpDown } from 'lucide-react'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
@@ -66,7 +65,11 @@ function Skeleton() {
 
 const PAGE_SIZE = 10
 
-export function HotPanelClient() {
+export function HotPanelClient({
+  onSelectBattle,
+}: {
+  onSelectBattle?: (entry: PanelHotEntry) => void
+}) {
   const [entries, setEntries] = useState<PanelHotEntry[]>([])
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -200,10 +203,10 @@ export function HotPanelClient() {
             const rankStyle = RANK_STYLE[rank]
 
             return (
-              <Link
+              <div
                 key={entry.id}
-                href={`/?id=${entry.id}`}
-                style={{ display: 'block', textDecoration: 'none', color: 'inherit', marginBottom: 20 }}
+                onClick={() => onSelectBattle?.(entry)}
+                style={{ display: 'block', marginBottom: 20, cursor: 'pointer' }}
               >
                 {/* 썸네일 */}
                 <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 12, overflow: 'hidden', background: '#000' }}>
@@ -316,7 +319,7 @@ export function HotPanelClient() {
                     </p>
                   </div>
                 </div>
-              </Link>
+              </div>
             )
           })}
           {/* 스크롤 sentinel + 로딩 인디케이터 */}
