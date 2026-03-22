@@ -55,6 +55,8 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
   const [textColor, setTextColor] = useState('#ffffff')
   const [hasBg, setHasBg]     = useState(false)
   const [isExporting, setIsExporting] = useState(false)
+  const [textInputShown, setTextInputShown] = useState(false)
+  const [textInputValue, setTextInputValue] = useState('')
 
   const aspectRef = useRef<AspectKey>('3:4')
   aspectRef.current = aspect
@@ -258,11 +260,12 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
   }
 
   // ── 텍스트 추가 ────────────────────────────────────────────────
-  async function addText() {
+  // 모바일에서 IText 직접 편집 시 키보드가 안 뜨는 문제 → 네이티브 입력창 경유
+  async function placeText(value: string) {
     const { IText } = await getFabric()
     const canvas = fc.current
-    if (!canvas) return
-    const text = new IText('텍스트 입력', {
+    if (!canvas || !value.trim()) return
+    const text = new IText(value.trim(), {
       left: canvas.width / 2,
       top:  canvas.height / 2,
       originX: 'center',
@@ -274,13 +277,11 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
       backgroundColor: hasBg ? 'rgba(0,0,0,0.55)' : '',
       selectable: true,
       evented: true,
-      editable: true,
+      editable: false,
     })
     canvas.add(text)
     canvas.setActiveObject(text)
     canvas.requestRenderAll()
-    // 더블탭으로 편집 모드 진입
-    setTimeout(() => text.enterEditing?.(), 100)
   }
 
   // ── 90° 회전 ───────────────────────────────────────────────────
@@ -479,7 +480,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
           </div>
 
           <button
-            onClick={addText}
+            onClick={() => { setTextInputValue(''); setTextInputShown(true) }}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
               padding: '9px 0', borderRadius: 12,
@@ -536,6 +537,52 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
           </button>
         </div>
       </div>
+
+      {/* ── 텍스트 입력 오버레이 (네이티브 키보드 보장) ── */}
+      {textInputShown && (
+        <div
+          style={{ position: 'absolute', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'flex-end' }}
+          onClick={() => setTextInputShown(false)}
+        >
+          <div
+            style={{ width: '100%', background: '#1c1c1e', borderRadius: '18px 18px 0 0', padding: '20px 16px 32px' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p style={{ color: 'white', fontWeight: 700, fontSize: '0.95rem', marginBottom: 12 }}>텍스트 입력</p>
+            <textarea
+              autoFocus
+              value={textInputValue}
+              onChange={(e) => setTextInputValue(e.target.value)}
+              placeholder="입력할 텍스트를 작성하세요"
+              rows={3}
+              style={{
+                width: '100%', background: '#2c2c2e', color: 'white',
+                border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12,
+                padding: '12px 14px', fontSize: '1rem', resize: 'none',
+                outline: 'none', boxSizing: 'border-box',
+              }}
+            />
+            <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+              <button
+                onClick={() => setTextInputShown(false)}
+                style={{ flex: 1, padding: '13px 0', borderRadius: 12, background: 'rgba(255,255,255,0.1)', color: 'white', border: 'none', fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }}
+              >
+                취소
+              </button>
+              <button
+                onClick={async () => {
+                  await placeText(textInputValue)
+                  setTextInputShown(false)
+                  setTextInputValue('')
+                }}
+                style={{ flex: 2, padding: '13px 0', borderRadius: 12, background: '#6366F1', color: 'white', border: 'none', fontWeight: 700, fontSize: '0.9rem', cursor: 'pointer' }}
+              >
+                추가
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
