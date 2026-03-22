@@ -11,6 +11,7 @@ export type PanelHotEntry = {
   imageBUrl: string
   category: BetterCategory
   likeCount: number
+  createdAt: string
 }
 
 const getCachedHot = unstable_cache(
@@ -22,6 +23,7 @@ const getCachedHot = unstable_cache(
         imageAUrl: betters.imageAUrl,
         imageBUrl: betters.imageBUrl,
         category: betters.category,
+        createdAt: betters.createdAt,
       }).from(betters),
       db.select({ betterId: likes.betterId }).from(likes),
     ])
@@ -32,7 +34,7 @@ const getCachedHot = unstable_cache(
     }
 
     return allBetters
-      .map(b => ({ ...b, likeCount: likeCountMap.get(b.id) ?? 0 }))
+      .map(b => ({ ...b, createdAt: b.createdAt instanceof Date ? b.createdAt.toISOString() : String(b.createdAt), likeCount: likeCountMap.get(b.id) ?? 0 }))
       .filter(b => b.likeCount > 0)
       .sort((a, b) => b.likeCount - a.likeCount)
       .slice(0, 50)
