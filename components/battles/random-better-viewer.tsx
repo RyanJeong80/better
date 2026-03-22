@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { ChevronRight, Check, Heart, ChevronUp, Share2 } from 'lucide-react'
+import { ChevronRight, Check, Heart, ChevronUp, Share2, X } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
@@ -10,6 +10,7 @@ import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
 type Phase = 'voting' | 'picked' | 'submitting' | 'voted' | 'loading' | 'empty'
 type SlideDir = 'none' | 'enter-up' | 'enter-down'
+type DetailPhoto = { url: string; description: string | null; side: 'A' | 'B' }
 
 interface VoteResult {
   votesA: number
@@ -57,6 +58,26 @@ export function RandomBetterViewer({
   const [likeCount, setLikeCount] = useState(initialBattle?.likeCount ?? 0)
   const [isLiked, setIsLiked] = useState(initialBattle?.isLiked ?? false)
   const [likePending, setLikePending] = useState(false)
+
+  // ── 제스처 힌트 ────────────────────────────────────────────────────
+  const [showHint, setShowHint] = useState(false)
+  const [detailPhoto, setDetailPhoto] = useState<DetailPhoto | null>(null)
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem('betterHintDone')) {
+        setShowHint(true)
+        const t = setTimeout(dismissHint, 3000)
+        return () => clearTimeout(t)
+      }
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  function dismissHint() {
+    setShowHint(false)
+    try { localStorage.setItem('betterHintDone', '1') } catch {}
+  }
 
   // ── 세로 스와이프를 위한 히스토리 ──────────────────────────────────
   const [historyStack, setHistoryStack] = useState<BattleForVoting[]>([])
@@ -265,9 +286,62 @@ export function RandomBetterViewer({
   return (
     <div className="space-y-3">
       <style>{`
-        @keyframes _slideUp   { from { transform: translateY(28px); opacity:0 } to { transform: translateY(0); opacity:1 } }
-        @keyframes _slideDown { from { transform: translateY(-28px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+        @keyframes _slideUp      { from { transform: translateY(28px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+        @keyframes _slideDown    { from { transform: translateY(-28px); opacity:0 } to { transform: translateY(0); opacity:1 } }
+        @keyframes _slideUpModal { from { transform: translateY(100%) } to { transform: translateY(0) } }
       `}</style>
+
+      {/* ── 제스처 힌트 오버레이 ── */}
+      {showHint && (
+        <div
+          onClick={dismissHint}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 9998,
+            background: 'rgba(0,0,0,0.72)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <div style={{
+            background: 'rgba(255,255,255,0.1)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
+            borderRadius: 22,
+            padding: '28px 32px',
+            border: '1px solid rgba(255,255,255,0.18)',
+            maxWidth: 300,
+            textAlign: 'center',
+          }}>
+            <p style={{ color: 'white', fontWeight: 800, marginBottom: 20, fontSize: '1.05rem', letterSpacing: '-0.01em' }}>
+              사용 방법
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {([
+                { icon: '↕️', text: '위아래 스와이프 → 다음 Better' },
+                { icon: '↔️', text: '좌우 스와이프 → Top100 / 랭킹' },
+                { icon: '👆', text: '사진 탭 → 투표  |  상세보기 → 크게 보기' },
+              ] as const).map(({ icon, text }) => (
+                <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' }}>
+                  <span style={{ fontSize: '1.3rem', flexShrink: 0 }}>{icon}</span>
+                  <span style={{ color: 'rgba(255,255,255,0.88)', fontSize: '0.82rem', lineHeight: 1.45 }}>{text}</span>
+                </div>
+              ))}
+            </div>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem', marginTop: 22 }}>탭하면 닫힙니다</p>
+          </div>
+        </div>
+      )}
+
+      {/* ── 사진 상세보기 모달 ── */}
+      {detailPhoto && (
+        <PhotoDetailModal
+          url={detailPhoto.url}
+          description={detailPhoto.description}
+          side={detailPhoto.side}
+          canVote={phase === 'voting'}
+          onClose={() => setDetailPhoto(null)}
+          onVote={() => { setDetailPhoto(null); handlePickPhoto(detailPhoto.side) }}
+        />
+      )}
 
       {/* 카테고리 필터 탭 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
@@ -345,6 +419,7 @@ export function RandomBetterViewer({
                   votes={voteResult?.votesA ?? 0}
                   isWinner={(voteResult?.votesA ?? 0) > (voteResult?.votesB ?? 0)}
                   onClick={() => handlePickPhoto('A')}
+                  onDetail={() => setDetailPhoto({ url: battle.imageAUrl, description: battle.imageADescription, side: 'A' })}
                 />
                 <PhotoCard
                   imageUrl={battle.imageBUrl}
@@ -356,6 +431,7 @@ export function RandomBetterViewer({
                   votes={voteResult?.votesB ?? 0}
                   isWinner={(voteResult?.votesB ?? 0) > (voteResult?.votesA ?? 0)}
                   onClick={() => handlePickPhoto('B')}
+                  onDetail={() => setDetailPhoto({ url: battle.imageBUrl, description: battle.imageBDescription, side: 'B' })}
                 />
               </div>
 
@@ -513,6 +589,7 @@ function PhotoCard({
   votes,
   isWinner,
   onClick,
+  onDetail,
 }: {
   imageUrl: string
   description: string | null
@@ -523,6 +600,7 @@ function PhotoCard({
   votes: number
   isWinner: boolean
   onClick: () => void
+  onDetail: () => void
 }) {
   const isSelected = selectedChoice === side
   const isRejected = selectedChoice !== null && !isSelected
@@ -575,6 +653,26 @@ function PhotoCard({
           }}>
             {side}
           </div>
+        )}
+
+        {/* 상세보기 버튼 (voting 단계) */}
+        {canClick && (
+          <button
+            onClick={e => { e.stopPropagation(); onDetail() }}
+            style={{
+              position: 'absolute', top: 10, right: 10, zIndex: 4,
+              background: 'rgba(0,0,0,0.52)',
+              backdropFilter: 'blur(8px)',
+              WebkitBackdropFilter: 'blur(8px)',
+              color: 'white',
+              fontSize: '0.62rem', fontWeight: 700,
+              padding: '3px 9px', borderRadius: 999,
+              border: '1px solid rgba(255,255,255,0.2)',
+              cursor: 'pointer', lineHeight: 1.6,
+            }}
+          >
+            상세보기
+          </button>
         )}
 
         {/* 설명 텍스트 오버레이 */}
@@ -653,6 +751,106 @@ function PhotoCard({
         )}
       </div>
 
+    </div>
+  )
+}
+
+// ─── PhotoDetailModal ────────────────────────────────────────────────────────
+
+function PhotoDetailModal({
+  url, description, side, canVote, onClose, onVote,
+}: {
+  url: string
+  description: string | null
+  side: 'A' | 'B'
+  canVote: boolean
+  onClose: () => void
+  onVote: () => void
+}) {
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'rgba(0,0,0,0.82)',
+        display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'flex-end',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          width: '100%', maxWidth: 520,
+          background: 'var(--color-card)',
+          borderRadius: '24px 24px 0 0',
+          overflow: 'hidden',
+          animation: '_slideUpModal 0.32s cubic-bezier(0.25,1,0.5,1)',
+        }}
+      >
+        {/* 상단 바 */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '14px 16px 10px',
+        }}>
+          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--color-foreground)' }}>
+            사진 {side}
+          </span>
+          <button
+            onClick={onClose}
+            style={{
+              width: 32, height: 32, borderRadius: '50%',
+              background: 'var(--color-muted)',
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--color-muted-foreground)',
+            }}
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* 사진 */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={url}
+          alt={`사진 ${side}`}
+          style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block' }}
+        />
+
+        {/* 설명 */}
+        {description ? (
+          <p style={{
+            padding: '14px 18px',
+            fontSize: '0.875rem', lineHeight: 1.6,
+            color: 'var(--color-muted-foreground)',
+            margin: 0,
+          }}>
+            {description}
+          </p>
+        ) : (
+          <div style={{ height: 12 }} />
+        )}
+
+        {/* 투표 버튼 */}
+        {canVote && (
+          <div style={{ padding: `${description ? 4 : 8}px 16px 36px` }}>
+            <button
+              onClick={onVote}
+              style={{
+                width: '100%', padding: '14px',
+                borderRadius: 16, border: 'none', cursor: 'pointer',
+                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                color: 'white', fontSize: '0.95rem', fontWeight: 800,
+                boxShadow: '0 4px 16px rgba(99,102,241,0.35)',
+                transition: 'opacity 0.15s',
+              }}
+            >
+              이게 Better 👍
+            </button>
+          </div>
+        )}
+        {!canVote && <div style={{ height: 24 }} />}
+      </div>
     </div>
   )
 }
