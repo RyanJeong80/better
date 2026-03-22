@@ -777,14 +777,17 @@ function PhotoDetailModal({
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%', maxWidth: 520,
+          maxHeight: 'calc(100dvh - 48px)',
           background: 'var(--color-card)',
           borderRadius: '20px 20px 0 0',
+          display: 'flex', flexDirection: 'column',
           overflow: 'hidden',
           animation: '_slideUpModal 0.32s cubic-bezier(0.25,1,0.5,1)',
         }}
       >
         {/* 상단 바 */}
         <div style={{
+          flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '12px 14px 8px',
         }}>
@@ -805,24 +808,26 @@ function PhotoDetailModal({
           </button>
         </div>
 
-        {/* 사진 — 화면 너비의 75% 정사각형으로 제한 */}
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '0 16px' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={url}
-            alt={`사진 ${side}`}
-            style={{
-              width: '100%', maxWidth: 340,
-              aspectRatio: '1', objectFit: 'cover',
-              borderRadius: 12, display: 'block',
-            }}
-          />
-        </div>
+        {/* 사진 — 최대 50vh로 제한해 상하 여백 확보 */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={url}
+          alt={`사진 ${side}`}
+          style={{
+            flexShrink: 1,
+            width: '100%',
+            maxHeight: '50vh',
+            objectFit: 'contain',
+            display: 'block',
+            background: 'var(--color-muted)',
+          }}
+        />
 
         {/* 설명 */}
         {description ? (
           <p style={{
-            padding: '12px 20px 28px',
+            flexShrink: 0,
+            padding: '12px 18px 28px',
             margin: 0,
             fontSize: '0.85rem', lineHeight: 1.6,
             color: 'var(--color-muted-foreground)',
@@ -830,7 +835,7 @@ function PhotoDetailModal({
             {description}
           </p>
         ) : (
-          <div style={{ height: 24 }} />
+          <div style={{ flexShrink: 0, height: 20 }} />
         )}
       </div>
     </div>
