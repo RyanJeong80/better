@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { X, Check, Crop, Type, RotateCw, Plus, Trash2, Bold, Italic, Undo2 } from 'lucide-react'
+import { X, Check, Crop, Type, RotateCw, Plus, Bold, Italic, Undo2 } from 'lucide-react'
 
 type Mode = 'crop' | 'text'
 type AspectKey = '3:4' | '1:1' | 'free'
@@ -63,8 +63,9 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
   const [textInputValue, setTextInputValue] = useState('')
   const [editingTextObj, setEditingTextObj] = useState<any>(null)
 
-  // 선택된 텍스트 객체
+  // 선택된 텍스트 객체 + X 버튼 위치
   const [selectedTextObj, setSelectedTextObj] = useState<any>(null)
+  const [deleteBtnPos, setDeleteBtnPos] = useState<{ x: number; y: number } | null>(null)
 
   const aspectRef = useRef<AspectKey>('3:4')
   aspectRef.current = aspect
@@ -176,7 +177,11 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
       cropRect.on('scaling', refresh)
       updateOverlay(fabricCanvas, cropRect, overlays)
 
-      // ── 텍스트 객체 선택 시 패널 동기화 ──────────────────────
+      // ── 텍스트 객체 선택 시 패널 동기화 + X 버튼 위치 계산 ──
+      const calcDeletePos = (obj: any) => {
+        const rect = obj.getBoundingRect()
+        setDeleteBtnPos({ x: rect.left + rect.width, y: rect.top })
+      }
       const syncSelected = (obj: any) => {
         if (obj?.type === 'i-text') {
           setSelectedTextObj(obj)
@@ -185,13 +190,18 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
           setHasBg(!!obj.backgroundColor)
           setIsBold(obj.fontWeight === '700' || obj.fontWeight === 'bold')
           setIsItalic(obj.fontStyle === 'italic')
+          calcDeletePos(obj)
         } else {
           setSelectedTextObj(null)
+          setDeleteBtnPos(null)
         }
       }
       fabricCanvas.on('selection:created', (e: any) => syncSelected(e.selected?.[0]))
       fabricCanvas.on('selection:updated', (e: any) => syncSelected(e.selected?.[0]))
-      fabricCanvas.on('selection:cleared', () => setSelectedTextObj(null))
+      fabricCanvas.on('selection:cleared', () => { setSelectedTextObj(null); setDeleteBtnPos(null) })
+      // 이동/크기 변경 시 X 버튼 위치 실시간 업데이트
+      fabricCanvas.on('object:moving',  (e: any) => { if (e.target?.type === 'i-text') calcDeletePos(e.target) })
+      fabricCanvas.on('object:scaling', (e: any) => { if (e.target?.type === 'i-text') calcDeletePos(e.target) })
 
       // ── 더블탭/더블클릭으로 텍스트 편집 ─────────────────────
       fabricCanvas.on('mouse:dblclick', (e: any) => {
@@ -279,6 +289,7 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
     canvas.discardActiveObject()
     canvas.requestRenderAll()
     setSelectedTextObj(null)
+    setDeleteBtnPos(null)
     textHistoryRef.current = textHistoryRef.current.filter((t: any) => t !== obj)
   }
 
@@ -502,6 +513,26 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
       {/* ── 캔버스 ── */}
       <div ref={containerRef} className="flex-1 relative overflow-hidden" style={{ background: '#111' }}>
         <canvas ref={canvasRef} style={{ display: 'block' }} />
+        {/* 선택된 텍스트 우측 상단 X 버튼 */}
+        {deleteBtnPos && (
+          <button
+            onPointerDown={(e) => { e.stopPropagation(); deleteSelected() }}
+            style={{
+              position: 'absolute',
+              left: deleteBtnPos.x - 12,
+              top:  deleteBtnPos.y - 12,
+              width: 24, height: 24,
+              borderRadius: '50%',
+              background: '#FF3B30',
+              border: '2px solid white',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', zIndex: 20,
+              boxShadow: '0 1px 6px rgba(0,0,0,0.5)',
+            }}
+          >
+            <X size={12} color="white" strokeWidth={3} />
+          </button>
+        )}
       </div>
 
       {/* ── 크롭 옵션 ── */}
@@ -598,14 +629,6 @@ export function ImageEditor({ file, onDone, onCancel }: Props) {
               <Italic size={13} />
             </button>
 
-            {/* 선택된 텍스트 삭제 */}
-            <button
-              onClick={deleteSelected}
-              title="선택 삭제"
-              style={{ ...btnBase, padding: '5px 8px', borderRadius: 8, background: 'rgba(255,59,48,0.25)', color: '#FF3B30' }}
-            >
-              <Trash2 size={13} />
-            </button>
           </div>
 
           {/* 3행: 텍스트 추가 버튼 */}
