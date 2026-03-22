@@ -337,9 +337,7 @@ export function RandomBetterViewer({
           url={detailPhoto.url}
           description={detailPhoto.description}
           side={detailPhoto.side}
-          canVote={phase === 'voting'}
           onClose={() => setDetailPhoto(null)}
-          onVote={() => { setDetailPhoto(null); handlePickPhoto(detailPhoto.side) }}
         />
       )}
 
@@ -758,98 +756,71 @@ function PhotoCard({
 // ─── PhotoDetailModal ────────────────────────────────────────────────────────
 
 function PhotoDetailModal({
-  url, description, side, canVote, onClose, onVote,
+  url, description, side, onClose,
 }: {
   url: string
   description: string | null
   side: 'A' | 'B'
-  canVote: boolean
   onClose: () => void
-  onVote: () => void
 }) {
   return (
     <div
       onClick={onClose}
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(0,0,0,0.82)',
+        background: 'rgba(0,0,0,0.92)',
         display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'flex-end',
+        alignItems: 'center', justifyContent: 'center',
       }}
     >
+      {/* X 버튼 */}
+      <button
+        onClick={onClose}
+        style={{
+          position: 'absolute', top: 16, right: 16,
+          width: 36, height: 36, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.15)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: 'white', zIndex: 1,
+        }}
+      >
+        <X size={18} />
+      </button>
+
+      {/* 사진 + 설명 */}
       <div
         onClick={e => e.stopPropagation()}
         style={{
           width: '100%', maxWidth: 520,
-          background: 'var(--color-card)',
-          borderRadius: '24px 24px 0 0',
-          overflow: 'hidden',
-          animation: '_slideUpModal 0.32s cubic-bezier(0.25,1,0.5,1)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
+          animation: '_slideUpModal 0.28s cubic-bezier(0.25,1,0.5,1)',
         }}
       >
-        {/* 상단 바 */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '14px 16px 10px',
-        }}>
-          <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--color-foreground)' }}>
-            사진 {side}
-          </span>
-          <button
-            onClick={onClose}
-            style={{
-              width: 32, height: 32, borderRadius: '50%',
-              background: 'var(--color-muted)',
-              border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'var(--color-muted-foreground)',
-            }}
-          >
-            <X size={16} />
-          </button>
-        </div>
-
-        {/* 사진 */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={url}
           alt={`사진 ${side}`}
-          style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block' }}
+          style={{
+            width: '100%',
+            maxHeight: 'calc(100dvh - 120px)',
+            objectFit: 'contain',
+            display: 'block',
+          }}
         />
-
-        {/* 설명 */}
-        {description ? (
+        {description && (
           <p style={{
-            padding: '14px 18px',
-            fontSize: '0.875rem', lineHeight: 1.6,
-            color: 'var(--color-muted-foreground)',
+            width: '100%',
+            padding: '12px 20px',
             margin: 0,
+            fontSize: '0.875rem', lineHeight: 1.6,
+            color: 'rgba(255,255,255,0.75)',
+            background: 'rgba(0,0,0,0.4)',
           }}>
             {description}
           </p>
-        ) : (
-          <div style={{ height: 12 }} />
         )}
-
-        {/* 투표 버튼 */}
-        {canVote && (
-          <div style={{ padding: `${description ? 4 : 8}px 16px 36px` }}>
-            <button
-              onClick={onVote}
-              style={{
-                width: '100%', padding: '14px',
-                borderRadius: 16, border: 'none', cursor: 'pointer',
-                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-                color: 'white', fontSize: '0.95rem', fontWeight: 800,
-                boxShadow: '0 4px 16px rgba(99,102,241,0.35)',
-                transition: 'opacity 0.15s',
-              }}
-            >
-              이게 Better 👍
-            </button>
-          </div>
-        )}
-        {!canVote && <div style={{ height: 24 }} />}
       </div>
     </div>
   )
