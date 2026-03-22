@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ['fabric'],
+  transpilePackages: ['fabric'],
   images: {
     remotePatterns: [
       {

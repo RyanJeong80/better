@@ -34,7 +34,8 @@ let fabricModuleCache: any = null
 async function getFabric() {
   if (!fabricModuleCache) {
     const mod = await import('fabric')
-    fabricModuleCache = mod
+    // CJS interop: if named exports aren't at top level, unwrap from .default
+    fabricModuleCache = (mod as any).Canvas ? mod : ((mod as any).default ?? mod)
   }
   return fabricModuleCache
 }
