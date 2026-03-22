@@ -7,40 +7,48 @@ import { CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory } from '@/lib/constants/categories'
 import type { PanelHotEntry } from '@/app/api/panels/hot/route'
 
-const CAT_BADGE: Record<BetterCategory, { bg: string; text: string }> = {
-  fashion:    { bg: '#EFF6FF', text: '#2563EB' },
-  appearance: { bg: '#FDF2F8', text: '#BE185D' },
-  love:       { bg: '#FFF1F2', text: '#F43F5E' },
-  shopping:   { bg: '#FFFBEB', text: '#D97706' },
-  food:       { bg: '#FFF7ED', text: '#EA580C' },
-  it:         { bg: '#F5F3FF', text: '#7C3AED' },
-  decision:   { bg: '#F0FDF4', text: '#15803D' },
+const CAT_COLOR: Record<BetterCategory, { bg: string; text: string }> = {
+  fashion:    { bg: '#DBEAFE', text: '#1D4ED8' },
+  appearance: { bg: '#FCE7F3', text: '#9D174D' },
+  love:       { bg: '#FFE4E6', text: '#BE123C' },
+  shopping:   { bg: '#FEF3C7', text: '#B45309' },
+  food:       { bg: '#FFEDD5', text: '#C2410C' },
+  it:         { bg: '#EDE9FE', text: '#6D28D9' },
+  decision:   { bg: '#DCFCE7', text: '#15803D' },
 }
 
-const HOT_RANK_COLOR = ['#D97706', '#9CA3AF', '#92400E']
+const RANK_STYLE: Record<number, { bg: string; color: string }> = {
+  1: { bg: '#F59E0B', color: 'white' },
+  2: { bg: '#9CA3AF', color: 'white' },
+  3: { bg: '#B45309', color: 'white' },
+}
+
+function SkeletonItem() {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      {/* 썸네일 */}
+      <div style={{ paddingTop: '56.25%', borderRadius: 12, background: 'var(--color-muted)', position: 'relative', overflow: 'hidden' }} className="animate-pulse" />
+      {/* 정보 */}
+      <div style={{ display: 'flex', gap: 10, marginTop: 10, alignItems: 'flex-start' }}>
+        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--color-muted)', flexShrink: 0 }} className="animate-pulse" />
+        <div style={{ flex: 1 }}>
+          <div style={{ height: 14, borderRadius: 4, background: 'var(--color-muted)', marginBottom: 6 }} className="animate-pulse" />
+          <div style={{ height: 14, borderRadius: 4, background: 'var(--color-muted)', width: '75%', marginBottom: 6 }} className="animate-pulse" />
+          <div style={{ height: 11, borderRadius: 4, background: 'var(--color-muted)', width: '40%' }} className="animate-pulse" />
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function Skeleton() {
   return (
-    <div style={{ paddingTop: 12, paddingBottom: 40 }}>
+    <div style={{ padding: '12px 12px 40px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-        <div style={{ width: 40, height: 40, borderRadius: 12, background: '#FEF3C7', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Flame size={20} color="#F59E0B" />
-        </div>
-        <div>
-          <div style={{ width: 120, height: 18, borderRadius: 6, background: 'var(--color-muted)', marginBottom: 4 }} className="animate-pulse" />
-          <div style={{ width: 160, height: 12, borderRadius: 4, background: 'var(--color-muted)' }} className="animate-pulse" />
-        </div>
+        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--color-muted)', flexShrink: 0 }} className="animate-pulse" />
+        <div style={{ width: 140, height: 18, borderRadius: 6, background: 'var(--color-muted)' }} className="animate-pulse" />
       </div>
-      <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid var(--color-border)', background: 'var(--color-card)' }}>
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: i < 7 ? '1px solid var(--color-border)' : undefined }}>
-            <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--color-muted)', flexShrink: 0 }} className="animate-pulse" />
-            <div style={{ width: 72, height: 36, borderRadius: 8, background: 'var(--color-muted)', flexShrink: 0 }} className="animate-pulse" />
-            <div style={{ flex: 1, height: 14, borderRadius: 4, background: 'var(--color-muted)' }} className="animate-pulse" />
-            <div style={{ width: 40, height: 22, borderRadius: 999, background: 'var(--color-muted)' }} className="animate-pulse" />
-          </div>
-        ))}
-      </div>
+      {Array.from({ length: 6 }).map((_, i) => <SkeletonItem key={i} />)}
     </div>
   )
 }
@@ -59,29 +67,29 @@ export function HotPanelClient() {
   if (status === 'loading') return <Skeleton />
 
   return (
-    <div style={{ paddingTop: 12, paddingBottom: 40 }}>
+    <div style={{ padding: '12px 12px 40px' }}>
       {/* 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
         <div style={{
-          width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+          width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
           background: 'linear-gradient(135deg, #F59E0B, #EF4444)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <Flame size={20} color="white" />
+          <Flame size={18} color="white" />
         </div>
         <div>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 900, lineHeight: 1.2 }}>Hot 100 Better</h2>
-          <p style={{ fontSize: '0.72rem', color: 'var(--color-muted-foreground)', marginTop: 2 }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: 900, lineHeight: 1.2, margin: 0 }}>Hot 100 Better</h2>
+          <p style={{ fontSize: '0.72rem', color: 'var(--color-muted-foreground)', margin: '2px 0 0' }}>
             좋아요를 가장 많이 받은 Better
           </p>
         </div>
       </div>
 
-      {/* 리스트 */}
+      {/* 빈 상태 */}
       {entries.length === 0 ? (
         <div style={{
           padding: '48px 16px', textAlign: 'center',
-          borderRadius: 20, border: '1.5px dashed var(--color-border)',
+          borderRadius: 16, border: '1.5px dashed var(--color-border)',
         }}>
           <p style={{ fontSize: '2rem', marginBottom: 8 }}>🔥</p>
           <p style={{ fontWeight: 700, marginBottom: 4 }}>아직 좋아요가 없어요</p>
@@ -90,58 +98,129 @@ export function HotPanelClient() {
           </p>
         </div>
       ) : (
-        <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid var(--color-border)', background: 'var(--color-card)' }}>
+        <div>
           {entries.map((entry, i) => {
             const rank = i + 1
             const cat = CATEGORY_MAP[entry.category]
-            const catStyle = CAT_BADGE[entry.category]
+            const catColor = CAT_COLOR[entry.category]
+            const rankStyle = RANK_STYLE[rank]
+
             return (
               <Link
                 key={entry.id}
                 href={`/battles/${entry.id}`}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 10,
-                  padding: '10px 14px',
-                  borderBottom: i < entries.length - 1 ? '1px solid var(--color-border)' : undefined,
-                  textDecoration: 'none', color: 'inherit',
-                }}
+                style={{ display: 'block', textDecoration: 'none', color: 'inherit', marginBottom: 20 }}
               >
-                {rank <= 3 ? (
-                  <span style={{
-                    width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                {/* 썸네일 */}
+                <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 12, overflow: 'hidden', background: '#000' }}>
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={entry.imageAUrl}
+                      alt="A"
+                      style={{ width: '50%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                    {/* VS 구분선 */}
+                    <div style={{
+                      position: 'relative', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <div style={{ width: 1, height: '100%', position: 'absolute', background: 'rgba(255,255,255,0.25)' }} />
+                      <span style={{
+                        position: 'relative', zIndex: 1,
+                        background: 'rgba(0,0,0,0.7)',
+                        backdropFilter: 'blur(6px)',
+                        color: 'white', fontSize: '0.55rem', fontWeight: 900,
+                        padding: '3px 5px', borderRadius: 6,
+                        letterSpacing: '0.04em',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                      }}>VS</span>
+                    </div>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={entry.imageBUrl}
+                      alt="B"
+                      style={{ width: '50%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    />
+                  </div>
+
+                  {/* 순위 배지 (좌상단) */}
+                  <div style={{
+                    position: 'absolute', top: 8, left: 8,
+                    background: rankStyle ? rankStyle.bg : 'rgba(0,0,0,0.7)',
+                    color: rankStyle ? rankStyle.color : 'white',
+                    fontSize: rank > 9 ? '0.62rem' : '0.7rem',
+                    fontWeight: 900,
+                    minWidth: 24, height: 24,
+                    borderRadius: 6,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '0.7rem', fontWeight: 900,
-                    background: rank === 1 ? '#FEF3C7' : rank === 2 ? '#F3F4F6' : '#FEF3C7',
-                    color: HOT_RANK_COLOR[rank - 1],
+                    padding: '0 6px',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
                   }}>
                     {rank}
-                  </span>
-                ) : (
-                  <span style={{ width: 26, textAlign: 'center', fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-muted-foreground)', flexShrink: 0 }}>
-                    {rank}
-                  </span>
-                )}
+                  </div>
 
-                <div style={{ display: 'flex', overflow: 'hidden', borderRadius: 8, flexShrink: 0 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={entry.imageAUrl} alt="A" style={{ width: 36, height: 36, objectFit: 'cover' }} />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={entry.imageBUrl} alt="B" style={{ width: 36, height: 36, objectFit: 'cover', borderLeft: '2px solid var(--color-background)' }} />
+                  {/* 좋아요 수 (우하단) */}
+                  <div style={{
+                    position: 'absolute', bottom: 8, right: 8,
+                    display: 'flex', alignItems: 'center', gap: 4,
+                    background: 'rgba(0,0,0,0.65)',
+                    backdropFilter: 'blur(6px)',
+                    borderRadius: 6,
+                    padding: '3px 7px',
+                  }}>
+                    <Heart size={11} style={{ fill: '#F43F5E', stroke: '#F43F5E', flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'white' }}>
+                      {entry.likeCount}
+                    </span>
+                  </div>
                 </div>
 
-                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.83rem', fontWeight: 600 }}>
-                  {cat.emoji} {entry.title}
-                </span>
+                {/* 정보 영역 */}
+                <div style={{ display: 'flex', gap: 10, marginTop: 10, alignItems: 'flex-start' }}>
+                  {/* 카테고리 아이콘 */}
+                  <div style={{
+                    width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                    background: catColor.bg,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '1rem',
+                  }}>
+                    {cat.emoji}
+                  </div>
 
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0,
-                  background: '#FFF1F2', borderRadius: 999, padding: '3px 8px',
-                  border: '1px solid #FECDD3',
-                }}>
-                  <Heart size={11} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
-                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: '#F43F5E' }}>
-                    {entry.likeCount}
-                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* 제목 */}
+                    <p style={{
+                      margin: 0,
+                      fontSize: '0.88rem', fontWeight: 700, lineHeight: 1.4,
+                      color: 'var(--color-foreground)',
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                    }}>
+                      {entry.title}
+                    </p>
+                    {/* 메타 */}
+                    <p style={{
+                      margin: '4px 0 0',
+                      fontSize: '0.75rem', color: 'var(--color-muted-foreground)',
+                      display: 'flex', alignItems: 'center', gap: 6,
+                    }}>
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 3,
+                        background: catColor.bg, color: catColor.text,
+                        padding: '1px 7px', borderRadius: 999,
+                        fontSize: '0.68rem', fontWeight: 700,
+                      }}>
+                        {cat.label}
+                      </span>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                        <Heart size={10} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
+                        {entry.likeCount}
+                      </span>
+                    </p>
+                  </div>
                 </div>
               </Link>
             )
@@ -153,8 +232,8 @@ export function HotPanelClient() {
         href="/hot"
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          marginTop: 16, padding: '12px 0',
-          borderRadius: 16, border: '1.5px solid var(--color-border)',
+          marginTop: 4, padding: '12px 0',
+          borderRadius: 12, border: '1.5px solid var(--color-border)',
           fontSize: '0.85rem', fontWeight: 700, color: '#F59E0B',
           textDecoration: 'none',
         }}
