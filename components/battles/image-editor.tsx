@@ -33,9 +33,10 @@ function updateOverlay(canvas: any, crop: any, overlays: any[]) {
 let fabricModuleCache: any = null
 async function getFabric() {
   if (!fabricModuleCache) {
-    const mod = await import('fabric')
-    // CJS interop: if named exports aren't at top level, unwrap from .default
-    fabricModuleCache = (mod as any).Canvas ? mod : ((mod as any).default ?? mod)
+    // Load from public/vendor to avoid Turbopack static analysis of 'fabric' bare specifier
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error: URL path import not typed
+    fabricModuleCache = await import(/* webpackIgnore: true */ '/vendor/fabric.mjs')
   }
   return fabricModuleCache
 }
