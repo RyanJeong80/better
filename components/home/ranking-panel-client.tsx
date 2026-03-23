@@ -61,8 +61,12 @@ export function RankingPanelClient() {
     setStatus('loading')
     fetch(`/api/panels/ranking?category=${activeTab}`)
       .then(r => r.json())
-      .then((d: PanelRankResponse) => { setData(d); setStatus('done') })
-      .catch(() => setStatus('error'))
+      .then((d: PanelRankResponse) => {
+        console.log('[RankingPanel] response:', d)
+        setData(d)
+        setStatus('done')
+      })
+      .catch((e) => { console.error('[RankingPanel] error:', e); setStatus('error') })
   }, [activeTab])
 
   if (status === 'loading' && !data) return <Skeleton />

@@ -73,6 +73,8 @@ async function buildAllRanking(currentUserId: string | null): Promise<PanelRankR
     countMap.get(v.voterId)!.count++
   }
 
+  console.log('[panel/ranking all] countMap size:', countMap.size)
+
   const entries = [...countMap.entries()]
     .map(([id, s]) => ({ id, name: s.name, participated: s.count, accuracy: null }))
     .sort((a, b) => b.participated - a.participated)
@@ -158,8 +160,10 @@ async function buildCategoryRanking(
     accuracy: s.eligible > 0 ? Math.round((s.correct / s.eligible) * 100) : null,
   }))
 
+  console.log('[panel/ranking cat] allEntries:', allEntries.length, 'sample:', allEntries.slice(0, 3))
+
   const entries = allEntries
-    .filter(e => e.participated >= MIN_VOTES_CAT && e.accuracy !== null)
+    .filter(e => e.accuracy !== null)
     .sort((a, b) => (b.accuracy ?? 0) - (a.accuracy ?? 0) || b.participated - a.participated)
     .slice(0, 30)
 

@@ -6,10 +6,6 @@ import { RankingView, type RankEntry, type MyStats } from '@/components/ranking/
 import { CATEGORY_FILTERS } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
-// 최소 투표 수 기준 (전체: 10개, 카테고리: 5개)
-const MIN_VOTES_ALL = 10
-const MIN_VOTES_CAT = 5
-
 // ─── 순위 계산 ─────────────────────────────────────────────────────
 async function buildRankingData(
   currentUserId?: string,
@@ -19,7 +15,6 @@ async function buildRankingData(
   participationRanking: RankEntry[]
   accuracyRanking: RankEntry[]
 }> {
-  const minVotes = categoryFilter === 'all' ? MIN_VOTES_ALL : MIN_VOTES_CAT
 
   // votes + betters(winner, category) + users 조인
   // betters.winner = 확정 winner ('A'|'B'|null)
@@ -112,15 +107,17 @@ async function buildRankingData(
     accuracy: s.eligible > 0 ? Math.round((s.hits / s.eligible) * 100) : -1,
   }))
 
-  // 참여 수 랭킹: 최소 투표 수 적용
+  console.log('[ranking] allRows:', allRows.length, 'allEntries:', allEntries.length)
+  console.log('[ranking] sample entries:', allEntries.slice(0, 3))
+
+  // 참여 수 랭킹
   const participationRanking = [...allEntries]
-    .filter(e => e.participated >= minVotes)
     .sort((a, b) => b.participated - a.participated || b.accuracy - a.accuracy)
     .slice(0, 20)
 
-  // 적중률 랭킹: winner 확정된 Better에 투표한 유저만 + 최소 투표 수 적용
+  // 적중률 랭킹: winner 확정된 Better에 투표한 유저만
   const accuracyRanking = [...allEntries]
-    .filter(e => e.accuracy !== -1 && e.participated >= minVotes)
+    .filter(e => e.accuracy !== -1)
     .sort((a, b) => b.accuracy - a.accuracy || b.participated - a.participated)
     .slice(0, 20)
 
