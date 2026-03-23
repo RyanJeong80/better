@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Check, Heart, ChevronRight, ChevronUp, Share2, X } from 'lucide-react'
+import { ArrowLeft, Check, Heart, ChevronDown, ChevronRight, ChevronUp, Share2, X } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
@@ -73,6 +73,10 @@ export function RandomBetterViewer({
   const [slideDir, setSlideDir] = useState<SlideDir>('none')
   const [barFilled, setBarFilled] = useState(false)
   const autoNextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [catSheetOpen, setCatSheetOpen] = useState(false)
+  const [accuracyStatus, setAccuracyStatus] = useState<'loading' | 'done' | 'no-auth'>('loading')
+  const [accuracy, setAccuracy] = useState<number | null>(null)
+  const [accuracyTotal, setAccuracyTotal] = useState(0)
 
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
@@ -96,6 +100,22 @@ export function RandomBetterViewer({
       }
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // 적중률 fetch
+  useEffect(() => {
+    fetch('/api/user/accuracy')
+      .then(r => {
+        if (r.status === 401) { setAccuracyStatus('no-auth'); return null }
+        return r.json()
+      })
+      .then(data => {
+        if (!data) return
+        setAccuracy(data.accuracy)
+        setAccuracyTotal(data.total)
+        setAccuracyStatus('done')
+      })
+      .catch(() => setAccuracyStatus('no-auth'))
   }, [])
 
   function dismissHint() {
@@ -370,26 +390,73 @@ export function RandomBetterViewer({
     : 1
 
   return (
-    <div
-      style={{
-        height: '100%',
-        overflow: 'hidden',
-        position: 'relative',
-        background: '#000',
-        userSelect: 'none',
-        touchAction: 'pan-x',
-      }}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#000', userSelect: 'none' }}>
       <style>{`
         @keyframes _slideUp      { from { transform: translateY(28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
         @keyframes _slideDown    { from { transform: translateY(-28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
         @keyframes _slideUpModal { from { transform: translateY(100%) } to { transform: translateY(0) } }
         @keyframes _checkPop     { 0% { transform: translate(-50%,-50%) scale(0); opacity:0 } 65% { transform: translate(-50%,-50%) scale(1.3); opacity:1 } 100% { transform: translate(-50%,-50%) scale(1); opacity:1 } }
-        .better-cat-filter::-webkit-scrollbar { display: none; }
       `}</style>
+
+      {/* ── 정보 바 ── */}
+      <div style={{
+        height: 36, flexShrink: 0, zIndex: 20,
+        background: 'rgba(0,0,0,0.5)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+        display: 'flex', alignItems: 'center',
+        paddingLeft: 16, paddingRight: 12, gap: 10,
+      }}>
+        {/* 좌측: 적중률 */}
+        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+          {accuracyStatus === 'no-auth' ? (
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>
+              로그인하면 적중률을 확인할 수 있어요
+            </span>
+          ) : accuracyStatus === 'loading' ? (
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>
+              적중률 계산 중...
+            </span>
+          ) : accuracy !== null ? (
+            <span style={{ color: 'white', fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+              내 적중률 {accuracy}%, 참여 {accuracyTotal}개
+            </span>
+          ) : (
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>
+              아직 투표 기록이 없어요
+            </span>
+          )}
+        </div>
+        {/* 우측: 카테고리 선택 */}
+        {!handleClose && (
+          <button
+            onClick={e => { e.stopPropagation(); setCatSheetOpen(true) }}
+            onTouchStart={e => e.stopPropagation()}
+            onTouchEnd={e => e.stopPropagation()}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0,
+              background: 'rgba(255,255,255,0.12)',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 999, padding: '3px 10px',
+              cursor: 'pointer', color: 'white',
+              fontSize: '0.7rem', fontWeight: 700,
+            }}
+          >
+            <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>카테고리</span>
+            <span style={{ maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {CATEGORY_FILTERS.find(f => f.id === categoryFilter)?.label ?? '전체'}
+            </span>
+            <ChevronDown size={11} style={{ flexShrink: 0 }} />
+          </button>
+        )}
+      </div>
+
+      {/* ── 사진 영역 ── */}
+      <div
+        style={{ flex: 1, position: 'relative', overflow: 'hidden', touchAction: 'pan-x' }}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
 
       {/* ── 제스처 힌트 오버레이 ── */}
       {showHint && (
@@ -822,8 +889,8 @@ export function RandomBetterViewer({
             </div>
           </div>
 
-          {/* ── 상단 카테고리 필터 / 뒤로가기 버튼 (handleClose 모드) ── */}
-          {handleClose ? (
+          {/* ── 뒤로가기 버튼 (handleClose 모드) ── */}
+          {handleClose && (
             <button
               onClick={handleClose}
               style={{
@@ -838,28 +905,6 @@ export function RandomBetterViewer({
             >
               <ArrowLeft size={20} color="white" />
             </button>
-          ) : (
-            <div className="better-cat-filter" style={{
-              position: 'absolute', top: 0, left: 0, right: 0, zIndex: 30,
-              display: 'flex', overflowX: 'auto', gap: 6, padding: '8px 12px 10px',
-              scrollbarWidth: 'none',
-              background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0) 100%)',
-              WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],
-            }}>
-              {CATEGORY_FILTERS.map((f) => (
-                <button key={f.id} onClick={() => handleCategoryChange(f.id)} style={{
-                  flexShrink: 0, fontSize: '0.7rem', fontWeight: 700,
-                  padding: '4px 10px', borderRadius: 999,
-                  border: categoryFilter === f.id ? 'none' : '1px solid rgba(255,255,255,0.28)',
-                  cursor: 'pointer',
-                  background: categoryFilter === f.id ? '#6366F1' : 'rgba(255,255,255,0.12)',
-                  backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-                  color: 'white', transition: 'all 0.18s', lineHeight: 1.5,
-                }}>
-                  {f.emoji} {f.label}
-                </button>
-              ))}
-            </div>
           )}
 
           {/* ── 우측 액션 버튼 (좋아요 + 공유, VS 선 기준 중앙 배치) ── */}
@@ -1048,6 +1093,63 @@ export function RandomBetterViewer({
               </span>
             </div>
           )}
+        </>
+      )}
+      </div>{/* ── 사진 영역 끝 ── */}
+
+      {/* ── 카테고리 바텀시트 ── */}
+      {catSheetOpen && !handleClose && (
+        <>
+          <div
+            onClick={() => setCatSheetOpen(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 300 }}
+          />
+          <div style={{
+            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 301,
+            background: 'var(--color-background)',
+            borderTopLeftRadius: 20, borderTopRightRadius: 20,
+            boxShadow: '0 -4px 32px rgba(0,0,0,0.2)',
+            animation: '_slideUpModal 0.25s cubic-bezier(0.25, 1, 0.5, 1)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 10, paddingBottom: 4 }}>
+              <div style={{ width: 36, height: 4, borderRadius: 999, background: 'var(--color-border)' }} />
+            </div>
+            <div style={{ padding: '4px 16px 16px' }}>
+              <p style={{
+                fontSize: '0.78rem', fontWeight: 800, letterSpacing: '-0.01em',
+                color: 'var(--color-muted-foreground)', margin: '0 0 8px 4px',
+              }}>
+                카테고리
+              </p>
+              {CATEGORY_FILTERS.map(f => {
+                const isActive = categoryFilter === f.id
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() => { handleCategoryChange(f.id); setCatSheetOpen(false) }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 14,
+                      padding: '11px 12px',
+                      background: isActive ? 'rgba(99,102,241,0.08)' : 'transparent',
+                      border: 'none', borderRadius: 12, cursor: 'pointer',
+                      textAlign: 'left', marginBottom: 2,
+                    }}
+                  >
+                    <span style={{ fontSize: '1.25rem', flexShrink: 0, lineHeight: 1 }}>{f.emoji}</span>
+                    <span style={{
+                      flex: 1, fontSize: '0.92rem',
+                      fontWeight: isActive ? 800 : 500,
+                      color: isActive ? '#6366F1' : 'var(--color-foreground)',
+                    }}>
+                      {f.label}
+                    </span>
+                    {isActive && <Check size={16} style={{ color: '#6366F1', flexShrink: 0 }} />}
+                  </button>
+                )
+              })}
+            </div>
+            <div style={{ height: 'env(safe-area-inset-bottom, 16px)' }} />
+          </div>
         </>
       )}
     </div>
