@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Check, Heart, ChevronDown, ChevronRight, ChevronUp, Share2, X, Search, Hash } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
@@ -596,8 +597,8 @@ export function RandomBetterViewer({
         )}
       </div>
 
-      {/* ── 태그 검색 전체화면 오버레이 ── */}
-      {searchOpen && !tagFilter && (
+      {/* ── 태그 검색 전체화면 오버레이 (portal → transform 조상 영향 차단) ── */}
+      {searchOpen && !tagFilter && createPortal(
         <div
           onTouchStart={e => e.stopPropagation()}
           onTouchMove={e => e.stopPropagation()}
@@ -692,7 +693,8 @@ export function RandomBetterViewer({
               태그명을 입력하면 검색 결과가 표시돼요
             </div>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
 
       {/* ── 사진 영역 ── */}
