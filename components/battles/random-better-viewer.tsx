@@ -446,7 +446,7 @@ export function RandomBetterViewer({
         @keyframes _slideDown    { from { transform: translateY(-28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
         @keyframes _slideUpModal { from { transform: translateY(100%) } to { transform: translateY(0) } }
         @keyframes _checkPop     { 0% { transform: translate(-50%,-50%) scale(0); opacity:0 } 65% { transform: translate(-50%,-50%) scale(1.3); opacity:1 } 100% { transform: translate(-50%,-50%) scale(1); opacity:1 } }
-        ._tag-search-input::placeholder { color: #9CA3AF; }
+        ._tag-search-input::placeholder { color: #666666 !important; opacity: 1 !important; }
       `}</style>
 
       {/* ── 정보 바 ── */}
@@ -614,7 +614,7 @@ export function RandomBetterViewer({
             onTouchEnd={e => e.stopPropagation()}
             style={{
               position: 'absolute', top: 36, left: 0, right: 0, zIndex: 9995,
-              background: 'white',
+              backgroundColor: '#ffffff',
               borderBottom: '1px solid #E5E7EB',
               boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
               animation: '_slideUp 0.18s ease',
@@ -624,6 +624,7 @@ export function RandomBetterViewer({
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
               padding: '10px 14px',
+              backgroundColor: '#ffffff',
               borderBottom: '1px solid #F3F4F6',
             }}>
               <Hash size={14} style={{ color: '#6366F1', flexShrink: 0 }} />
@@ -643,9 +644,11 @@ export function RandomBetterViewer({
                 placeholder="태그 검색... (예: 여름코디)"
                 style={{
                   flex: 1, border: 'none', outline: 'none',
-                  background: 'white',
-                  color: '#111827', WebkitTextFillColor: '#111827',
-                  fontSize: '0.88rem', caretColor: '#6366F1',
+                  backgroundColor: '#ffffff',
+                  color: '#000000',
+                  WebkitTextFillColor: '#000000',
+                  caretColor: '#000000',
+                  fontSize: '0.88rem',
                   touchAction: 'manipulation',
                 }}
               />
@@ -662,7 +665,7 @@ export function RandomBetterViewer({
 
             {/* 태그 목록 */}
             {tagSuggestions.length > 0 ? (
-              <div style={{ maxHeight: 240, overflowY: 'auto', background: 'white' }}>
+              <div style={{ maxHeight: 240, overflowY: 'auto', backgroundColor: '#ffffff' }}>
                 {tagSuggestions.map((s, i) => (
                   <button
                     key={s.name}
@@ -671,23 +674,23 @@ export function RandomBetterViewer({
                     style={{
                       width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                       padding: '12px 16px',
-                      background: 'white',
+                      backgroundColor: '#ffffff',
                       border: 'none', cursor: 'pointer', textAlign: 'left',
                       borderBottom: i < tagSuggestions.length - 1 ? '1px solid #F3F4F6' : undefined,
                     }}
                   >
                     <Hash size={13} style={{ color: '#6366F1', flexShrink: 0 }} />
-                    <span style={{ flex: 1, color: '#111827', fontSize: '0.88rem', fontWeight: 600 }}>{s.name}</span>
-                    <span style={{ color: '#9CA3AF', fontSize: '0.72rem' }}>{s.betterCount}개</span>
+                    <span style={{ flex: 1, color: '#000000', fontSize: '0.88rem', fontWeight: 600 }}>{s.name}</span>
+                    <span style={{ color: '#666666', fontSize: '0.72rem' }}>{s.betterCount}개</span>
                   </button>
                 ))}
               </div>
             ) : tagInput.replace(/^#+/, '').trim() ? (
-              <div style={{ padding: '20px 16px', textAlign: 'center', color: '#9CA3AF', fontSize: '0.82rem', background: 'white' }}>
+              <div style={{ padding: '20px 16px', textAlign: 'center', color: '#666666', fontSize: '0.82rem', backgroundColor: '#ffffff' }}>
                 일치하는 태그가 없어요
               </div>
             ) : (
-              <div style={{ padding: '16px', color: '#9CA3AF', fontSize: '0.78rem', textAlign: 'center', background: 'white' }}>
+              <div style={{ padding: '16px', color: '#666666', fontSize: '0.78rem', textAlign: 'center', backgroundColor: '#ffffff' }}>
                 태그명을 입력하면 검색 결과가 표시돼요
               </div>
             )}
