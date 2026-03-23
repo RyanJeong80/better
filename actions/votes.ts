@@ -43,6 +43,13 @@ export async function castVote(betterId: string, choice: VoteChoice) {
     choice,
   })
 
+  // user_stats 갱신 (DB 트리거 백업 — non-fatal)
+  try {
+    await supabase.rpc('refresh_user_stats', { p_user_id: user.id })
+  } catch (e) {
+    console.warn('[castVote] refresh_user_stats failed (continuing):', (e as Error)?.message)
+  }
+
   revalidatePath(`/battles/${betterId}`)
   return { success: true }
 }
@@ -83,6 +90,13 @@ export async function submitVote(
     choice,
     reason: reason?.trim() || null,
   })
+
+  // user_stats 갱신 (DB 트리거 백업 — non-fatal)
+  try {
+    await supabase.rpc('refresh_user_stats', { p_user_id: user.id })
+  } catch (e) {
+    console.warn('[submitVote] refresh_user_stats failed (continuing):', (e as Error)?.message)
+  }
 
   const allVotes = await db.query.votes.findMany({
     where: eq(votes.betterId, betterId),

@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, pgEnum } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, timestamp, pgEnum, integer, numeric, smallint } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
 export const voteChoiceEnum = pgEnum('vote_choice', ['A', 'B'])
@@ -55,6 +55,23 @@ export const likes = pgTable('likes', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
+export const userStats = pgTable('user_stats', {
+  userId: uuid('user_id').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
+  totalVotes: integer('total_votes').notNull().default(0),
+  correctVotes: integer('correct_votes').notNull().default(0),
+  accuracyRate: numeric('accuracy_rate', { precision: 5, scale: 1 }).notNull().default('0'),
+  level: smallint('level').notNull().default(1),
+  levelName: text('level_name').notNull().default('아이언'),
+  fashionAccuracy: numeric('fashion_accuracy', { precision: 5, scale: 1 }),
+  appearanceAccuracy: numeric('appearance_accuracy', { precision: 5, scale: 1 }),
+  loveAccuracy: numeric('love_accuracy', { precision: 5, scale: 1 }),
+  shoppingAccuracy: numeric('shopping_accuracy', { precision: 5, scale: 1 }),
+  foodAccuracy: numeric('food_accuracy', { precision: 5, scale: 1 }),
+  itAccuracy: numeric('it_accuracy', { precision: 5, scale: 1 }),
+  decisionAccuracy: numeric('decision_accuracy', { precision: 5, scale: 1 }),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
 export const comments = pgTable('comments', {
   id: uuid('id').primaryKey().defaultRandom(),
   betterId: uuid('better_id')
@@ -69,11 +86,12 @@ export const comments = pgTable('comments', {
 
 // ─── Relations ────────────────────────────────────────────────────
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   betters: many(betters),
   votes: many(votes),
   likes: many(likes),
   comments: many(comments),
+  stats: one(userStats, { fields: [users.id], references: [userStats.userId] }),
 }))
 
 export const bettersRelations = relations(betters, ({ one, many }) => ({
@@ -98,6 +116,10 @@ export const commentsRelations = relations(comments, ({ one }) => ({
   user: one(users, { fields: [comments.userId], references: [users.id] }),
 }))
 
+export const userStatsRelations = relations(userStats, ({ one }) => ({
+  user: one(users, { fields: [userStats.userId], references: [users.id] }),
+}))
+
 // ─── Types ────────────────────────────────────────────────────────
 
 export type User = typeof users.$inferSelect
@@ -109,3 +131,4 @@ export type NewBetter = typeof betters.$inferInsert
 export type NewVote = typeof votes.$inferInsert
 export type NewLike = typeof likes.$inferInsert
 export type NewComment = typeof comments.$inferInsert
+export type UserStats = typeof userStats.$inferSelect
