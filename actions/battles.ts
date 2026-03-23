@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { and, eq, ne, notInArray, sql } from 'drizzle-orm'
+import { and, eq, ne, notInArray, inArray, sql } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
 import { betters, votes, users, likes, tags, betterTags } from '@/lib/db/schema'
@@ -24,7 +24,7 @@ export type BattleForVoting = {
 export async function getRandomBattle(
   excludeIds: string[],
   category?: BetterCategory | 'all',
-  options?: { skipAuth?: boolean },
+  options?: { skipAuth?: boolean; tagName?: string },
 ): Promise<BattleForVoting | null> {
   try {
     let userId: string | undefined
@@ -55,6 +55,17 @@ export async function getRandomBattle(
     if (userId) conditions.push(ne(betters.userId, userId))
     if (allExclude.length > 0) conditions.push(notInArray(betters.id, allExclude))
     if (category && category !== 'all') conditions.push(eq(betters.category, category))
+
+    // 태그 필터
+    if (options?.tagName) {
+      const tagged = await db
+        .select({ betterId: betterTags.betterId })
+        .from(betterTags)
+        .innerJoin(tags, and(eq(betterTags.tagId, tags.id), eq(tags.name, options.tagName)))
+      if (!tagged.length) return null
+      conditions.push(inArray(betters.id, tagged.map(r => r.betterId)))
+    }
+
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
     const eligible = await db.select({

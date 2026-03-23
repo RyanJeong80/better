@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Check, Heart, ChevronDown, ChevronRight, ChevronUp, Share2, X } from 'lucide-react'
+import { ArrowLeft, Check, Heart, ChevronDown, ChevronRight, ChevronUp, Share2, X, Search, Hash } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
@@ -78,6 +78,13 @@ export function RandomBetterViewer({
   const [accuracyStatus, setAccuracyStatus] = useState<'loading' | 'done' | 'no-auth'>('loading')
   const [accuracy, setAccuracy] = useState<number | null>(null)
   const [accuracyTotal, setAccuracyTotal] = useState(0)
+  // 태그 검색
+  const [tagFilter, setTagFilter] = useState<string | null>(null)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [tagInput, setTagInput] = useState('')
+  const [tagSuggestions, setTagSuggestions] = useState<{ name: string; betterCount: number }[]>([])
+  const tagInputRef = useRef<HTMLInputElement>(null)
+  const tagDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
@@ -91,6 +98,7 @@ export function RandomBetterViewer({
   const isPrefetching = useRef(false)
   const seenIdsRef = useRef<string[]>(seenIds)    // seenIds 최신값 ref (async 클로저용)
   const categoryRef = useRef<CategoryFilter>(initialCategory)
+  const tagFilterRef = useRef<string | null>(null)
 
   useEffect(() => {
     try {
@@ -120,6 +128,26 @@ export function RandomBetterViewer({
   }
 
   useEffect(() => { fetchAccuracy() }, [])
+
+  // 태그 자동완성
+  useEffect(() => {
+    const q = tagInput.replace(/^#+/, '').trim()
+    if (!q) { setTagSuggestions([]); return }
+    if (tagDebounceRef.current) clearTimeout(tagDebounceRef.current)
+    tagDebounceRef.current = setTimeout(() => {
+      fetch(`/api/tags/search?q=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then((data: { name: string; betterCount: number }[]) => setTagSuggestions(data))
+        .catch(() => {})
+    }, 200)
+    return () => { if (tagDebounceRef.current) clearTimeout(tagDebounceRef.current) }
+  }, [tagInput])
+
+  // 검색창 열릴 때 포커스
+  useEffect(() => {
+    if (searchOpen) setTimeout(() => tagInputRef.current?.focus(), 80)
+    else { setTagInput(''); setTagSuggestions([]) }
+  }, [searchOpen])
 
   function dismissHint() {
     setShowHint(false)
@@ -158,7 +186,7 @@ export function RandomBetterViewer({
       while (prefetchQueue.current.length < PREFETCH_SIZE) {
         const cat = categoryRef.current !== 'all' ? categoryRef.current : undefined
         const excludeIds = [...seenIdsRef.current, ...queuedIds.current]
-        const next = await getRandomBattle(excludeIds, cat)
+        const next = await getRandomBattle(excludeIds, cat, { tagName: tagFilterRef.current ?? undefined })
         if (!next) break
         prefetchQueue.current.push(next)
         queuedIds.current.push(next.id)
@@ -222,11 +250,12 @@ export function RandomBetterViewer({
     })
   }
 
-  function loadNext(cat: CategoryFilter, currentSeenIds: string[]) {
+  function loadNext(cat: CategoryFilter, currentSeenIds: string[], tag?: string | null) {
     setPhase('loading')
     startTransition(async () => {
       const c = cat !== 'all' ? cat : undefined
-      const next = await getRandomBattle(currentSeenIds, c)
+      const t = (tag !== undefined ? tag : tagFilterRef.current) ?? undefined
+      const next = await getRandomBattle(currentSeenIds, c, { tagName: t })
       if (!next) {
         try { sessionStorage.removeItem('seenBattleIds') } catch {}
         setPhase('empty')
@@ -295,19 +324,29 @@ export function RandomBetterViewer({
     setTimeout(() => setSlideDir('none'), 320)
   }
 
-  function handleCategoryChange(newCat: CategoryFilter) {
-    if (newCat === categoryFilter) return
-    // 카테고리 변경: ref 즉시 동기화 + 큐 초기화
-    categoryRef.current = newCat
+  function resetQueue() {
     prefetchQueue.current = []
     queuedIds.current = []
     isPrefetching.current = false
-    setCategoryFilter(newCat)
     setHistoryStack([])
-    const freshSeenIds: string[] = []
-    seenIdsRef.current = freshSeenIds
-    setSeenIds(freshSeenIds)
-    loadNext(newCat, freshSeenIds)
+    const fresh: string[] = []
+    seenIdsRef.current = fresh
+    setSeenIds(fresh)
+    return fresh
+  }
+
+  function handleCategoryChange(newCat: CategoryFilter) {
+    if (newCat === categoryFilter) return
+    categoryRef.current = newCat
+    setCategoryFilter(newCat)
+    loadNext(newCat, resetQueue())
+  }
+
+  function handleTagChange(newTag: string | null) {
+    tagFilterRef.current = newTag
+    setTagFilter(newTag)
+    setSearchOpen(false)
+    loadNext(categoryRef.current, resetQueue(), newTag)
   }
 
   async function handleShare() {
@@ -415,9 +454,14 @@ export function RandomBetterViewer({
         display: 'flex', alignItems: 'center',
         paddingLeft: 12, paddingRight: 10, gap: 0,
       }}>
-        {/* 좌측: 레벨 · 적중률 · 참여 수 */}
+        {/* 좌측: 태그 필터 활성 시 태그명 표시 / 아니면 레벨·적중률·참여 수 */}
         <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
-          {accuracyStatus === 'no-auth' ? (
+          {tagFilter ? (
+            <span style={{ color: '#A5B4FC', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Hash size={10} strokeWidth={2.5} />
+              {tagFilter} 검색 중
+            </span>
+          ) : accuracyStatus === 'no-auth' ? (
             <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
               로그인하면 내 기록을 볼 수 있어요
             </span>
@@ -430,13 +474,11 @@ export function RandomBetterViewer({
             const sep = <span style={{ color: 'rgba(255,255,255,0.3)', margin: '0 5px', fontSize: '0.6rem' }}>·</span>
             return (
               <>
-                {/* 레벨 */}
                 <span style={{ color: 'white', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3 }}>
                   <span style={{ fontSize: '0.75rem' }}>{li.emoji}</span>
                   {li.levelName}
                 </span>
                 {sep}
-                {/* 적중률 */}
                 {accuracy !== null ? (
                   <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
                     적중률 {accuracy}%
@@ -447,7 +489,6 @@ export function RandomBetterViewer({
                   </span>
                 )}
                 {sep}
-                {/* 참여 수 */}
                 <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
                   참여 {accuracyTotal}개
                 </span>
@@ -455,80 +496,188 @@ export function RandomBetterViewer({
             )
           })()}
         </div>
-        {/* 우측: 카테고리 선택 드롭다운 */}
+
+        {/* 우측: 카테고리 드롭다운 + 검색 아이콘 */}
         {!handleClose && (
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            {/* 드롭다운 열릴 때 바깥 터치 닫힘용 backdrop */}
-            {catDropdownOpen && (
-              <div
-                onClick={() => setCatDropdownOpen(false)}
-                onTouchEnd={() => setCatDropdownOpen(false)}
-                style={{ position: 'fixed', inset: 0, zIndex: 9990 }}
-              />
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            {/* 카테고리 드롭다운 */}
+            <div style={{ position: 'relative' }}>
+              {catDropdownOpen && (
+                <div
+                  onClick={() => setCatDropdownOpen(false)}
+                  onTouchEnd={() => setCatDropdownOpen(false)}
+                  style={{ position: 'fixed', inset: 0, zIndex: 9990 }}
+                />
+              )}
+              <button
+                onClick={e => { e.stopPropagation(); setCatDropdownOpen(prev => !prev) }}
+                onTouchStart={e => e.stopPropagation()}
+                onTouchEnd={e => e.stopPropagation()}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 4,
+                  background: catDropdownOpen ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.12)',
+                  border: `1px solid ${catDropdownOpen ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.2)'}`,
+                  borderRadius: 999, padding: '3px 10px',
+                  cursor: 'pointer', color: 'white',
+                  fontSize: '0.7rem', fontWeight: 700,
+                  position: 'relative', zIndex: 9991,
+                }}
+              >
+                <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>카테고리</span>
+                <span style={{ maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {CATEGORY_FILTERS.find(f => f.id === categoryFilter)?.label ?? '전체'}
+                </span>
+                <ChevronDown size={11} style={{ flexShrink: 0, transform: catDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s' }} />
+              </button>
+              {catDropdownOpen && (
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 9999,
+                  background: 'rgba(0,0,0,0.92)',
+                  backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                  borderRadius: 12, minWidth: 180,
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  overflow: 'hidden',
+                }}>
+                  {CATEGORY_FILTERS.map(f => {
+                    const isActive = categoryFilter === f.id
+                    return (
+                      <button
+                        key={f.id}
+                        onClick={e => { e.stopPropagation(); handleCategoryChange(f.id); setCatDropdownOpen(false) }}
+                        onTouchEnd={e => { e.stopPropagation(); handleCategoryChange(f.id); setCatDropdownOpen(false) }}
+                        style={{
+                          width: '100%', height: 44,
+                          display: 'flex', alignItems: 'center', gap: 12,
+                          padding: '0 14px',
+                          background: isActive ? 'rgba(99,102,241,0.25)' : 'transparent',
+                          border: 'none', cursor: 'pointer', textAlign: 'left',
+                          borderBottom: '1px solid rgba(255,255,255,0.06)',
+                        }}
+                      >
+                        <span style={{ fontSize: '1.1rem', flexShrink: 0, lineHeight: 1 }}>{f.emoji}</span>
+                        <span style={{
+                          flex: 1, fontSize: '0.85rem',
+                          fontWeight: isActive ? 800 : 400,
+                          color: isActive ? '#A5B4FC' : 'rgba(255,255,255,0.85)',
+                        }}>
+                          {f.label}
+                        </span>
+                        {isActive && <Check size={14} style={{ color: '#A5B4FC', flexShrink: 0 }} />}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* 🔍 / ✕ 태그 검색 토글 버튼 */}
             <button
-              onClick={e => { e.stopPropagation(); setCatDropdownOpen(prev => !prev) }}
+              onClick={e => {
+                e.stopPropagation()
+                if (tagFilter) { handleTagChange(null); return }
+                setSearchOpen(prev => !prev)
+              }}
               onTouchStart={e => e.stopPropagation()}
               onTouchEnd={e => e.stopPropagation()}
               style={{
-                display: 'flex', alignItems: 'center', gap: 4,
-                background: catDropdownOpen ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.12)',
-                border: `1px solid ${catDropdownOpen ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.2)'}`,
-                borderRadius: 999, padding: '3px 10px',
+                width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: (searchOpen || tagFilter) ? 'rgba(99,102,241,0.45)' : 'rgba(255,255,255,0.12)',
+                border: `1px solid ${(searchOpen || tagFilter) ? 'rgba(99,102,241,0.7)' : 'rgba(255,255,255,0.2)'}`,
                 cursor: 'pointer', color: 'white',
-                fontSize: '0.7rem', fontWeight: 700,
-                position: 'relative', zIndex: 9991,
               }}
             >
-              <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>카테고리</span>
-              <span style={{ maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {CATEGORY_FILTERS.find(f => f.id === categoryFilter)?.label ?? '전체'}
-              </span>
-              <ChevronDown size={11} style={{ flexShrink: 0, transform: catDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s' }} />
+              {tagFilter ? <X size={13} /> : <Search size={13} />}
             </button>
-            {catDropdownOpen && (
-              <div style={{
-                position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 9999,
-                background: 'rgba(0,0,0,0.92)',
-                backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-                borderRadius: 12, minWidth: 180,
-                boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-                border: '1px solid rgba(255,255,255,0.1)',
-                overflow: 'hidden',
-              }}>
-                {CATEGORY_FILTERS.map(f => {
-                  const isActive = categoryFilter === f.id
-                  return (
-                    <button
-                      key={f.id}
-                      onClick={e => { e.stopPropagation(); handleCategoryChange(f.id); setCatDropdownOpen(false) }}
-                      onTouchEnd={e => { e.stopPropagation(); handleCategoryChange(f.id); setCatDropdownOpen(false) }}
-                      style={{
-                        width: '100%', height: 44,
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '0 14px',
-                        background: isActive ? 'rgba(99,102,241,0.25)' : 'transparent',
-                        border: 'none', cursor: 'pointer', textAlign: 'left',
-                        borderBottom: '1px solid rgba(255,255,255,0.06)',
-                      }}
-                    >
-                      <span style={{ fontSize: '1.1rem', flexShrink: 0, lineHeight: 1 }}>{f.emoji}</span>
-                      <span style={{
-                        flex: 1, fontSize: '0.85rem',
-                        fontWeight: isActive ? 800 : 400,
-                        color: isActive ? '#A5B4FC' : 'rgba(255,255,255,0.85)',
-                      }}>
-                        {f.label}
-                      </span>
-                      {isActive && <Check size={14} style={{ color: '#A5B4FC', flexShrink: 0 }} />}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
           </div>
         )}
       </div>
+
+      {/* ── 태그 검색 패널 ── */}
+      {searchOpen && !tagFilter && (
+        <>
+          {/* 배경 닫힘 backdrop */}
+          <div
+            onClick={() => setSearchOpen(false)}
+            onTouchEnd={() => setSearchOpen(false)}
+            style={{ position: 'fixed', inset: 0, zIndex: 9994 }}
+          />
+          <div style={{
+            position: 'absolute', top: 36, left: 0, right: 0, zIndex: 9995,
+            background: 'rgba(10,10,10,0.96)',
+            backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            animation: '_slideUp 0.18s ease',
+          }}>
+            {/* 검색 입력 */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '10px 14px',
+              borderBottom: '1px solid rgba(255,255,255,0.06)',
+            }}>
+              <Hash size={14} style={{ color: '#A5B4FC', flexShrink: 0 }} />
+              <input
+                ref={tagInputRef}
+                type="text"
+                value={tagInput}
+                onChange={e => setTagInput(e.target.value)}
+                onTouchStart={e => e.stopPropagation()}
+                onKeyDown={e => {
+                  if (e.key === 'Escape') setSearchOpen(false)
+                  if (e.key === 'Enter' && tagSuggestions.length > 0) handleTagChange(tagSuggestions[0].name)
+                }}
+                placeholder="태그 검색... (예: 여름코디)"
+                style={{
+                  flex: 1, background: 'transparent', border: 'none', outline: 'none',
+                  color: 'white', fontSize: '0.88rem',
+                }}
+              />
+              {tagInput && (
+                <button
+                  type="button"
+                  onClick={() => setTagInput('')}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', display: 'flex' }}
+                >
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            {/* 태그 목록 */}
+            {tagSuggestions.length > 0 ? (
+              <div style={{ maxHeight: 240, overflowY: 'auto' }}>
+                {tagSuggestions.map((s, i) => (
+                  <button
+                    key={s.name}
+                    onClick={() => handleTagChange(s.name)}
+                    onTouchEnd={e => { e.stopPropagation(); handleTagChange(s.name) }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '12px 16px',
+                      background: 'transparent',
+                      border: 'none', cursor: 'pointer', textAlign: 'left',
+                      borderBottom: i < tagSuggestions.length - 1 ? '1px solid rgba(255,255,255,0.05)' : undefined,
+                    }}
+                  >
+                    <Hash size={13} style={{ color: '#A5B4FC', flexShrink: 0 }} />
+                    <span style={{ flex: 1, color: 'white', fontSize: '0.88rem', fontWeight: 600 }}>{s.name}</span>
+                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem' }}>{s.betterCount}개</span>
+                  </button>
+                ))}
+              </div>
+            ) : tagInput.replace(/^#+/, '').trim() ? (
+              <div style={{ padding: '20px 16px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem' }}>
+                일치하는 태그가 없어요
+              </div>
+            ) : (
+              <div style={{ padding: '16px', color: 'rgba(255,255,255,0.35)', fontSize: '0.78rem', textAlign: 'center' }}>
+                태그명을 입력하면 검색 결과가 표시돼요
+              </div>
+            )}
+          </div>
+        </>
+      )}
 
       {/* ── 사진 영역 ── */}
       <div
@@ -604,11 +753,35 @@ export function RandomBetterViewer({
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           color: 'white', textAlign: 'center', padding: 32,
         }}>
-          <div style={{ fontSize: '3.5rem', marginBottom: 20 }}>🎉</div>
-          <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>모두 다 봤어요!</p>
-          <p style={{ margin: '10px 0 0', color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-            새로운 Better가 올라오면 다시 돌아오세요.
-          </p>
+          {tagFilter ? (
+            <>
+              <div style={{ fontSize: '3rem', marginBottom: 16 }}>🏷️</div>
+              <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>
+                #{tagFilter} Better가 없어요
+              </p>
+              <p style={{ margin: '10px 0 0', color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', lineHeight: 1.6 }}>
+                해당 태그의 Better가 아직 없거나<br />모두 확인했어요.
+              </p>
+              <button
+                onClick={() => handleTagChange(null)}
+                style={{
+                  marginTop: 20, padding: '8px 20px', borderRadius: 999,
+                  background: 'rgba(99,102,241,0.3)', border: '1px solid rgba(99,102,241,0.6)',
+                  color: 'white', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer',
+                }}
+              >
+                태그 필터 해제
+              </button>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: '3.5rem', marginBottom: 20 }}>🎉</div>
+              <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>모두 다 봤어요!</p>
+              <p style={{ margin: '10px 0 0', color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                새로운 Better가 올라오면 다시 돌아오세요.
+              </p>
+            </>
+          )}
         </div>
       )}
 

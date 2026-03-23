@@ -14,7 +14,7 @@ export async function GET(req: Request) {
       .where(ilike(tags.name, `%${q}%`))
       .orderBy(desc(tags.count))
       .limit(8)
-    return NextResponse.json(rows.map(r => r.name))
+    return NextResponse.json(rows.map(r => ({ name: r.name, betterCount: r.count ?? 0 })))
   } catch {
     return NextResponse.json([])
   }
