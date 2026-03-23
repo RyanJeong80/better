@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, pgEnum, integer, numeric, smallint } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, timestamp, pgEnum, integer, numeric, smallint, primaryKey } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
 export const voteChoiceEnum = pgEnum('vote_choice', ['A', 'B'])
@@ -84,6 +84,18 @@ export const comments = pgTable('comments', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
+export const tags = pgTable('tags', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: text('name').notNull().unique(),
+  count: integer('count').default(1),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const betterTags = pgTable('better_tags', {
+  betterId: uuid('better_id').notNull().references(() => betters.id, { onDelete: 'cascade' }),
+  tagId: uuid('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
+}, (t) => [primaryKey({ columns: [t.betterId, t.tagId] })])
+
 // ─── Relations ────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -99,6 +111,16 @@ export const bettersRelations = relations(betters, ({ one, many }) => ({
   votes: many(votes),
   likes: many(likes),
   comments: many(comments),
+  betterTags: many(betterTags),
+}))
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+  betterTags: many(betterTags),
+}))
+
+export const betterTagsRelations = relations(betterTags, ({ one }) => ({
+  better: one(betters, { fields: [betterTags.betterId], references: [betters.id] }),
+  tag: one(tags, { fields: [betterTags.tagId], references: [tags.id] }),
 }))
 
 export const votesRelations = relations(votes, ({ one }) => ({
@@ -132,3 +154,4 @@ export type NewVote = typeof votes.$inferInsert
 export type NewLike = typeof likes.$inferInsert
 export type NewComment = typeof comments.$inferInsert
 export type UserStats = typeof userStats.$inferSelect
+export type Tag = typeof tags.$inferSelect

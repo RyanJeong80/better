@@ -2,10 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { and, eq, ne, notInArray } from 'drizzle-orm'
+import { and, eq, ne, notInArray, sql } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { betters, votes, users, likes } from '@/lib/db/schema'
+import { betters, votes, users, likes, tags, betterTags } from '@/lib/db/schema'
 import type { BetterCategory } from '@/lib/constants/categories'
 
 export type BattleForVoting = {
@@ -114,6 +114,11 @@ export async function saveBattle(
     const descriptionA = (formData.get('descriptionA') as string) || ''
     const descriptionB = (formData.get('descriptionB') as string) || ''
     const category = (formData.get('category') as BetterCategory) || 'decision'
+    const rawTags = (formData.get('tags') as string) || ''
+    const tagNames: string[] = rawTags
+      ? JSON.parse(rawTags).map((t: string) => t.toLowerCase().replace(/\s+/g, '').replace(/^#+/, ''))
+          .filter((t: string) => t.length > 0 && t.length <= 30).slice(0, 5)
+      : []
 
     if (!title) return { error: '제목을 입력해주세요' }
     if (!imageAUrl) return { error: '사진 A 업로드가 완료되지 않았습니다' }
@@ -135,7 +140,7 @@ export async function saveBattle(
 
     console.log('[saveBattle] step 4: DB insert better')
 
-    await db.insert(betters).values({
+    const [newBetter] = await db.insert(betters).values({
       userId: user.id,
       title,
       imageAUrl,
@@ -143,7 +148,23 @@ export async function saveBattle(
       imageBUrl,
       imageBDescription: descriptionB || null,
       category,
-    })
+    }).returning({ id: betters.id })
+
+    // 태그 저장
+    if (tagNames.length > 0) {
+      try {
+        for (const name of tagNames) {
+          const [tag] = await db
+            .insert(tags)
+            .values({ name })
+            .onConflictDoUpdate({ target: tags.name, set: { count: sql`${tags.count} + 1` } })
+            .returning({ id: tags.id })
+          await db.insert(betterTags).values({ betterId: newBetter.id, tagId: tag.id }).onConflictDoNothing()
+        }
+      } catch (tagErr) {
+        console.warn('[saveBattle] tag save failed (continuing):', (tagErr as Error)?.message)
+      }
+    }
 
     console.log('[saveBattle] step 4: success')
     revalidatePath('/')

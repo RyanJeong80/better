@@ -2,7 +2,7 @@
 
 import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ImagePlus, ArrowLeft, Loader2 } from 'lucide-react'
+import { ImagePlus, ArrowLeft, Loader2, X, Hash } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { saveBattle } from '@/actions/battles'
 import { CATEGORIES, CATEGORY_MAP } from '@/lib/constants/categories'
@@ -315,6 +315,156 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
 
 const initSlot = (): SlotState => ({ preview: null, url: null, uploading: false, uploadError: null, desc: '', selectedColor: 0, file: null })
 
+// ─── 태그 입력 ────────────────────────────────────────────────────
+const MAX_TAGS = 5
+const TAG_COLORS = { bg: '#EDE9FE', text: '#6D28D9', border: '#C4B5FD' }
+
+function TagInput({ value, onChange }: { value: string[]; onChange: (tags: string[]) => void }) {
+  const [input, setInput] = useState('')
+  const [suggestions, setSuggestions] = useState<string[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [suggIdx, setSuggIdx] = useState(-1)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const cleanTag = (raw: string) =>
+    raw.toLowerCase().replace(/^#+/, '').replace(/\s+/g, '').slice(0, 30)
+
+  const addTag = (raw: string) => {
+    const name = cleanTag(raw)
+    if (!name || value.includes(name) || value.length >= MAX_TAGS) return
+    onChange([...value, name])
+    setInput('')
+    setSuggestions([])
+    setShowSuggestions(false)
+    setSuggIdx(-1)
+  }
+
+  const removeTag = (name: string) => onChange(value.filter(t => t !== name))
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setSuggIdx(i => Math.min(i + 1, suggestions.length - 1)); return }
+    if (e.key === 'ArrowUp') { e.preventDefault(); setSuggIdx(i => Math.max(i - 1, -1)); return }
+    if ((e.key === ' ' || e.key === 'Enter') && input.trim()) {
+      e.preventDefault()
+      if (suggIdx >= 0 && suggestions[suggIdx]) addTag(suggestions[suggIdx])
+      else addTag(input.trim())
+      return
+    }
+    if (e.key === 'Backspace' && !input && value.length > 0) {
+      onChange(value.slice(0, -1))
+    }
+  }
+
+  useEffect(() => {
+    const q = input.replace(/^#+/, '').trim()
+    if (!q) { setSuggestions([]); setShowSuggestions(false); return }
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      fetch(`/api/tags/search?q=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then((data: string[]) => {
+          const filtered = data.filter(t => !value.includes(t))
+          setSuggestions(filtered)
+          setShowSuggestions(filtered.length > 0)
+          setSuggIdx(-1)
+        })
+        .catch(() => {})
+    }, 200)
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [input, value])
+
+  return (
+    <div>
+      {/* 배지 + 입력 래퍼 */}
+      <div
+        onClick={() => inputRef.current?.focus()}
+        style={{
+          display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6,
+          padding: '8px 12px', borderRadius: 12,
+          border: '1.5px solid var(--color-input)',
+          background: 'var(--color-background)',
+          cursor: 'text', minHeight: 44,
+          transition: 'border-color 0.15s',
+        }}
+      >
+        {value.map(tag => (
+          <span
+            key={tag}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 4,
+              padding: '3px 8px', borderRadius: 999,
+              background: TAG_COLORS.bg, color: TAG_COLORS.text,
+              border: `1px solid ${TAG_COLORS.border}`,
+              fontSize: '0.78rem', fontWeight: 700, whiteSpace: 'nowrap',
+            }}
+          >
+            <Hash size={11} strokeWidth={2.5} />
+            {tag}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); removeTag(tag) }}
+              style={{ display: 'flex', alignItems: 'center', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: TAG_COLORS.text, opacity: 0.6 }}
+            >
+              <X size={12} strokeWidth={2.5} />
+            </button>
+          </span>
+        ))}
+        {value.length < MAX_TAGS && (
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            placeholder={value.length === 0 ? '#태그 입력 후 스페이스' : ''}
+            style={{
+              flex: 1, minWidth: 80, border: 'none', outline: 'none',
+              background: 'transparent', fontSize: '0.85rem',
+              color: 'var(--color-foreground)',
+            }}
+          />
+        )}
+      </div>
+
+      {/* 자동완성 드롭다운 */}
+      {showSuggestions && (
+        <div style={{
+          marginTop: 4, borderRadius: 10, overflow: 'hidden',
+          border: '1px solid var(--color-border)',
+          background: 'var(--color-card)',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+          zIndex: 50, position: 'relative',
+        }}>
+          {suggestions.map((s, i) => (
+            <button
+              key={s}
+              type="button"
+              onMouseDown={() => addTag(s)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                width: '100%', padding: '9px 12px',
+                background: i === suggIdx ? 'var(--color-accent)' : 'transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left',
+                fontSize: '0.82rem', color: 'var(--color-foreground)',
+                borderBottom: i < suggestions.length - 1 ? '1px solid var(--color-border)' : undefined,
+              }}
+            >
+              <Hash size={12} style={{ color: TAG_COLORS.text, flexShrink: 0 }} />
+              <span style={{ fontWeight: 600 }}>{s}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <p style={{ marginTop: 6, fontSize: '0.68rem', color: 'var(--color-muted-foreground)' }}>
+        스페이스 또는 엔터로 태그 확정 · 최대 {MAX_TAGS}개 · {value.length}/{MAX_TAGS}
+      </p>
+    </div>
+  )
+}
+
 // ─── 미리보기 카드 ────────────────────────────────────────────────
 const CAT_BADGE_COLORS: Record<BetterCategory, { bg: string; text: string }> = {
   fashion:    { bg: '#EFF6FF', text: '#2563EB' },
@@ -451,6 +601,7 @@ export function CreateBattleForm() {
   const [slotB, setSlotB] = useState<SlotState>(initSlot)
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState<BetterCategory | null>(null)
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [view, setView] = useState<'input' | 'preview'>('input')
   const [upload, setUpload] = useState<UploadState>(initUpload)
   const [editTarget, setEditTarget] = useState<'A' | 'B' | null>(null)
@@ -517,6 +668,7 @@ export function CreateBattleForm() {
     formData.set('descriptionA', slotA.url ? slotA.desc : '')
     formData.set('descriptionB', slotB.url ? slotB.desc : '')
     formData.set('category', category ?? 'decision')
+    formData.set('tags', JSON.stringify(selectedTags))
 
     try {
       const result = await saveBattle(null, formData)
@@ -657,6 +809,14 @@ export function CreateBattleForm() {
           placeholder="어떤 걸 비교하나요? (예: 어떤 프로필 사진이 더 나아?)"
           className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-base outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
         />
+      </div>
+
+      {/* 태그 */}
+      <div className="space-y-1.5">
+        <label className="text-sm font-medium">
+          태그 <span className="text-muted-foreground/50 text-xs font-normal">(선택)</span>
+        </label>
+        <TagInput value={selectedTags} onChange={setSelectedTags} />
       </div>
 
       {/* 사진 두 장 */}
