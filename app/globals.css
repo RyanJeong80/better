@@ -85,16 +85,3 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-plus-jakarta), 'Pretendard Variable', var(--font-m-plus), var(--font-noto-sc), sans-serif;
 }
-
-.tag-search-input {
-  background-color: #ffffff !important;
-  color: #000000 !important;
-  -webkit-text-fill-color: #000000 !important;
-  caret-color: #000000 !important;
-  opacity: 1 !important;
-}
-.tag-search-input::placeholder {
-  color: #666666 !important;
-  -webkit-text-fill-color: #666666 !important;
-  opacity: 1 !important;
-}
