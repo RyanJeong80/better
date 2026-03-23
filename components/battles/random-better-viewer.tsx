@@ -104,8 +104,8 @@ export function RandomBetterViewer({
   }, [])
 
   // 적중률 fetch
-  useEffect(() => {
-    fetch('/api/user/accuracy')
+  function fetchAccuracy() {
+    return fetch('/api/user/accuracy')
       .then(r => {
         if (r.status === 401) { setAccuracyStatus('no-auth'); return null }
         return r.json()
@@ -117,7 +117,9 @@ export function RandomBetterViewer({
         setAccuracyStatus('done')
       })
       .catch(() => setAccuracyStatus('no-auth'))
-  }, [])
+  }
+
+  useEffect(() => { fetchAccuracy() }, [])
 
   function dismissHint() {
     setShowHint(false)
@@ -211,6 +213,12 @@ export function RandomBetterViewer({
       }
       setVoteResult({ votesA: result.votesA, votesB: result.votesB, total: result.total })
       setPhase('voted')
+
+      // 참여 수 즉시 낙관적 업데이트 후 서버에서 정확한 값 재조회
+      if (accuracyStatus === 'done') {
+        setAccuracyTotal(prev => prev + 1)
+        fetchAccuracy()
+      }
     })
   }
 

@@ -138,20 +138,14 @@ export function SwipeSections({
           <button
             onClick={() => setMenuOpen(true)}
             style={{
-              display: 'flex', alignItems: 'center', gap: 5,
-              background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-              flexShrink: 0,
+              width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+              border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '0.82rem', fontWeight: 800, color: 'white',
             }}
           >
-            <div style={{
-              width: 32, height: 32, borderRadius: '50%',
-              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '0.82rem', fontWeight: 800, color: 'white', flexShrink: 0,
-            }}>
-              {user.initial}
-            </div>
-            <LevelBadge level={user.levelInfo} size="xs" showName={false} />
+            {user.initial}
           </button>
         ) : (
           <Link
