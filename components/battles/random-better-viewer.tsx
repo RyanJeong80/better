@@ -73,7 +73,7 @@ export function RandomBetterViewer({
   const [slideDir, setSlideDir] = useState<SlideDir>('none')
   const [barFilled, setBarFilled] = useState(false)
   const autoNextTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const [catSheetOpen, setCatSheetOpen] = useState(false)
+  const [catDropdownOpen, setCatDropdownOpen] = useState(false)
   const [accuracyStatus, setAccuracyStatus] = useState<'loading' | 'done' | 'no-auth'>('loading')
   const [accuracy, setAccuracy] = useState<number | null>(null)
   const [accuracyTotal, setAccuracyTotal] = useState(0)
@@ -416,37 +416,92 @@ export function RandomBetterViewer({
             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>
               적중률 계산 중...
             </span>
+          ) : accuracyTotal === 0 ? (
+            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>
+              아직 투표 기록이 없어요
+            </span>
           ) : accuracy !== null ? (
             <span style={{ color: 'white', fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
               내 적중률 {accuracy}%, 참여 {accuracyTotal}개
             </span>
           ) : (
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>
-              아직 투표 기록이 없어요
+            <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
+              참여 {accuracyTotal}개 (집계 중)
             </span>
           )}
         </div>
-        {/* 우측: 카테고리 선택 */}
+        {/* 우측: 카테고리 선택 드롭다운 */}
         {!handleClose && (
-          <button
-            onClick={e => { e.stopPropagation(); setCatSheetOpen(true) }}
-            onTouchStart={e => e.stopPropagation()}
-            onTouchEnd={e => e.stopPropagation()}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0,
-              background: 'rgba(255,255,255,0.12)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: 999, padding: '3px 10px',
-              cursor: 'pointer', color: 'white',
-              fontSize: '0.7rem', fontWeight: 700,
-            }}
-          >
-            <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>카테고리</span>
-            <span style={{ maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {CATEGORY_FILTERS.find(f => f.id === categoryFilter)?.label ?? '전체'}
-            </span>
-            <ChevronDown size={11} style={{ flexShrink: 0 }} />
-          </button>
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            {/* 드롭다운 열릴 때 바깥 터치 닫힘용 backdrop */}
+            {catDropdownOpen && (
+              <div
+                onClick={() => setCatDropdownOpen(false)}
+                onTouchEnd={() => setCatDropdownOpen(false)}
+                style={{ position: 'fixed', inset: 0, zIndex: 9990 }}
+              />
+            )}
+            <button
+              onClick={e => { e.stopPropagation(); setCatDropdownOpen(prev => !prev) }}
+              onTouchStart={e => e.stopPropagation()}
+              onTouchEnd={e => e.stopPropagation()}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 4,
+                background: catDropdownOpen ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.12)',
+                border: `1px solid ${catDropdownOpen ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.2)'}`,
+                borderRadius: 999, padding: '3px 10px',
+                cursor: 'pointer', color: 'white',
+                fontSize: '0.7rem', fontWeight: 700,
+                position: 'relative', zIndex: 9991,
+              }}
+            >
+              <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>카테고리</span>
+              <span style={{ maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {CATEGORY_FILTERS.find(f => f.id === categoryFilter)?.label ?? '전체'}
+              </span>
+              <ChevronDown size={11} style={{ flexShrink: 0, transform: catDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s' }} />
+            </button>
+            {catDropdownOpen && (
+              <div style={{
+                position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 9999,
+                background: 'rgba(0,0,0,0.92)',
+                backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                borderRadius: 12, minWidth: 180,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                overflow: 'hidden',
+              }}>
+                {CATEGORY_FILTERS.map(f => {
+                  const isActive = categoryFilter === f.id
+                  return (
+                    <button
+                      key={f.id}
+                      onClick={e => { e.stopPropagation(); handleCategoryChange(f.id); setCatDropdownOpen(false) }}
+                      onTouchEnd={e => { e.stopPropagation(); handleCategoryChange(f.id); setCatDropdownOpen(false) }}
+                      style={{
+                        width: '100%', height: 44,
+                        display: 'flex', alignItems: 'center', gap: 12,
+                        padding: '0 14px',
+                        background: isActive ? 'rgba(99,102,241,0.25)' : 'transparent',
+                        border: 'none', cursor: 'pointer', textAlign: 'left',
+                        borderBottom: '1px solid rgba(255,255,255,0.06)',
+                      }}
+                    >
+                      <span style={{ fontSize: '1.1rem', flexShrink: 0, lineHeight: 1 }}>{f.emoji}</span>
+                      <span style={{
+                        flex: 1, fontSize: '0.85rem',
+                        fontWeight: isActive ? 800 : 400,
+                        color: isActive ? '#A5B4FC' : 'rgba(255,255,255,0.85)',
+                      }}>
+                        {f.label}
+                      </span>
+                      {isActive && <Check size={14} style={{ color: '#A5B4FC', flexShrink: 0 }} />}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         )}
       </div>
 
@@ -1097,61 +1152,6 @@ export function RandomBetterViewer({
       )}
       </div>{/* ── 사진 영역 끝 ── */}
 
-      {/* ── 카테고리 바텀시트 ── */}
-      {catSheetOpen && !handleClose && (
-        <>
-          <div
-            onClick={() => setCatSheetOpen(false)}
-            style={{ position: 'fixed', inset: 0, zIndex: 300 }}
-          />
-          <div style={{
-            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 301,
-            background: 'var(--color-background)',
-            borderTopLeftRadius: 20, borderTopRightRadius: 20,
-            boxShadow: '0 -4px 32px rgba(0,0,0,0.2)',
-            animation: '_slideUpModal 0.25s cubic-bezier(0.25, 1, 0.5, 1)',
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 10, paddingBottom: 4 }}>
-              <div style={{ width: 36, height: 4, borderRadius: 999, background: 'var(--color-border)' }} />
-            </div>
-            <div style={{ padding: '4px 16px 16px' }}>
-              <p style={{
-                fontSize: '0.78rem', fontWeight: 800, letterSpacing: '-0.01em',
-                color: 'var(--color-muted-foreground)', margin: '0 0 8px 4px',
-              }}>
-                카테고리
-              </p>
-              {CATEGORY_FILTERS.map(f => {
-                const isActive = categoryFilter === f.id
-                return (
-                  <button
-                    key={f.id}
-                    onClick={() => { handleCategoryChange(f.id); setCatSheetOpen(false) }}
-                    style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 14,
-                      padding: '11px 12px',
-                      background: isActive ? 'rgba(99,102,241,0.08)' : 'transparent',
-                      border: 'none', borderRadius: 12, cursor: 'pointer',
-                      textAlign: 'left', marginBottom: 2,
-                    }}
-                  >
-                    <span style={{ fontSize: '1.25rem', flexShrink: 0, lineHeight: 1 }}>{f.emoji}</span>
-                    <span style={{
-                      flex: 1, fontSize: '0.92rem',
-                      fontWeight: isActive ? 800 : 500,
-                      color: isActive ? '#6366F1' : 'var(--color-foreground)',
-                    }}>
-                      {f.label}
-                    </span>
-                    {isActive && <Check size={16} style={{ color: '#6366F1', flexShrink: 0 }} />}
-                  </button>
-                )
-              })}
-            </div>
-            <div style={{ height: 'env(safe-area-inset-bottom, 16px)' }} />
-          </div>
-        </>
-      )}
     </div>
   )
 }
