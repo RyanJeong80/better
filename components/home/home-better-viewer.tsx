@@ -310,22 +310,6 @@ function BattleCard({ card, onVote, onNext, onLike }: {
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                 />
 
-                {/* 상세보기 버튼 */}
-                <button
-                  onClick={(e) => { e.stopPropagation(); setModalSide(side) }}
-                  style={{
-                    position: 'absolute', top: 0, right: 0, zIndex: 10,
-                    display: 'flex', alignItems: 'center', gap: 3,
-                    background: 'rgba(0,0,0,0.5)', color: 'white',
-                    fontSize: '0.62rem', fontWeight: 600,
-                    padding: '5px 7px',
-                    borderBottomLeftRadius: 10,
-                    border: 'none', cursor: 'pointer',
-                  }}
-                >
-                  <Search size={10} />
-                  상세보기
-                </button>
 
                 {/* 투표 전 레이블 */}
                 {phase === 'voting' && !voteError && (
