@@ -1,11 +1,14 @@
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
 import { votes, users, betters } from '@/lib/db/schema'
 import { RankingView, type RankEntry, type MyStats } from '@/components/ranking/ranking-view'
 import { CATEGORY_FILTERS } from '@/lib/constants/categories'
-import type { CategoryFilter } from '@/lib/constants/categories'
+import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
+// 최소 투표 수 기준 (전체: 10개, 카테고리: 5개)
+const MIN_VOTES_ALL = 10
+const MIN_VOTES_CAT = 5
 
 // ─── 순위 계산 ─────────────────────────────────────────────────────
 async function buildRankingData(
@@ -16,89 +19,102 @@ async function buildRankingData(
   participationRanking: RankEntry[]
   accuracyRanking: RankEntry[]
 }> {
-  // votes + users + betters(카테고리 필터용) 조인
-  const allVoteRows = await db.select({
-    betterId: votes.betterId,
-    voterId: votes.voterId,
-    choice: votes.choice,
-    betterCategory: betters.category,
-    voterUsername: users.username,
-    voterName: users.name,
-    voterEmail: users.email,
-  })
+  const minVotes = categoryFilter === 'all' ? MIN_VOTES_ALL : MIN_VOTES_CAT
+
+  // votes + betters(winner, category) + users 조인
+  // betters.winner = 확정 winner ('A'|'B'|null)
+  const baseQuery = db
+    .select({
+      voterId: votes.voterId,
+      betterId: votes.betterId,
+      choice: votes.choice,
+      winner: betters.winner,
+      betterCategory: betters.category,
+      voterUsername: users.username,
+      voterName: users.name,
+      voterEmail: users.email,
+    })
     .from(votes)
+    .innerJoin(betters, eq(votes.betterId, betters.id))
     .leftJoin(users, eq(votes.voterId, users.id))
-    .leftJoin(betters, eq(votes.betterId, betters.id))
 
-  // 카테고리 필터링
-  const filteredVotes = categoryFilter === 'all'
-    ? allVoteRows
-    : allVoteRows.filter((v) => v.betterCategory === categoryFilter)
+  const allRows = categoryFilter === 'all'
+    ? await baseQuery
+    : await db
+        .select({
+          voterId: votes.voterId,
+          betterId: votes.betterId,
+          choice: votes.choice,
+          winner: betters.winner,
+          betterCategory: betters.category,
+          voterUsername: users.username,
+          voterName: users.name,
+          voterEmail: users.email,
+        })
+        .from(votes)
+        .innerJoin(betters, and(
+          eq(votes.betterId, betters.id),
+          eq(betters.category, categoryFilter as BetterCategory),
+        ))
+        .leftJoin(users, eq(votes.voterId, users.id))
 
-  const betterWinners = new Map<string, 'A' | 'B' | null>()
-  const votesByBetter = new Map<string, typeof filteredVotes>()
-  for (const v of filteredVotes) {
-    if (!votesByBetter.has(v.betterId)) votesByBetter.set(v.betterId, [])
-    votesByBetter.get(v.betterId)!.push(v)
+  type Stats = {
+    displayName: string
+    participated: number  // winner 무관 전체 투표 수
+    eligible: number      // winner 확정된 Better 중 투표 수
+    hits: number          // winner와 일치한 수
   }
-  for (const [betterId, bvotes] of votesByBetter) {
-    const cntA = bvotes.filter((v) => v.choice === 'A').length
-    const cntB = bvotes.filter((v) => v.choice === 'B').length
-    betterWinners.set(betterId, cntA > cntB ? 'A' : cntB > cntA ? 'B' : null)
-  }
+  const statsMap = new Map<string, Stats>()
 
-  const statsMap = new Map<
-    string,
-    { displayName: string; participated: number; hits: number; eligibleBase: number }
-  >()
-
-  for (const vote of filteredVotes) {
-    if (!statsMap.has(vote.voterId)) {
+  for (const v of allRows) {
+    if (!statsMap.has(v.voterId)) {
       const name =
-        vote.voterUsername ??
-        vote.voterName ??
-        vote.voterEmail?.split('@')[0] ??
-        `사용자 ${vote.voterId.slice(0, 6)}`
-      statsMap.set(vote.voterId, { displayName: name, participated: 0, hits: 0, eligibleBase: 0 })
+        v.voterUsername ??
+        v.voterName ??
+        v.voterEmail?.split('@')[0] ??
+        `사용자 ${v.voterId.slice(0, 6)}`
+      statsMap.set(v.voterId, { displayName: name, participated: 0, eligible: 0, hits: 0 })
     }
-    const s = statsMap.get(vote.voterId)!
-    s.participated++
-    const winner = betterWinners.get(vote.betterId)
-    if (winner !== null && winner !== undefined) {
-      s.eligibleBase++
-      if (vote.choice === winner) s.hits++
+    const s = statsMap.get(v.voterId)!
+    s.participated++                       // 항상 참여 수에 포함
+    if (v.winner !== null) {
+      s.eligible++                         // winner 확정된 것만 적중률 계산
+      if (v.choice === v.winner) s.hits++
     }
   }
 
-  const entries: RankEntry[] = Array.from(statsMap.entries()).map(([userId, s]) => ({
+  const allEntries: RankEntry[] = [...statsMap.entries()].map(([userId, s]) => ({
     userId,
     displayName: s.displayName,
     participated: s.participated,
     hits: s.hits,
-    accuracy: s.eligibleBase > 0 ? Math.round((s.hits / s.eligibleBase) * 100) : -1,
+    accuracy: s.eligible > 0 ? Math.round((s.hits / s.eligible) * 100) : -1,
   }))
 
-  const participationRanking = [...entries]
+  // 참여 수 랭킹: 최소 투표 수 적용
+  const participationRanking = [...allEntries]
+    .filter(e => e.participated >= minVotes)
     .sort((a, b) => b.participated - a.participated || b.accuracy - a.accuracy)
     .slice(0, 20)
 
-  const accuracyRanking = [...entries]
-    .filter((e) => e.accuracy !== -1)
+  // 적중률 랭킹: winner 확정된 Better에 투표한 유저만 + 최소 투표 수 적용
+  const accuracyRanking = [...allEntries]
+    .filter(e => e.accuracy !== -1 && e.participated >= minVotes)
     .sort((a, b) => b.accuracy - a.accuracy || b.participated - a.participated)
     .slice(0, 20)
 
   let myStats: MyStats | null = null
   if (currentUserId) {
-    const mine = entries.find((e) => e.userId === currentUserId)
+    const mine = statsMap.get(currentUserId)
     myStats = mine
-      ? { participated: mine.participated, hits: mine.hits, accuracy: mine.accuracy }
+      ? { participated: mine.participated, hits: mine.hits, accuracy: mine.eligible > 0 ? Math.round((mine.hits / mine.eligible) * 100) : -1 }
       : { participated: 0, hits: 0, accuracy: -1 }
   }
 
   return { myStats, participationRanking, accuracyRanking }
 }
 
-export const revalidate = 30 // 30초 캐시 — 랭킹은 실시간 불필요
+export const revalidate = 60
 
 // ─── 페이지 ────────────────────────────────────────────────────────
 export default async function RankingPage({
@@ -108,13 +124,12 @@ export default async function RankingPage({
 }) {
   const { category } = await searchParams
   const activeCategory: CategoryFilter =
-    (CATEGORY_FILTERS.find((f) => f.id === category)?.id) ?? 'all'
+    CATEGORY_FILTERS.find(f => f.id === category)?.id ?? 'all'
 
   const supabase = await createClient()
-  // getUser()는 네트워크 요청 — 3초 타임아웃
   const { data: { user } } = await Promise.race([
     supabase.auth.getUser(),
-    new Promise<{ data: { user: null } }>((resolve) =>
+    new Promise<{ data: { user: null } }>(resolve =>
       setTimeout(() => resolve({ data: { user: null } }), 3000)
     ),
   ])
