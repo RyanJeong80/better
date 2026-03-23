@@ -7,6 +7,7 @@ import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
 import { CATEGORY_FILTERS, CATEGORY_MAP } from '@/lib/constants/categories'
+import { calcLevel } from '@/lib/level'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
 type Phase = 'voting' | 'picked' | 'submitting' | 'voted' | 'loading' | 'empty'
@@ -404,31 +405,47 @@ export function RandomBetterViewer({
         background: 'rgba(0,0,0,0.5)',
         backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center',
-        paddingLeft: 16, paddingRight: 12, gap: 10,
+        paddingLeft: 12, paddingRight: 10, gap: 0,
       }}>
-        {/* 좌측: 적중률 */}
-        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+        {/* 좌측: 레벨 · 적중률 · 참여 수 */}
+        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
           {accuracyStatus === 'no-auth' ? (
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>
-              로그인하면 적중률을 확인할 수 있어요
+            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+              로그인하면 내 기록을 볼 수 있어요
             </span>
           ) : accuracyStatus === 'loading' ? (
-            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>
-              적중률 계산 중...
+            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+              불러오는 중...
             </span>
-          ) : accuracyTotal === 0 ? (
-            <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.68rem', whiteSpace: 'nowrap' }}>
-              아직 투표 기록이 없어요
-            </span>
-          ) : accuracy !== null ? (
-            <span style={{ color: 'white', fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-              내 적중률 {accuracy}%, 참여 {accuracyTotal}개
-            </span>
-          ) : (
-            <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.72rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-              참여 {accuracyTotal}개 (집계 중)
-            </span>
-          )}
+          ) : (() => {
+            const li = calcLevel(accuracyTotal, accuracy)
+            const sep = <span style={{ color: 'rgba(255,255,255,0.3)', margin: '0 5px', fontSize: '0.6rem' }}>·</span>
+            return (
+              <>
+                {/* 레벨 */}
+                <span style={{ color: 'white', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <span style={{ fontSize: '0.75rem' }}>{li.emoji}</span>
+                  {li.levelName}
+                </span>
+                {sep}
+                {/* 적중률 */}
+                {accuracy !== null ? (
+                  <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                    적중률 {accuracy}%
+                  </span>
+                ) : (
+                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+                    적중률 -
+                  </span>
+                )}
+                {sep}
+                {/* 참여 수 */}
+                <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  참여 {accuracyTotal}개
+                </span>
+              </>
+            )
+          })()}
         </div>
         {/* 우측: 카테고리 선택 드롭다운 */}
         {!handleClose && (
