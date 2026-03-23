@@ -1,8 +1,18 @@
+import { eq } from 'drizzle-orm'
 import { getRandomBattle } from '@/actions/battles'
 import { createClient } from '@/lib/supabase/server'
 import { HomeClient } from '@/components/home/home-client'
+import { db } from '@/lib/db'
+import { userStats } from '@/lib/db/schema'
+import { calcLevel } from '@/lib/level'
+import type { LevelInfo } from '@/lib/level'
 
-export type UserInfo = { initial: string; name: string; email: string }
+export type UserInfo = {
+  initial: string
+  name: string
+  email: string
+  levelInfo: LevelInfo
+}
 
 export default async function HomePage() {
   const initialBattle = await getRandomBattle([], undefined, { skipAuth: true }).catch(() => null)
@@ -19,7 +29,17 @@ export default async function HomePage() {
     if (data.user) {
       const nm = data.user.user_metadata?.name ?? data.user.user_metadata?.full_name ?? ''
       const email = data.user.email ?? ''
-      userInfo = { initial: (nm || email || '?')[0].toUpperCase(), name: nm, email }
+
+      let levelInfo = calcLevel(0, null)
+      try {
+        const stats = await db.query.userStats.findFirst({
+          where: eq(userStats.userId, data.user.id),
+          columns: { totalVotes: true, accuracyRate: true },
+        })
+        if (stats) levelInfo = calcLevel(stats.totalVotes, parseFloat(stats.accuracyRate as string))
+      } catch {}
+
+      userInfo = { initial: (nm || email || '?')[0].toUpperCase(), name: nm, email, levelInfo }
     }
   } catch {}
 

@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Trophy } from 'lucide-react'
+import { calcLevel } from '@/lib/level'
+import { LevelBadge } from '@/components/ui/level-badge'
 import type { PanelRankEntry, PanelRankResponse } from '@/app/api/panels/ranking/route'
 
 const TABS = [
@@ -226,6 +228,7 @@ export function RankingPanelClient() {
                 <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.88rem', fontWeight: 600 }}>
                   {entry.name}
                 </span>
+                <LevelBadge level={calcLevel(entry.participated, entry.accuracy)} size="xs" showName={false} />
                 {isCategoryMode ? (
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#6366F1', fontVariantNumeric: 'tabular-nums' }}>

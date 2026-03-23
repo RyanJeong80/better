@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { CATEGORY_FILTERS } from '@/lib/constants/categories'
+import { calcLevel } from '@/lib/level'
+import { LevelBadge } from '@/components/ui/level-badge'
 import type { CategoryFilter } from '@/lib/constants/categories'
 
 export type RankEntry = {
@@ -188,6 +190,11 @@ function RankTable({
                     </span>
                   )}
                 </span>
+                <LevelBadge
+                  level={calcLevel(entry.participated, entry.accuracy === -1 ? null : entry.accuracy)}
+                  size="xs"
+                  showName={false}
+                />
 
                 {/* 주 지표 */}
                 <span className="text-sm font-black tabular-nums" style={{ color: accentColor }}>
