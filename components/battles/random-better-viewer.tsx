@@ -383,12 +383,14 @@ export function RandomBetterViewer({
   }
 
   const onTouchStart = (e: React.TouchEvent) => {
+    if (searchOpen) return // 검색창 열려있으면 스와이프 차단
     touchStartX.current = e.touches[0].clientX
     touchStartY.current = e.touches[0].clientY
     swipeAxis.current = 'none'
   }
 
   const onTouchMove = (e: React.TouchEvent) => {
+    if (searchOpen) return
     if (swipeAxis.current === 'none') {
       const dx = Math.abs(e.touches[0].clientX - touchStartX.current)
       const dy = Math.abs(e.touches[0].clientY - touchStartY.current)
@@ -399,7 +401,7 @@ export function RandomBetterViewer({
   }
 
   const onTouchEnd = (e: React.TouchEvent) => {
-    if (handleClose) return // 뒤로가기 모드: 스와이프 네비게이션 비활성화
+    if (handleClose || searchOpen) return // 뒤로가기 모드 또는 검색창 열림: 스와이프 비활성화
     const dx = e.changedTouches[0].clientX - touchStartX.current
     const dy = e.changedTouches[0].clientY - touchStartY.current
     const absDx = Math.abs(dx)
@@ -444,7 +446,7 @@ export function RandomBetterViewer({
         @keyframes _slideDown    { from { transform: translateY(-28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
         @keyframes _slideUpModal { from { transform: translateY(100%) } to { transform: translateY(0) } }
         @keyframes _checkPop     { 0% { transform: translate(-50%,-50%) scale(0); opacity:0 } 65% { transform: translate(-50%,-50%) scale(1.3); opacity:1 } 100% { transform: translate(-50%,-50%) scale(1); opacity:1 } }
-        ._tag-search-input::placeholder { color: rgba(255,255,255,0.4); }
+        ._tag-search-input::placeholder { color: #9CA3AF; }
       `}</style>
 
       {/* ── 정보 바 ── */}
@@ -601,23 +603,30 @@ export function RandomBetterViewer({
           {/* 배경 닫힘 backdrop */}
           <div
             onClick={() => setSearchOpen(false)}
-            onTouchEnd={() => setSearchOpen(false)}
+            onTouchStart={e => e.stopPropagation()}
+            onTouchEnd={e => { e.stopPropagation(); setSearchOpen(false) }}
             style={{ position: 'fixed', inset: 0, zIndex: 9994 }}
           />
-          <div style={{
-            position: 'absolute', top: 36, left: 0, right: 0, zIndex: 9995,
-            background: 'rgba(10,10,10,0.96)',
-            backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-            borderBottom: '1px solid rgba(255,255,255,0.08)',
-            animation: '_slideUp 0.18s ease',
-          }}>
+          {/* 패널 — 모든 터치 이벤트를 여기서 흡수해 상위 스와이프 차단 */}
+          <div
+            onTouchStart={e => e.stopPropagation()}
+            onTouchMove={e => e.stopPropagation()}
+            onTouchEnd={e => e.stopPropagation()}
+            style={{
+              position: 'absolute', top: 36, left: 0, right: 0, zIndex: 9995,
+              background: 'white',
+              borderBottom: '1px solid #E5E7EB',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+              animation: '_slideUp 0.18s ease',
+            }}
+          >
             {/* 검색 입력 */}
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
               padding: '10px 14px',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              borderBottom: '1px solid #F3F4F6',
             }}>
-              <Hash size={14} style={{ color: '#A5B4FC', flexShrink: 0 }} />
+              <Hash size={14} style={{ color: '#6366F1', flexShrink: 0 }} />
               <input
                 ref={tagInputRef}
                 type="text"
@@ -625,22 +634,26 @@ export function RandomBetterViewer({
                 value={tagInput}
                 onChange={e => setTagInput(e.target.value)}
                 onTouchStart={e => e.stopPropagation()}
+                onTouchMove={e => e.stopPropagation()}
+                onTouchEnd={e => e.stopPropagation()}
                 onKeyDown={e => {
                   if (e.key === 'Escape') setSearchOpen(false)
                   if (e.key === 'Enter' && tagSuggestions.length > 0) handleTagChange(tagSuggestions[0].name)
                 }}
                 placeholder="태그 검색... (예: 여름코디)"
                 style={{
-                  flex: 1, background: 'transparent', border: 'none', outline: 'none',
-                  color: 'white', WebkitTextFillColor: 'white',
-                  fontSize: '0.88rem', caretColor: 'white',
+                  flex: 1, border: 'none', outline: 'none',
+                  background: 'white',
+                  color: '#111827', WebkitTextFillColor: '#111827',
+                  fontSize: '0.88rem', caretColor: '#6366F1',
+                  touchAction: 'manipulation',
                 }}
               />
               {tagInput && (
                 <button
                   type="button"
                   onClick={() => setTagInput('')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', display: 'flex' }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}
                 >
                   <X size={14} />
                 </button>
@@ -649,7 +662,7 @@ export function RandomBetterViewer({
 
             {/* 태그 목록 */}
             {tagSuggestions.length > 0 ? (
-              <div style={{ maxHeight: 240, overflowY: 'auto' }}>
+              <div style={{ maxHeight: 240, overflowY: 'auto', background: 'white' }}>
                 {tagSuggestions.map((s, i) => (
                   <button
                     key={s.name}
@@ -658,23 +671,23 @@ export function RandomBetterViewer({
                     style={{
                       width: '100%', display: 'flex', alignItems: 'center', gap: 10,
                       padding: '12px 16px',
-                      background: 'transparent',
+                      background: 'white',
                       border: 'none', cursor: 'pointer', textAlign: 'left',
-                      borderBottom: i < tagSuggestions.length - 1 ? '1px solid rgba(255,255,255,0.05)' : undefined,
+                      borderBottom: i < tagSuggestions.length - 1 ? '1px solid #F3F4F6' : undefined,
                     }}
                   >
-                    <Hash size={13} style={{ color: '#A5B4FC', flexShrink: 0 }} />
-                    <span style={{ flex: 1, color: 'white', fontSize: '0.88rem', fontWeight: 600 }}>{s.name}</span>
-                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem' }}>{s.betterCount}개</span>
+                    <Hash size={13} style={{ color: '#6366F1', flexShrink: 0 }} />
+                    <span style={{ flex: 1, color: '#111827', fontSize: '0.88rem', fontWeight: 600 }}>{s.name}</span>
+                    <span style={{ color: '#9CA3AF', fontSize: '0.72rem' }}>{s.betterCount}개</span>
                   </button>
                 ))}
               </div>
             ) : tagInput.replace(/^#+/, '').trim() ? (
-              <div style={{ padding: '20px 16px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem' }}>
+              <div style={{ padding: '20px 16px', textAlign: 'center', color: '#9CA3AF', fontSize: '0.82rem', background: 'white' }}>
                 일치하는 태그가 없어요
               </div>
             ) : (
-              <div style={{ padding: '16px', color: 'rgba(255,255,255,0.35)', fontSize: '0.78rem', textAlign: 'center' }}>
+              <div style={{ padding: '16px', color: '#9CA3AF', fontSize: '0.78rem', textAlign: 'center', background: 'white' }}>
                 태그명을 입력하면 검색 결과가 표시돼요
               </div>
             )}
