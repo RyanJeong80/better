@@ -58,6 +58,26 @@ async function buildRankingData(
         ))
         .leftJoin(users, eq(votes.voterId, users.id))
 
+  // winner 미확정 betters의 다수결 계산
+  const betterCounts = new Map<string, { A: number; B: number; stored: string | null }>()
+  for (const v of allRows) {
+    if (!betterCounts.has(v.betterId)) {
+      betterCounts.set(v.betterId, { A: 0, B: 0, stored: v.winner })
+    }
+    betterCounts.get(v.betterId)![v.choice as 'A' | 'B']++
+  }
+
+  // 유효 winner: stored 우선, 없으면 다수결
+  const effectiveWinner = new Map<string, 'A' | 'B' | null>()
+  for (const [id, c] of betterCounts) {
+    effectiveWinner.set(
+      id,
+      c.stored
+        ? (c.stored as 'A' | 'B')
+        : c.A > c.B ? 'A' : c.B > c.A ? 'B' : null,
+    )
+  }
+
   type Stats = {
     displayName: string
     participated: number  // winner 무관 전체 투표 수
@@ -77,9 +97,10 @@ async function buildRankingData(
     }
     const s = statsMap.get(v.voterId)!
     s.participated++                       // 항상 참여 수에 포함
-    if (v.winner !== null) {
+    const w = effectiveWinner.get(v.betterId)
+    if (w) {
       s.eligible++                         // winner 확정된 것만 적중률 계산
-      if (v.choice === v.winner) s.hits++
+      if (v.choice === w) s.hits++
     }
   }
 

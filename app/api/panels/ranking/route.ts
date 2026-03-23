@@ -10,7 +10,7 @@ export type PanelRankEntry = {
   id: string
   name: string
   participated: number
-  accuracy: number | null // null = 전체(참여 수) 모드
+  accuracy: number | null
 }
 
 export type PanelRankResponse = {
@@ -18,7 +18,6 @@ export type PanelRankResponse = {
   myEntry: { rank: number | null; participated: number; accuracy: number | null } | null
 }
 
-// 최소 투표 수 기준
 const MIN_VOTES_ALL = 10
 const MIN_VOTES_CAT = 5
 
@@ -52,7 +51,7 @@ export async function GET(req: Request) {
   }
 }
 
-// ── 전체: 참여 수 기준 (winner 무관) ───────────────────────────
+// ── 전체: 참여 수 기준 ───────────────────────────────────────────
 async function buildAllRanking(currentUserId: string | null): Promise<PanelRankResponse> {
   const rows = await db
     .select({
@@ -92,18 +91,17 @@ async function buildAllRanking(currentUserId: string | null): Promise<PanelRankR
   return { entries, myEntry }
 }
 
-// ── 카테고리: winner 확정 기반 적중률 ──────────────────────────
+// ── 카테고리: winner 기반 적중률 (미확정은 다수결 폴백) ─────────
 async function buildCategoryRanking(
   category: BetterCategory,
   currentUserId: string | null,
 ): Promise<PanelRankResponse> {
-  // 해당 카테고리 votes + winner 컬럼
   const rows = await db
     .select({
       voterId: votes.voterId,
       betterId: votes.betterId,
       choice: votes.choice,
-      winner: betters.winner,       // null = 미확정
+      winner: betters.winner,
       voterUsername: users.username,
       voterName: users.name,
       voterEmail: users.email,
@@ -115,6 +113,26 @@ async function buildCategoryRanking(
     ))
     .leftJoin(users, eq(votes.voterId, users.id))
 
+  // winner 미확정 betters의 다수결 계산
+  const betterCounts = new Map<string, { A: number; B: number; stored: string | null }>()
+  for (const v of rows) {
+    if (!betterCounts.has(v.betterId)) {
+      betterCounts.set(v.betterId, { A: 0, B: 0, stored: v.winner })
+    }
+    betterCounts.get(v.betterId)![v.choice as 'A' | 'B']++
+  }
+
+  // 유효 winner: stored 우선, 없으면 다수결
+  const effectiveWinner = new Map<string, 'A' | 'B' | null>()
+  for (const [id, c] of betterCounts) {
+    effectiveWinner.set(
+      id,
+      c.stored
+        ? (c.stored as 'A' | 'B')
+        : c.A > c.B ? 'A' : c.B > c.A ? 'B' : null,
+    )
+  }
+
   type Stats = { name: string; participated: number; eligible: number; correct: number }
   const statsMap = new Map<string, Stats>()
 
@@ -125,10 +143,11 @@ async function buildCategoryRanking(
       statsMap.set(v.voterId, { name, participated: 0, eligible: 0, correct: 0 })
     }
     const s = statsMap.get(v.voterId)!
-    s.participated++                          // winner 무관하게 참여 수 포함
-    if (v.winner !== null) {
-      s.eligible++                            // winner 확정된 것만 적중률 계산
-      if (v.choice === v.winner) s.correct++
+    s.participated++
+    const w = effectiveWinner.get(v.betterId)
+    if (w) {
+      s.eligible++
+      if (v.choice === w) s.correct++
     }
   }
 
