@@ -444,6 +444,7 @@ export function RandomBetterViewer({
         @keyframes _slideDown    { from { transform: translateY(-28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
         @keyframes _slideUpModal { from { transform: translateY(100%) } to { transform: translateY(0) } }
         @keyframes _checkPop     { 0% { transform: translate(-50%,-50%) scale(0); opacity:0 } 65% { transform: translate(-50%,-50%) scale(1.3); opacity:1 } 100% { transform: translate(-50%,-50%) scale(1); opacity:1 } }
+        ._tag-search-input::placeholder { color: rgba(255,255,255,0.4); }
       `}</style>
 
       {/* ── 정보 바 ── */}
@@ -620,6 +621,7 @@ export function RandomBetterViewer({
               <input
                 ref={tagInputRef}
                 type="text"
+                className="_tag-search-input"
                 value={tagInput}
                 onChange={e => setTagInput(e.target.value)}
                 onTouchStart={e => e.stopPropagation()}
@@ -630,7 +632,8 @@ export function RandomBetterViewer({
                 placeholder="태그 검색... (예: 여름코디)"
                 style={{
                   flex: 1, background: 'transparent', border: 'none', outline: 'none',
-                  color: 'white', fontSize: '0.88rem',
+                  color: 'white', WebkitTextFillColor: 'white',
+                  fontSize: '0.88rem', caretColor: 'white',
                 }}
               />
               {tagInput && (
