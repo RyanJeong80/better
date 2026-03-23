@@ -642,23 +642,6 @@ export function RandomBetterViewer({
                 </p>
               )}
 
-              {/* 상세보기 버튼 */}
-              {phase === 'voting' && (
-                <button
-                  onTouchEnd={e => { e.stopPropagation(); e.preventDefault(); setDetailPhoto({ url: battle.imageAUrl, description: battle.imageADescription, side: 'A' }) }}
-                  onClick={e => { e.stopPropagation(); setDetailPhoto({ url: battle.imageAUrl, description: battle.imageADescription, side: 'A' }) }}
-                  style={{
-                    position: 'absolute', top: 50, right: 8, zIndex: 5,
-                    background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-                    color: 'white', fontSize: '0.65rem', fontWeight: 700,
-                    padding: '5px 10px', borderRadius: 999,
-                    border: '1px solid rgba(255,255,255,0.25)', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}
-                >
-                  상세보기
-                </button>
-              )}
 
               {/* 선택됨 오버레이 */}
               {(phase === 'picked' || phase === 'submitting') && selectedChoice === 'A' && (
@@ -831,23 +814,6 @@ export function RandomBetterViewer({
                 </p>
               )}
 
-              {/* 상세보기 버튼 */}
-              {phase === 'voting' && (
-                <button
-                  onTouchEnd={e => { e.stopPropagation(); e.preventDefault(); setDetailPhoto({ url: battle.imageBUrl, description: battle.imageBDescription, side: 'B' }) }}
-                  onClick={e => { e.stopPropagation(); setDetailPhoto({ url: battle.imageBUrl, description: battle.imageBDescription, side: 'B' }) }}
-                  style={{
-                    position: 'absolute', top: 8, right: 8, zIndex: 5,
-                    background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-                    color: 'white', fontSize: '0.65rem', fontWeight: 700,
-                    padding: '5px 10px', borderRadius: 999,
-                    border: '1px solid rgba(255,255,255,0.25)', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}
-                >
-                  상세보기
-                </button>
-              )}
 
               {/* 선택됨 오버레이 */}
               {(phase === 'picked' || phase === 'submitting') && selectedChoice === 'B' && (
