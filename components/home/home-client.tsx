@@ -19,6 +19,7 @@ export function HomeClient({
 }) {
   const [activePanel, setActivePanel] = useState(0) // 0=랜덤Better, 1=Hot Better, 2=랭킹, 3=프로필
   const [currentBattle, setCurrentBattle] = useState<BattleForVoting | null>(initialBattle)
+  const [commentOpen, setCommentOpen] = useState(false)
 
   // Hot Better 카드 클릭 시 호출 — 랜덤Better 패널(0)로 전환 + 해당 Better 표시
   const handleSelectFromHot = useCallback((entry: PanelHotEntry) => {
@@ -46,12 +47,14 @@ export function HomeClient({
           <RandomBetterViewer
             key={currentBattle?.id ?? 'empty'}
             initialBattle={currentBattle}
+            onCommentOpen={setCommentOpen}
           />
         </div>
       }
       hotContent={<HotPanelClient onSelectBattle={handleSelectFromHot} />}
       rankingContent={<RankingPanelClient />}
       profileContent={<ProfilePanelClient user={user} />}
+      hideIndicator={commentOpen}
     />
   )
 }

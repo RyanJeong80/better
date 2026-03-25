@@ -38,12 +38,14 @@ export function RandomBetterViewer({
   isDemo = false,
   onClose,
   showBack = false,
+  onCommentOpen,
 }: {
   initialBattle: BattleForVoting | null
   initialCategory?: CategoryFilter
   isDemo?: boolean
   onClose?: () => void
   showBack?: boolean
+  onCommentOpen?: (open: boolean) => void
 }) {
   const router = useRouter()
   const t = useTranslations()
@@ -138,6 +140,12 @@ export function RandomBetterViewer({
       })
       .catch(() => {}) // 실패 시 원문 유지
   }, [battle?.id, locale]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 사유 입력 UI 열림/닫힘 → 부모에 전달
+  useEffect(() => {
+    const isOpen = phase === 'picked' || phase === 'submitting'
+    onCommentOpen?.(isOpen)
+  }, [phase, onCommentOpen])
 
   useEffect(() => {
     try {
