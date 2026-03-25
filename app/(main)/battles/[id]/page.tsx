@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import { eq } from 'drizzle-orm'
+import { getTranslations } from 'next-intl/server'
 import { db } from '@/lib/db'
 import { betters, votes } from '@/lib/db/schema'
 import { createClient } from '@/lib/supabase/server'
@@ -38,11 +39,13 @@ export default async function BattlePage({
       total: allVotes.length,
     }
 
+    const t = await getTranslations('vote')
+
     return (
       <div className="mx-auto max-w-2xl space-y-6">
         <div>
           <h2 className="text-2xl font-bold">{better.title}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">총 {counts.total}표</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t('totalVotes', { count: counts.total })}</p>
         </div>
 
         <BattleVote

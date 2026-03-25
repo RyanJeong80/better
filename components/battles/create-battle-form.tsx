@@ -2,6 +2,7 @@
 
 import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { ImagePlus, ArrowLeft, Loader2, X, Hash } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { saveBattle } from '@/actions/battles'
@@ -166,13 +167,14 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
   onChange: (patch: Partial<SlotState>) => void
   onEdit?: () => void
 }>(function ImageSlot({ side, state, onChange, onEdit }, ref) {
+  const t = useTranslations('create')
   const hasImage = !!state.preview || state.uploading
   const nearLimit = state.desc.length >= 80
   const atLimit = state.desc.length >= MAX_DESC
 
   const handleFile = async (file: File) => {
     if (file.size > MAX_FILE_MB * 1024 * 1024) {
-      onChange({ uploadError: `파일 크기는 ${MAX_FILE_MB}MB 이하여야 합니다` })
+      onChange({ uploadError: t('fileSizeError', { maxMb: MAX_FILE_MB }) })
       return
     }
     if (state.preview?.startsWith('blob:')) URL.revokeObjectURL(state.preview)
@@ -196,7 +198,7 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
       const { data: { publicUrl } } = supabase.storage.from('battle-images').getPublicUrl(data.path)
       onChange({ uploading: false, url: publicUrl })
     } catch (e) {
-      onChange({ uploading: false, uploadError: `업로드 중 오류: ${e instanceof Error ? e.message : String(e)}` })
+      onChange({ uploading: false, uploadError: t('uploadError', { message: e instanceof Error ? e.message : String(e) }) })
     }
   }
 
@@ -217,10 +219,10 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
         {state.preview ? (
           <>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={state.preview} alt={`미리보기 ${side}`} className="h-full w-full object-cover" />
+            <img src={state.preview} alt={`${side}`} className="h-full w-full object-cover" />
             <div className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center gap-1.5 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
               <ImagePlus className="h-5 w-5 text-white" />
-              <p className="text-xs font-semibold text-white">사진 변경</p>
+              <p className="text-xs font-semibold text-white">{t('changePhoto')}</p>
             </div>
             {state.uploading && (
               <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/40">
@@ -251,8 +253,8 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
                   <ImagePlus className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium text-muted-foreground">클릭 또는 드래그</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground/60">사진 대신 밑에 글로 적어도 됩니다</p>
+                  <p className="text-sm font-medium text-muted-foreground">{t('clickOrDrag')}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground/60">{t('orTypeText')}</p>
                 </div>
               </>
             )}
@@ -268,13 +270,13 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
           onClick={onEdit}
           className="w-full rounded-xl border border-border bg-background py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
         >
-          ✏️ 편집
+          {t('editImage')}
         </button>
       )}
 
       {!hasImage && (
         <div className="flex items-center gap-2.5">
-          <span className="text-xs text-muted-foreground shrink-0">배경색</span>
+          <span className="text-xs text-muted-foreground shrink-0">{t('bgColor')}</span>
           <div className="flex gap-1.5">
             {TEXT_BG_COLORS.map((color, i) => (
               <button
@@ -295,7 +297,10 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
       <div className="space-y-1.5">
         <div className="flex items-center justify-between">
           <label className="text-xs font-medium text-muted-foreground">
-            {hasImage ? <>설명 <span className="text-muted-foreground/50">(선택)</span></> : <>텍스트 내용 <span className="text-muted-foreground/50">(이미지로 변환됩니다)</span></>}
+            {hasImage
+              ? <>{t('descLabel')} <span className="text-muted-foreground/50">{t('optional')}</span></>
+              : <>{t('textContentLabel')} <span className="text-muted-foreground/50">{t('textConverted')}</span></>
+            }
           </label>
           <span className={['text-xs tabular-nums transition-colors', atLimit ? 'font-semibold text-destructive' : nearLimit ? 'text-orange-400' : 'text-muted-foreground/50'].join(' ')}>
             {state.desc.length}/{MAX_DESC}
@@ -305,7 +310,7 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
           value={state.desc}
           onChange={(e) => onChange({ desc: e.target.value.slice(0, MAX_DESC) })}
           maxLength={MAX_DESC} rows={2}
-          placeholder={hasImage ? `사진 ${side}에 대해 설명해주세요` : '텍스트를 입력하면 이미지로 변환됩니다'}
+          placeholder={hasImage ? t('descPlaceholder', { side }) : t('textPlaceholder')}
           className="w-full resize-none rounded-xl border border-input bg-background px-3.5 py-2.5 text-base outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
         />
       </div>
@@ -326,6 +331,7 @@ function TagInput({ value, onChange }: { value: string[]; onChange: (tags: strin
   const [suggIdx, setSuggIdx] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const t = useTranslations('create')
 
   const cleanTag = (raw: string) =>
     raw.toLowerCase().replace(/^#+/, '').replace(/\s+/g, '').slice(0, 30)
@@ -418,7 +424,7 @@ function TagInput({ value, onChange }: { value: string[]; onChange: (tags: strin
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-            placeholder={value.length === 0 ? '#태그 입력 후 스페이스' : ''}
+            placeholder={value.length === 0 ? t('tagInputPlaceholder') : ''}
             style={{
               flex: 1, minWidth: 80, border: 'none', outline: 'none',
               background: 'transparent', fontSize: '0.85rem',
@@ -459,7 +465,7 @@ function TagInput({ value, onChange }: { value: string[]; onChange: (tags: strin
       )}
 
       <p style={{ marginTop: 6, fontSize: '0.68rem', color: 'var(--color-muted-foreground)' }}>
-        스페이스 또는 엔터로 태그 확정 · 최대 {MAX_TAGS}개 · {value.length}/{MAX_TAGS}
+        {t('tagHint', { max: MAX_TAGS, count: value.length })}
       </p>
     </div>
   )
@@ -484,6 +490,7 @@ function BattlePreviewCard({
   slotA: SlotState
   slotB: SlotState
 }) {
+  const t = useTranslations()
   const cat = CATEGORY_MAP[category]
   const catStyle = CAT_BADGE_COLORS[category]
 
@@ -501,7 +508,7 @@ function BattlePreviewCard({
           borderRadius: 999, padding: '2px 8px', fontSize: '0.68rem', fontWeight: 700,
           background: catStyle.bg, color: catStyle.text, marginBottom: 6,
         }}>
-          {cat.emoji} {cat.label}
+          {cat.emoji} {t(`categories.${category}` as Parameters<typeof t>[0])}
         </span>
         <p style={{
           fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.35,
@@ -525,7 +532,7 @@ function BattlePreviewCard({
             }}>
               {imgSrc ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={imgSrc} alt={`사진 ${side}`}
+                <img src={imgSrc} alt={side}
                   style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (
@@ -541,7 +548,7 @@ function BattlePreviewCard({
                     overflow: 'hidden', display: '-webkit-box',
                     WebkitLineClamp: 6, WebkitBoxOrient: 'vertical',
                   }}>
-                    {slot.desc || `사진 ${side}`}
+                    {slot.desc || side}
                   </p>
                 </div>
               )}
@@ -576,7 +583,7 @@ function BattlePreviewCard({
       {/* 푸터 힌트 */}
       <div style={{ padding: '10px 14px', borderTop: '1px solid var(--color-border)' }}>
         <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--color-muted-foreground)' }}>
-          사진을 탭하여 선택하는 화면으로 표시됩니다
+          {t('create.previewHint')}
         </p>
       </div>
     </div>
@@ -597,6 +604,8 @@ const initUpload = (): UploadState => ({ running: false, step: '', progress: 0, 
 // ─── 메인 폼 ──────────────────────────────────────────────────────
 export function CreateBattleForm() {
   const router = useRouter()
+  const t = useTranslations('create')
+  const tCategories = useTranslations('categories')
   const [slotA, setSlotA] = useState<SlotState>(initSlot)
   const [slotB, setSlotB] = useState<SlotState>(initSlot)
   const [title, setTitle] = useState('')
@@ -637,7 +646,7 @@ export function CreateBattleForm() {
 
   // ── 이대로 올리기 ──────────────────────────────────────────────
   async function handleSubmit() {
-    setUpload({ running: true, step: '이미지 업로드 중... (1/2)', progress: 10, error: null, done: false })
+    setUpload({ running: true, step: t('uploadStep1'), progress: 10, error: null, done: false })
 
     let urlA = slotA.url
     let urlB = slotB.url
@@ -650,16 +659,16 @@ export function CreateBattleForm() {
         urlB = await uploadTextImage(slotB.desc.trim(), slotB.selectedColor, 'B')
       }
     } catch (e) {
-      setUpload({ running: false, step: '', progress: 0, error: `이미지 업로드 오류: ${e instanceof Error ? e.message : String(e)}`, done: false })
+      setUpload({ running: false, step: '', progress: 0, error: t('imageUploadError', { message: e instanceof Error ? e.message : String(e) }), done: false })
       return
     }
 
     if (!urlA || !urlB) {
-      setUpload({ running: false, step: '', progress: 0, error: 'A와 B 모두 이미지 또는 텍스트가 필요합니다', done: false })
+      setUpload({ running: false, step: '', progress: 0, error: t('bothContentRequired'), done: false })
       return
     }
 
-    setUpload(u => ({ ...u, step: 'Better 저장 중... (2/2)', progress: 60 }))
+    setUpload(u => ({ ...u, step: t('saveStep2'), progress: 60 }))
 
     const formData = new FormData()
     formData.set('title', title.trim())
@@ -676,10 +685,10 @@ export function CreateBattleForm() {
         setUpload({ running: false, step: '', progress: 0, error: result.error, done: false })
         return
       }
-      setUpload({ running: false, step: '완료! 🎉', progress: 100, error: null, done: true })
+      setUpload({ running: false, step: t('done'), progress: 100, error: null, done: true })
       setTimeout(() => router.push('/profile'), 1200)
     } catch (e) {
-      setUpload({ running: false, step: '', progress: 0, error: `저장 오류: ${e instanceof Error ? e.message : String(e)}`, done: false })
+      setUpload({ running: false, step: '', progress: 0, error: t('saveError', { message: e instanceof Error ? e.message : String(e) }), done: false })
     }
   }
 
@@ -703,8 +712,8 @@ export function CreateBattleForm() {
 
         {/* 헤더 */}
         <div>
-          <p className="text-lg font-black">미리보기</p>
-          <p className="text-xs text-muted-foreground mt-0.5">실제로 보여질 모습입니다</p>
+          <p className="text-lg font-black">{t('previewTitle')}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{t('previewSubtitle')}</p>
         </div>
 
         {/* 미리보기 카드 */}
@@ -740,7 +749,7 @@ export function CreateBattleForm() {
               className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-background py-3 text-sm font-semibold transition-opacity disabled:opacity-40"
             >
               <ArrowLeft size={15} />
-              수정하기
+              {t('goBack')}
             </button>
             <button
               type="button"
@@ -753,7 +762,7 @@ export function CreateBattleForm() {
                   <Loader2 size={15} className="animate-spin" />
                   {upload.step}
                 </>
-              ) : '이대로 올리기'}
+              ) : t('submitButton')}
             </button>
           </div>
         )}
@@ -775,7 +784,7 @@ export function CreateBattleForm() {
       {/* 카테고리 선택 */}
       <div className="space-y-2">
         <label className="text-sm font-medium">
-          카테고리 <span className="text-destructive">*</span>
+          {t('categoryLabel')} <span className="text-destructive">*</span>
         </label>
         <div className="grid grid-cols-3 gap-2">
           {CATEGORIES.map((cat) => (
@@ -788,25 +797,25 @@ export function CreateBattleForm() {
               ].join(' ')}
             >
               <span className="text-2xl">{cat.emoji}</span>
-              <span className="text-xs font-semibold">{cat.label}</span>
+              <span className="text-xs font-semibold">{tCategories(cat.id as Parameters<typeof tCategories>[0])}</span>
             </button>
           ))}
         </div>
         {category ? (
-          <p className="text-xs text-muted-foreground">{CATEGORY_MAP[category].description}</p>
+          <p className="text-xs text-muted-foreground">{tCategories(`${category}Desc` as Parameters<typeof tCategories>[0])}</p>
         ) : (
-          <p className="text-xs text-muted-foreground/50">카테고리를 먼저 선택해주세요</p>
+          <p className="text-xs text-muted-foreground/50">{t('categoryFirst')}</p>
         )}
       </div>
 
       {/* 제목 */}
       <div className="space-y-1.5">
-        <label htmlFor="title" className="text-sm font-medium">제목</label>
+        <label htmlFor="title" className="text-sm font-medium">{t('titleLabel')}</label>
         <input
           id="title" type="text" required
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="어떤 걸 비교하나요? (예: 어떤 프로필 사진이 더 나아?)"
+          placeholder={t('titlePlaceholder')}
           className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-base outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
         />
       </div>
@@ -814,7 +823,7 @@ export function CreateBattleForm() {
       {/* 태그 */}
       <div className="space-y-1.5">
         <label className="text-sm font-medium">
-          태그 <span className="text-muted-foreground/50 text-xs font-normal">(선택)</span>
+          {t('tagsLabel')} <span className="text-muted-foreground/50 text-xs font-normal">{t('optional')}</span>
         </label>
         <TagInput value={selectedTags} onChange={setSelectedTags} />
       </div>
@@ -841,12 +850,12 @@ export function CreateBattleForm() {
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
-            업로드 중…
+            {t('uploading')}
           </span>
-        ) : !category ? '카테고리를 선택해주세요'
-          : !title.trim() ? '제목을 입력해주세요'
-          : (!hasContentA || !hasContentB) ? 'A와 B 모두 내용을 입력해주세요'
-          : '미리보기'}
+        ) : !category ? t('categoryFirst')
+          : !title.trim() ? t('titleNeeded')
+          : (!hasContentA || !hasContentB) ? t('bothRequired')
+          : t('previewTitle')}
       </button>
     </div>
     </>

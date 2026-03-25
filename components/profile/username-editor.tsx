@@ -2,10 +2,12 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { useFormStatus } from 'react-dom'
+import { useTranslations } from 'next-intl'
 import { checkUsernameAvailable, updateUsername, type UsernameState } from '@/actions/users'
 
 function SaveButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus()
+  const t = useTranslations('username')
   return (
     <button
       type="submit"
@@ -13,7 +15,7 @@ function SaveButton({ disabled }: { disabled?: boolean }) {
       className="rounded-lg px-3 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
       style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)' }}
     >
-      {pending ? '저장 중…' : '저장'}
+      {pending ? t('saving') : t('save')}
     </button>
   )
 }
@@ -25,6 +27,7 @@ export function UsernameEditor({ currentUsername }: { currentUsername: string })
   const [checking, setChecking] = useState(false)
   const [availability, setAvailability] = useState<{ available: boolean; error?: string } | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const t = useTranslations('username')
 
   useEffect(() => {
     if (state === null && editing) {
@@ -63,7 +66,7 @@ export function UsernameEditor({ currentUsername }: { currentUsername: string })
           onClick={() => setEditing(true)}
           className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent"
         >
-          변경
+          {t('edit')}
         </button>
       </div>
     )
@@ -99,7 +102,7 @@ export function UsernameEditor({ currentUsername }: { currentUsername: string })
           onClick={() => { setEditing(false); setValue(currentUsername) }}
           className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium transition-colors hover:bg-accent"
         >
-          취소
+          {t('cancel')}
         </button>
       </div>
 
@@ -107,7 +110,7 @@ export function UsernameEditor({ currentUsername }: { currentUsername: string })
         <p className="text-xs text-rose-500">{availability?.error}</p>
       )}
       {!checking && isAvailable && (
-        <p className="text-xs text-emerald-600">사용 가능한 닉네임이에요</p>
+        <p className="text-xs text-emerald-600">{t('available')}</p>
       )}
       {state?.error && (
         <p className="text-xs text-rose-500">{state.error}</p>

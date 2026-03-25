@@ -1,6 +1,7 @@
 'use client'
 
 import { useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { castVote } from '@/actions/votes'
 import { useRealtimeVotes } from '@/hooks/use-realtime-votes'
 import type { VoteChoice } from '@/types'
@@ -16,6 +17,7 @@ interface Props {
 
 export function BattleVote({ battleId, imageAUrl, imageBUrl, counts, userVote, readOnly = false }: Props) {
   const [isPending, startTransition] = useTransition()
+  const t = useTranslations('vote')
   const live = useRealtimeVotes(battleId, counts)
 
   const hasVoted = readOnly || userVote !== null
@@ -55,7 +57,7 @@ export function BattleVote({ battleId, imageAUrl, imageBUrl, counts, userVote, r
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageUrl}
-                alt={`사진 ${choice}`}
+                alt={choice}
                 className="aspect-square w-full object-cover"
               />
 
@@ -68,14 +70,14 @@ export function BattleVote({ battleId, imageAUrl, imageBUrl, counts, userVote, r
                   </span>
                   {isWinner && (
                     <span className="mt-1.5 rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-bold text-white backdrop-blur-sm">
-                      우세
+                      {t('winning')}
                     </span>
                   )}
                   {/* 바 */}
                   <div className="absolute bottom-4 left-4 right-4">
                     <div className="mb-1 flex justify-between text-white/80 text-xs font-medium">
                       <span>{choice}</span>
-                      <span>{choice === 'A' ? live.A : live.B}명</span>
+                      <span>{t('voterCount', { count: choice === 'A' ? live.A : live.B })}</span>
                     </div>
                     <div className="h-1.5 w-full rounded-full bg-white/30">
                       <div
@@ -101,13 +103,13 @@ export function BattleVote({ battleId, imageAUrl, imageBUrl, counts, userVote, r
 
       {!hasVoted && (
         <p className="text-center text-sm text-muted-foreground">
-          사진을 클릭해서 투표하세요
+          {t('clickToVote')}
         </p>
       )}
 
       {hasVoted && (
         <p className="text-center text-sm text-muted-foreground">
-          총 {live.total}표
+          {t('totalVotes', { count: live.total })}
         </p>
       )}
     </div>

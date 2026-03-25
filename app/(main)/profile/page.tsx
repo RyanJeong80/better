@@ -12,7 +12,10 @@ import { UsernameEditor } from '@/components/profile/username-editor'
 import { ProfileBetterList, type BattleWithStats } from '@/components/profile/profile-better-list'
 
 export default async function ProfilePage() {
-  const t = await getTranslations('categories')
+  const tCategories = await getTranslations('categories')
+  const tProfile = await getTranslations('profile')
+  const tAuth = await getTranslations('auth')
+  const tRanking = await getTranslations('ranking')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -140,7 +143,7 @@ export default async function ProfilePage() {
               <LevelBadge level={levelInfo} size="xs" />
               {bestCat && (
                 <span style={{ fontSize: '0.65rem', color: 'var(--color-muted-foreground)' }}>
-                  {CATEGORY_LABELS[bestCat.key].emoji} {t(bestCat.key as Parameters<typeof t>[0])} 전문
+                  {CATEGORY_LABELS[bestCat.key].emoji} {tProfile('expertBadge', { category: tCategories(bestCat.key as Parameters<typeof tCategories>[0]) })}
                 </span>
               )}
             </div>
@@ -151,7 +154,7 @@ export default async function ProfilePage() {
             type="submit"
             className="rounded-xl border border-border px-3 py-1.5 text-xs font-medium transition-colors hover:bg-accent"
           >
-            로그아웃
+            {tAuth('logout')}
           </button>
         </form>
       </div>
@@ -169,21 +172,21 @@ export default async function ProfilePage() {
             </p>
             <div style={{ display: 'flex', gap: 12 }}>
               <div>
-                <p style={{ fontSize: '0.65rem', color: '#6B7280' }}>총 투표</p>
+                <p style={{ fontSize: '0.65rem', color: '#6B7280' }}>{tProfile('totalVotesLabel')}</p>
                 <p style={{ fontSize: '1.2rem', fontWeight: 900, color: levelInfo.color, lineHeight: 1.1 }}>
                   {stats?.totalVotes ?? 0}
-                  <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>건</span>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>{tRanking('countUnit')}</span>
                 </p>
               </div>
               <div>
-                <p style={{ fontSize: '0.65rem', color: '#6B7280' }}>적중률</p>
+                <p style={{ fontSize: '0.65rem', color: '#6B7280' }}>{tProfile('accuracy')}</p>
                 <p style={{ fontSize: '1.2rem', fontWeight: 900, color: levelInfo.color, lineHeight: 1.1 }}>
                   {stats?.accuracyRate != null ? `${parseFloat(stats.accuracyRate as string).toFixed(1)}%` : '-'}
                 </p>
               </div>
               {bestCat && (
                 <div>
-                  <p style={{ fontSize: '0.65rem', color: '#6B7280' }}>전문 분야</p>
+                  <p style={{ fontSize: '0.65rem', color: '#6B7280' }}>{tProfile('specialtyLabel')}</p>
                   <p style={{ fontSize: '1.2rem', fontWeight: 900, color: levelInfo.color, lineHeight: 1.1 }}>
                     {CATEGORY_LABELS[bestCat.key].emoji}
                     <span style={{ fontSize: '0.75rem', fontWeight: 700, marginLeft: 2 }}>
@@ -212,7 +215,7 @@ export default async function ProfilePage() {
                   }}
                 >
                   {CATEGORY_LABELS[c.key].emoji}
-                  <span style={{ color: '#6B7280' }}>{t(c.key as Parameters<typeof t>[0])}</span>
+                  <span style={{ color: '#6B7280' }}>{tCategories(c.key as Parameters<typeof tCategories>[0])}</span>
                   <span style={{ color: levelInfo.color }}>{parseFloat(c.value).toFixed(0)}%</span>
                 </span>
               ))}
@@ -223,9 +226,9 @@ export default async function ProfilePage() {
       {/* 요약 통계 */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Better', value: `${battlesWithStats.length}개` },
-          { label: '총 투표', value: `${totalVotes}표` },
-          { label: '좋아요', value: `${totalLikes}` },
+          { label: tProfile('myBetters'), value: tProfile('betterCountValue', { count: battlesWithStats.length }) },
+          { label: tProfile('totalVotesLabel'), value: tProfile('totalVotesValue', { count: totalVotes }) },
+          { label: tProfile('likesLabel'), value: `${totalLikes}` },
         ].map(({ label, value }) => (
           <div key={label} className="rounded-2xl border border-border bg-card p-4 text-center">
             <p className="text-xs text-muted-foreground">{label}</p>

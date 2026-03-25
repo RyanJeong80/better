@@ -54,7 +54,38 @@
       "titleRequired": "Please enter a title",
       "photoARequired": "Photo A upload incomplete",
       "photoBRequired": "Photo B upload incomplete"
-    }
+    },
+    "newTitle": "Create New Better",
+    "subtitle": "Upload two photos and get people's choice",
+    "changePhoto": "Change photo",
+    "clickOrDrag": "Click or drag",
+    "orTypeText": "Or type text below instead",
+    "editImage": "✏️ Edit",
+    "bgColor": "Background",
+    "descLabel": "Description",
+    "optional": "(optional)",
+    "textContentLabel": "Text content",
+    "textConverted": "(will be converted to image)",
+    "descPlaceholder": "Describe photo {side}",
+    "textPlaceholder": "Type text to convert to image",
+    "tagInputPlaceholder": "#tag then space",
+    "tagHint": "Space or Enter to add · Max {max} · {count}/{max}",
+    "previewTitle": "Preview",
+    "previewSubtitle": "This is how it will look",
+    "previewHint": "Photos shown as tap to vote",
+    "goBack": "Edit",
+    "submitButton": "Post as is",
+    "uploadStep1": "Uploading images... (1/2)",
+    "saveStep2": "Saving Better... (2/2)",
+    "done": "Done! 🎉",
+    "categoryFirst": "Please select a category first",
+    "titleNeeded": "Please enter a title",
+    "bothRequired": "Please add content for both A and B",
+    "fileSizeError": "File must be under {maxMb}MB",
+    "uploadError": "Upload error: {message}",
+    "imageUploadError": "Image upload error: {message}",
+    "bothContentRequired": "Both A and B need image or text",
+    "saveError": "Save error: {message}"
   },
   "vote": {
     "tapToSelect": "Tap a photo to choose",
@@ -82,7 +113,15 @@
     "participated": "Votes",
     "category": "Category",
     "loading": "Loading...",
-    "me": "Me"
+    "me": "Me",
+    "winning": "Leading",
+    "clickToVote": "Click a photo to vote",
+    "totalVotes": "{count} votes total",
+    "voterCount": "{count}",
+    "tagNoMatch": "No matching tags",
+    "tagSearchPrompt": "Type a tag name to search",
+    "prevButton": "Back",
+    "nextButton": "Next"
   },
   "hint": {
     "title": "How to use",
@@ -106,7 +145,14 @@
     "shoppingShort": "Shop",
     "foodShort": "Food",
     "itShort": "IT",
-    "decisionShort": "Decide"
+    "decisionShort": "Decide",
+    "fashionDesc": "Which outfit is better?",
+    "appearanceDesc": "Who looks more attractive?",
+    "loveDesc": "Should I confess? What do you think?",
+    "shoppingDesc": "Should I buy this? Which brand is better?",
+    "foodDesc": "This place vs that place, which cafe?",
+    "itDesc": "iPhone vs Galaxy, which product is better?",
+    "decisionDesc": "Can't decide? Ask people!"
   },
   "levels": {
     "iron": "Iron",
@@ -147,7 +193,17 @@
     "createFirst": "Create your first Better!",
     "me": "Me",
     "expert": "{category} Expert",
-    "bestCategory": "Best category"
+    "bestCategory": "Best category",
+    "expertBadge": "{category} Expert",
+    "specialtyLabel": "Specialty",
+    "totalVotesLabel": "Total Votes",
+    "likesLabel": "Likes",
+    "betterCountValue": "{count}",
+    "totalVotesValue": "{count} votes",
+    "noBettersYet": "No Betters yet",
+    "noBettersDesc": "Upload two photos and let people choose",
+    "createFirstBetter": "Create first Better",
+    "noCategoryBetters": "No Betters in this category"
   },
   "hot": {
     "title": "Hot 100",
@@ -156,7 +212,10 @@
     "share": "Share",
     "noData": "No data yet",
     "voteCount": "{count} votes",
-    "hot100Recommend": "Recommend to Hot100"
+    "hot100Recommend": "Recommend to Hot100",
+    "subtitle100": "Top 100 most liked Betters",
+    "noLikes": "No likes yet",
+    "noLikesDesc": "Like a Better from random explore"
   },
   "explore": {
     "title": "Explore"
@@ -167,6 +226,21 @@
     "retry": "Retry",
     "close": "Close",
     "back": "Back",
-    "search": "Search"
+    "search": "Search",
+    "cancel": "Cancel"
+  },
+  "participation": {
+    "unit": ""
+  },
+  "swipe": {
+    "hint": "↑ Swipe to continue",
+    "up": "↑ Swipe up"
+  },
+  "username": {
+    "save": "Save",
+    "saving": "Saving…",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "available": "Username is available"
   }
 }

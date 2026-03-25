@@ -54,7 +54,38 @@
       "titleRequired": "제목을 입력해주세요",
       "photoARequired": "사진 A 업로드가 완료되지 않았습니다",
       "photoBRequired": "사진 B 업로드가 완료되지 않았습니다"
-    }
+    },
+    "newTitle": "새 Better 만들기",
+    "subtitle": "두 사진을 올리고 사람들에게 선택을 받아보세요",
+    "changePhoto": "사진 변경",
+    "clickOrDrag": "클릭 또는 드래그",
+    "orTypeText": "사진 대신 밑에 글로 적어도 됩니다",
+    "editImage": "✏️ 편집",
+    "bgColor": "배경색",
+    "descLabel": "설명",
+    "optional": "(선택)",
+    "textContentLabel": "텍스트 내용",
+    "textConverted": "(이미지로 변환됩니다)",
+    "descPlaceholder": "사진 {side}에 대해 설명해주세요",
+    "textPlaceholder": "텍스트를 입력하면 이미지로 변환됩니다",
+    "tagInputPlaceholder": "#태그 입력 후 스페이스",
+    "tagHint": "스페이스 또는 엔터로 태그 확정 · 최대 {max}개 · {count}/{max}",
+    "previewTitle": "미리보기",
+    "previewSubtitle": "실제로 보여질 모습입니다",
+    "previewHint": "사진을 탭하여 선택하는 화면으로 표시됩니다",
+    "goBack": "수정하기",
+    "submitButton": "이대로 올리기",
+    "uploadStep1": "이미지 업로드 중... (1/2)",
+    "saveStep2": "Better 저장 중... (2/2)",
+    "done": "완료! 🎉",
+    "categoryFirst": "카테고리를 먼저 선택해주세요",
+    "titleNeeded": "제목을 입력해주세요",
+    "bothRequired": "A와 B 모두 내용을 입력해주세요",
+    "fileSizeError": "파일 크기는 {maxMb}MB 이하여야 합니다",
+    "uploadError": "업로드 중 오류: {message}",
+    "imageUploadError": "이미지 업로드 오류: {message}",
+    "bothContentRequired": "A와 B 모두 이미지 또는 텍스트가 필요합니다",
+    "saveError": "저장 오류: {message}"
   },
   "vote": {
     "tapToSelect": "사진을 눌러 선택하세요",
@@ -82,7 +113,15 @@
     "participated": "참여",
     "category": "카테고리",
     "loading": "불러오는 중...",
-    "me": "나"
+    "me": "나",
+    "winning": "우세",
+    "clickToVote": "사진을 클릭해서 투표하세요",
+    "totalVotes": "총 {count}표",
+    "voterCount": "{count}명",
+    "tagNoMatch": "일치하는 태그가 없어요",
+    "tagSearchPrompt": "태그명을 입력하면 검색 결과가 표시돼요",
+    "prevButton": "이전",
+    "nextButton": "다음"
   },
   "hint": {
     "title": "사용 방법",
@@ -106,7 +145,14 @@
     "shoppingShort": "쇼핑",
     "foodShort": "맛집",
     "itShort": "IT",
-    "decisionShort": "결정"
+    "decisionShort": "결정",
+    "fashionDesc": "어떤 코디가 나을까? 누가 더 잘 입었을까?",
+    "appearanceDesc": "누가 더 매력있을까? 어떤 헤어스타일이 더 어울릴까?",
+    "loveDesc": "고백할까 말까? 이 사람 어때?",
+    "shoppingDesc": "이거 살까 말까? 어느 브랜드가 나을까?",
+    "foodDesc": "이 집 vs 저 집, 어느 카페가 더 좋아?",
+    "itDesc": "아이폰 vs 갤럭시, 어떤 제품이 더 나을까?",
+    "decisionDesc": "어떤 걸 사는 게 나은지, 무엇이든 결정하기 어렵다면?"
   },
   "levels": {
     "iron": "아이언",
@@ -147,7 +193,17 @@
     "createFirst": "첫 번째 Better를 만들어보세요!",
     "me": "나",
     "expert": "{category} 전문가",
-    "bestCategory": "가장 잘 맞히는 카테고리"
+    "bestCategory": "가장 잘 맞히는 카테고리",
+    "expertBadge": "{category} 전문",
+    "specialtyLabel": "전문 분야",
+    "totalVotesLabel": "총 투표",
+    "likesLabel": "좋아요",
+    "betterCountValue": "{count}개",
+    "totalVotesValue": "{count}표",
+    "noBettersYet": "아직 Better가 없어요",
+    "noBettersDesc": "두 사진을 올리고 사람들의 선택을 받아보세요",
+    "createFirstBetter": "첫 Better 만들기",
+    "noCategoryBetters": "이 카테고리의 Better가 없어요"
   },
   "hot": {
     "title": "Hot 100",
@@ -156,7 +212,10 @@
     "share": "공유",
     "noData": "아직 데이터가 없어요",
     "voteCount": "{count}표",
-    "hot100Recommend": "Hot100에 추천하기"
+    "hot100Recommend": "Hot100에 추천하기",
+    "subtitle100": "좋아요를 가장 많이 받은 Better 100선",
+    "noLikes": "아직 좋아요가 없어요",
+    "noLikesDesc": "랜덤 Better에서 마음에 드는 Better에 좋아요를 눌러보세요"
   },
   "explore": {
     "title": "랜덤 탐색"
@@ -167,6 +226,21 @@
     "retry": "다시 시도",
     "close": "닫기",
     "back": "뒤로",
-    "search": "검색"
+    "search": "검색",
+    "cancel": "취소"
+  },
+  "participation": {
+    "unit": "개"
+  },
+  "swipe": {
+    "hint": "↑ 스와이프로 넘기기",
+    "up": "↑ 위로 스와이프"
+  },
+  "username": {
+    "save": "저장",
+    "saving": "저장 중…",
+    "edit": "변경",
+    "cancel": "취소",
+    "available": "사용 가능한 닉네임이에요"
   }
 }

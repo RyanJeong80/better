@@ -54,7 +54,38 @@
       "titleRequired": "Por favor ingresa un título",
       "photoARequired": "La subida de la foto A no está completa",
       "photoBRequired": "La subida de la foto B no está completa"
-    }
+    },
+    "newTitle": "Crear nuevo Better",
+    "subtitle": "Sube dos fotos y obtén la elección de las personas",
+    "changePhoto": "Cambiar foto",
+    "clickOrDrag": "Clic o arrastrar",
+    "orTypeText": "O escribe texto abajo",
+    "editImage": "✏️ Editar",
+    "bgColor": "Fondo",
+    "descLabel": "Descripción",
+    "optional": "(opcional)",
+    "textContentLabel": "Contenido de texto",
+    "textConverted": "(se convertirá en imagen)",
+    "descPlaceholder": "Describe la foto {side}",
+    "textPlaceholder": "Escribe texto para convertir a imagen",
+    "tagInputPlaceholder": "#etiqueta luego espacio",
+    "tagHint": "Espacio o Enter para añadir · Máx {max} · {count}/{max}",
+    "previewTitle": "Vista previa",
+    "previewSubtitle": "Así se verá",
+    "previewHint": "Las fotos se mostrarán para votar al tocar",
+    "goBack": "Editar",
+    "submitButton": "Publicar así",
+    "uploadStep1": "Subiendo imágenes... (1/2)",
+    "saveStep2": "Guardando Better... (2/2)",
+    "done": "¡Listo! 🎉",
+    "categoryFirst": "Por favor selecciona una categoría primero",
+    "titleNeeded": "Por favor ingresa un título",
+    "bothRequired": "Agrega contenido para A y B",
+    "fileSizeError": "El archivo debe ser menor a {maxMb}MB",
+    "uploadError": "Error al subir: {message}",
+    "imageUploadError": "Error al subir imagen: {message}",
+    "bothContentRequired": "A y B necesitan contenido",
+    "saveError": "Error al guardar: {message}"
   },
   "vote": {
     "tapToSelect": "Toca una foto para elegir",
@@ -82,7 +113,15 @@
     "participated": "Votos",
     "category": "Categoría",
     "loading": "Cargando...",
-    "me": "Yo"
+    "me": "Yo",
+    "winning": "Liderando",
+    "clickToVote": "Haz clic en una foto para votar",
+    "totalVotes": "{count} votos en total",
+    "voterCount": "{count}",
+    "tagNoMatch": "No hay etiquetas coincidentes",
+    "tagSearchPrompt": "Escribe un nombre de etiqueta para buscar",
+    "prevButton": "Anterior",
+    "nextButton": "Siguiente"
   },
   "hint": {
     "title": "Cómo usar",
@@ -106,7 +145,14 @@
     "shoppingShort": "Compras",
     "foodShort": "Comida",
     "itShort": "IT",
-    "decisionShort": "Decidir"
+    "decisionShort": "Decidir",
+    "fashionDesc": "¿Cuál conjunto queda mejor?",
+    "appearanceDesc": "¿Quién se ve más atractivo?",
+    "loveDesc": "¿Debo confesar? ¿Qué piensas?",
+    "shoppingDesc": "¿Debo comprar esto? ¿Qué marca es mejor?",
+    "foodDesc": "Este lugar vs aquel, ¿cuál café?",
+    "itDesc": "iPhone vs Galaxy, ¿qué producto es mejor?",
+    "decisionDesc": "¿No puedes decidir? ¡Pregunta a la gente!"
   },
   "levels": {
     "iron": "Hierro",
@@ -147,7 +193,17 @@
     "createFirst": "¡Crea tu primer Better!",
     "me": "Yo",
     "expert": "Experto en {category}",
-    "bestCategory": "Mejor categoría"
+    "bestCategory": "Mejor categoría",
+    "expertBadge": "Experto en {category}",
+    "specialtyLabel": "Especialidad",
+    "totalVotesLabel": "Votos totales",
+    "likesLabel": "Me gusta",
+    "betterCountValue": "{count}",
+    "totalVotesValue": "{count} votos",
+    "noBettersYet": "Todavía no hay Betters",
+    "noBettersDesc": "Sube dos fotos y deja que la gente elija",
+    "createFirstBetter": "Crear el primer Better",
+    "noCategoryBetters": "No hay Betters en esta categoría"
   },
   "hot": {
     "title": "Hot 100",
@@ -156,7 +212,10 @@
     "share": "Compartir",
     "noData": "Aún no hay datos",
     "voteCount": "{count} votos",
-    "hot100Recommend": "Recomendar a Hot100"
+    "hot100Recommend": "Recomendar a Hot100",
+    "subtitle100": "Los 100 Betters más gustados",
+    "noLikes": "Aún no hay me gusta",
+    "noLikesDesc": "Dale me gusta a un Better en exploración aleatoria"
   },
   "explore": {
     "title": "Explorar"
@@ -167,6 +226,21 @@
     "retry": "Reintentar",
     "close": "Cerrar",
     "back": "Volver",
-    "search": "Buscar"
+    "search": "Buscar",
+    "cancel": "Cancelar"
+  },
+  "participation": {
+    "unit": ""
+  },
+  "swipe": {
+    "hint": "↑ Desliza para continuar",
+    "up": "↑ Deslizar arriba"
+  },
+  "username": {
+    "save": "Guardar",
+    "saving": "Guardando…",
+    "edit": "Editar",
+    "cancel": "Cancelar",
+    "available": "El nombre de usuario está disponible"
   }
 }

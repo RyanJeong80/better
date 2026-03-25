@@ -54,7 +54,38 @@
       "titleRequired": "Veuillez entrer un titre",
       "photoARequired": "Le téléchargement de la photo A n'est pas complet",
       "photoBRequired": "Le téléchargement de la photo B n'est pas complet"
-    }
+    },
+    "newTitle": "Créer un nouveau Better",
+    "subtitle": "Téléchargez deux photos et obtenez le choix des gens",
+    "changePhoto": "Changer la photo",
+    "clickOrDrag": "Cliquer ou glisser",
+    "orTypeText": "Ou tapez du texte ci-dessous",
+    "editImage": "✏️ Modifier",
+    "bgColor": "Fond",
+    "descLabel": "Description",
+    "optional": "(optionnel)",
+    "textContentLabel": "Contenu texte",
+    "textConverted": "(sera converti en image)",
+    "descPlaceholder": "Décrivez la photo {side}",
+    "textPlaceholder": "Tapez du texte pour convertir en image",
+    "tagInputPlaceholder": "#tag puis espace",
+    "tagHint": "Espace ou Entrée pour ajouter · Max {max} · {count}/{max}",
+    "previewTitle": "Aperçu",
+    "previewSubtitle": "Voici comment ça apparaîtra",
+    "previewHint": "Les photos seront affichées pour voter au toucher",
+    "goBack": "Modifier",
+    "submitButton": "Publier tel quel",
+    "uploadStep1": "Téléchargement d'images... (1/2)",
+    "saveStep2": "Enregistrement du Better... (2/2)",
+    "done": "Terminé! 🎉",
+    "categoryFirst": "Veuillez d'abord sélectionner une catégorie",
+    "titleNeeded": "Veuillez entrer un titre",
+    "bothRequired": "Ajoutez du contenu pour A et B",
+    "fileSizeError": "Le fichier doit être inférieur à {maxMb}Mo",
+    "uploadError": "Erreur de téléchargement : {message}",
+    "imageUploadError": "Erreur de téléchargement d'image : {message}",
+    "bothContentRequired": "A et B nécessitent du contenu",
+    "saveError": "Erreur d'enregistrement : {message}"
   },
   "vote": {
     "tapToSelect": "Appuyez sur une photo pour choisir",
@@ -82,7 +113,15 @@
     "participated": "Votes",
     "category": "Catégorie",
     "loading": "Chargement...",
-    "me": "Moi"
+    "me": "Moi",
+    "winning": "En tête",
+    "clickToVote": "Cliquez sur une photo pour voter",
+    "totalVotes": "{count} votes au total",
+    "voterCount": "{count}",
+    "tagNoMatch": "Aucun tag correspondant",
+    "tagSearchPrompt": "Tapez un nom de tag pour rechercher",
+    "prevButton": "Précédent",
+    "nextButton": "Suivant"
   },
   "hint": {
     "title": "Comment utiliser",
@@ -106,7 +145,14 @@
     "shoppingShort": "Shop",
     "foodShort": "Food",
     "itShort": "IT",
-    "decisionShort": "Décider"
+    "decisionShort": "Décider",
+    "fashionDesc": "Quelle tenue est la meilleure?",
+    "appearanceDesc": "Qui est le plus attirant?",
+    "loveDesc": "Dois-je avouer? Qu'en penses-tu?",
+    "shoppingDesc": "Dois-je acheter ceci? Quelle marque est meilleure?",
+    "foodDesc": "Ce restaurant vs cet autre, quel café?",
+    "itDesc": "iPhone vs Galaxy, quel produit est le meilleur?",
+    "decisionDesc": "Vous n'arrivez pas à décider? Demandez aux gens!"
   },
   "levels": {
     "iron": "Fer",
@@ -147,7 +193,17 @@
     "createFirst": "Créez votre premier Better !",
     "me": "Moi",
     "expert": "Expert {category}",
-    "bestCategory": "Meilleure catégorie"
+    "bestCategory": "Meilleure catégorie",
+    "expertBadge": "Expert {category}",
+    "specialtyLabel": "Spécialité",
+    "totalVotesLabel": "Votes totaux",
+    "likesLabel": "J'aime",
+    "betterCountValue": "{count}",
+    "totalVotesValue": "{count} votes",
+    "noBettersYet": "Pas encore de Betters",
+    "noBettersDesc": "Téléchargez deux photos et laissez les gens choisir",
+    "createFirstBetter": "Créer le premier Better",
+    "noCategoryBetters": "Pas de Betters dans cette catégorie"
   },
   "hot": {
     "title": "Hot 100",
@@ -156,7 +212,10 @@
     "share": "Partager",
     "noData": "Pas encore de données",
     "voteCount": "{count} votes",
-    "hot100Recommend": "Recommander au Hot100"
+    "hot100Recommend": "Recommander au Hot100",
+    "subtitle100": "Les 100 Betters les plus aimés",
+    "noLikes": "Pas encore de j'aime",
+    "noLikesDesc": "Aimez un Better dans l'exploration aléatoire"
   },
   "explore": {
     "title": "Explorer"
@@ -167,6 +226,21 @@
     "retry": "Réessayer",
     "close": "Fermer",
     "back": "Retour",
-    "search": "Rechercher"
+    "search": "Rechercher",
+    "cancel": "Annuler"
+  },
+  "participation": {
+    "unit": ""
+  },
+  "swipe": {
+    "hint": "↑ Glisser pour continuer",
+    "up": "↑ Glisser vers le haut"
+  },
+  "username": {
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "edit": "Modifier",
+    "cancel": "Annuler",
+    "available": "Ce nom d'utilisateur est disponible"
   }
 }

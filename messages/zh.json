@@ -54,7 +54,38 @@
       "titleRequired": "请输入标题",
       "photoARequired": "照片A上传未完成",
       "photoBRequired": "照片B上传未完成"
-    }
+    },
+    "newTitle": "创建新的Better",
+    "subtitle": "上传两张照片，让大家来选择",
+    "changePhoto": "更换照片",
+    "clickOrDrag": "点击或拖拽",
+    "orTypeText": "也可在下方输入文字",
+    "editImage": "✏️ 编辑",
+    "bgColor": "背景色",
+    "descLabel": "描述",
+    "optional": "（可选）",
+    "textContentLabel": "文字内容",
+    "textConverted": "（将转换为图片）",
+    "descPlaceholder": "请描述图片{side}",
+    "textPlaceholder": "输入文字将转换为图片",
+    "tagInputPlaceholder": "#输入标签后空格",
+    "tagHint": "空格或回车确认 · 最多{max}个 · {count}/{max}",
+    "previewTitle": "预览",
+    "previewSubtitle": "这就是实际显示效果",
+    "previewHint": "图片将显示为点击投票界面",
+    "goBack": "重新编辑",
+    "submitButton": "就这样发布",
+    "uploadStep1": "上传图片中... (1/2)",
+    "saveStep2": "保存Better中... (2/2)",
+    "done": "完成! 🎉",
+    "categoryFirst": "请先选择分类",
+    "titleNeeded": "请输入标题",
+    "bothRequired": "请为A和B都添加内容",
+    "fileSizeError": "文件大小不能超过{maxMb}MB",
+    "uploadError": "上传错误: {message}",
+    "imageUploadError": "图片上传错误: {message}",
+    "bothContentRequired": "A和B都需要内容",
+    "saveError": "保存错误: {message}"
   },
   "vote": {
     "tapToSelect": "点击照片进行选择",
@@ -82,7 +113,15 @@
     "participated": "参与",
     "category": "类别",
     "loading": "加载中...",
-    "me": "我"
+    "me": "我",
+    "winning": "领先",
+    "clickToVote": "点击图片进行投票",
+    "totalVotes": "共{count}票",
+    "voterCount": "{count}人",
+    "tagNoMatch": "没有匹配的标签",
+    "tagSearchPrompt": "输入标签名称以搜索",
+    "prevButton": "上一个",
+    "nextButton": "下一个"
   },
   "hint": {
     "title": "使用方法",
@@ -106,7 +145,14 @@
     "shoppingShort": "购物",
     "foodShort": "美食",
     "itShort": "IT",
-    "decisionShort": "选择"
+    "decisionShort": "选择",
+    "fashionDesc": "哪套搭配更好？",
+    "appearanceDesc": "谁更有吸引力？",
+    "loveDesc": "该告白吗？你怎么看？",
+    "shoppingDesc": "该买这个吗？哪个品牌更好？",
+    "foodDesc": "这家还是那家，哪个咖啡厅更好？",
+    "itDesc": "iPhone vs Galaxy，哪款产品更好？",
+    "decisionDesc": "无法决定？问问大家！"
   },
   "levels": {
     "iron": "青铜",
@@ -147,7 +193,17 @@
     "createFirst": "创建您的第一个Better！",
     "me": "我",
     "expert": "{category}专家",
-    "bestCategory": "最擅长的类别"
+    "bestCategory": "最擅长的类别",
+    "expertBadge": "{category}专家",
+    "specialtyLabel": "专长",
+    "totalVotesLabel": "总投票",
+    "likesLabel": "喜欢",
+    "betterCountValue": "{count}个",
+    "totalVotesValue": "{count}票",
+    "noBettersYet": "还没有Better",
+    "noBettersDesc": "上传两张照片，让大家来选择",
+    "createFirstBetter": "创建第一个Better",
+    "noCategoryBetters": "此分类中没有Better"
   },
   "hot": {
     "title": "Hot 100",
@@ -156,7 +212,10 @@
     "share": "分享",
     "noData": "暂无数据",
     "voteCount": "{count}票",
-    "hot100Recommend": "推荐到Hot100"
+    "hot100Recommend": "推荐到Hot100",
+    "subtitle100": "点赞最多的100个Better",
+    "noLikes": "还没有喜欢",
+    "noLikesDesc": "在随机探索中为您喜欢的Better点赞"
   },
   "explore": {
     "title": "随机探索"
@@ -167,6 +226,21 @@
     "retry": "重试",
     "close": "关闭",
     "back": "返回",
-    "search": "搜索"
+    "search": "搜索",
+    "cancel": "取消"
+  },
+  "participation": {
+    "unit": "个"
+  },
+  "swipe": {
+    "hint": "↑ 上滑继续",
+    "up": "↑ 向上滑动"
+  },
+  "username": {
+    "save": "保存",
+    "saving": "保存中…",
+    "edit": "修改",
+    "cancel": "取消",
+    "available": "用户名可用"
   }
 }

@@ -54,7 +54,38 @@
       "titleRequired": "タイトルを入力してください",
       "photoARequired": "写真Aのアップロードが完了していません",
       "photoBRequired": "写真Bのアップロードが完了していません"
-    }
+    },
+    "newTitle": "新しいBetterを作成",
+    "subtitle": "2枚の写真をアップして選んでもらいましょう",
+    "changePhoto": "写真変更",
+    "clickOrDrag": "クリックまたはドラッグ",
+    "orTypeText": "または下のテキストを入力",
+    "editImage": "✏️ 編集",
+    "bgColor": "背景色",
+    "descLabel": "説明",
+    "optional": "(任意)",
+    "textContentLabel": "テキスト内容",
+    "textConverted": "(画像に変換されます)",
+    "descPlaceholder": "写真{side}について説明してください",
+    "textPlaceholder": "テキストを入力すると画像に変換されます",
+    "tagInputPlaceholder": "#タグを入力してスペース",
+    "tagHint": "スペースまたはEnterで確定 · 最大{max}個 · {count}/{max}",
+    "previewTitle": "プレビュー",
+    "previewSubtitle": "実際の表示イメージです",
+    "previewHint": "写真をタップして選択する画面として表示されます",
+    "goBack": "編集する",
+    "submitButton": "このまま投稿",
+    "uploadStep1": "画像アップロード中... (1/2)",
+    "saveStep2": "Better保存中... (2/2)",
+    "done": "完了! 🎉",
+    "categoryFirst": "まずカテゴリを選択してください",
+    "titleNeeded": "タイトルを入力してください",
+    "bothRequired": "AとBの両方にコンテンツを入力してください",
+    "fileSizeError": "ファイルサイズは{maxMb}MB以下にしてください",
+    "uploadError": "アップロードエラー: {message}",
+    "imageUploadError": "画像アップロードエラー: {message}",
+    "bothContentRequired": "AとBの両方にコンテンツが必要です",
+    "saveError": "保存エラー: {message}"
   },
   "vote": {
     "tapToSelect": "写真をタップして選んでください",
@@ -82,7 +113,15 @@
     "participated": "参加",
     "category": "カテゴリ",
     "loading": "読み込み中...",
-    "me": "自分"
+    "me": "自分",
+    "winning": "リード中",
+    "clickToVote": "写真をクリックして投票",
+    "totalVotes": "合計{count}票",
+    "voterCount": "{count}人",
+    "tagNoMatch": "一致するタグがありません",
+    "tagSearchPrompt": "タグ名を入力して検索",
+    "prevButton": "前へ",
+    "nextButton": "次へ"
   },
   "hint": {
     "title": "使い方",
@@ -106,7 +145,14 @@
     "shoppingShort": "買い物",
     "foodShort": "グルメ",
     "itShort": "IT",
-    "decisionShort": "決断"
+    "decisionShort": "決断",
+    "fashionDesc": "どのコーデがいい？",
+    "appearanceDesc": "どちらが魅力的？",
+    "loveDesc": "告白するべき？どう思う？",
+    "shoppingDesc": "これ買うべき？どのブランドがいい？",
+    "foodDesc": "この店 vs あの店、どちらのカフェが好き？",
+    "itDesc": "iPhone vs Galaxy、どの製品がいい？",
+    "decisionDesc": "決められない？みんなに聞いてみよう！"
   },
   "levels": {
     "iron": "アイアン",
@@ -147,7 +193,17 @@
     "createFirst": "最初のBetterを作ってみよう！",
     "me": "自分",
     "expert": "{category}エキスパート",
-    "bestCategory": "最も得意なカテゴリ"
+    "bestCategory": "最も得意なカテゴリ",
+    "expertBadge": "{category} 専門",
+    "specialtyLabel": "得意分野",
+    "totalVotesLabel": "合計投票",
+    "likesLabel": "いいね",
+    "betterCountValue": "{count}件",
+    "totalVotesValue": "{count}票",
+    "noBettersYet": "まだBetterがありません",
+    "noBettersDesc": "2枚の写真をアップして選んでもらいましょう",
+    "createFirstBetter": "最初のBetterを作成",
+    "noCategoryBetters": "このカテゴリのBetterがありません"
   },
   "hot": {
     "title": "Hot 100",
@@ -156,7 +212,10 @@
     "share": "シェア",
     "noData": "まだデータがありません",
     "voteCount": "{count}票",
-    "hot100Recommend": "Hot100に推薦"
+    "hot100Recommend": "Hot100に推薦",
+    "subtitle100": "いいね数トップ100のBetter",
+    "noLikes": "まだいいねがありません",
+    "noLikesDesc": "ランダム探索で気に入ったBetterにいいねしましょう"
   },
   "explore": {
     "title": "ランダム探索"
@@ -167,6 +226,21 @@
     "retry": "再試行",
     "close": "閉じる",
     "back": "戻る",
-    "search": "検索"
+    "search": "検索",
+    "cancel": "キャンセル"
+  },
+  "participation": {
+    "unit": "件"
+  },
+  "swipe": {
+    "hint": "↑ スワイプして次へ",
+    "up": "↑ 上にスワイプ"
+  },
+  "username": {
+    "save": "保存",
+    "saving": "保存中…",
+    "edit": "変更",
+    "cancel": "キャンセル",
+    "available": "このユーザー名は使用できます"
   }
 }

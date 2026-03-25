@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Heart, Flame } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { db } from '@/lib/db'
 import { betters, likes } from '@/lib/db/schema'
 import { CATEGORY_FILTERS, CATEGORY_MAP } from '@/lib/constants/categories'
@@ -41,6 +42,8 @@ export default async function HotPage({
   const { category } = await searchParams
   const activeCategory: CategoryFilter =
     (CATEGORY_FILTERS.find((f) => f.id === category)?.id) ?? 'all'
+
+  const t = await getTranslations()
 
   let entries: HotEntry[] = []
 
@@ -89,7 +92,7 @@ export default async function HotPage({
         </div>
         <div>
           <h2 className="text-2xl font-black text-gray-900">Hot 100 Better</h2>
-          <p className="mt-0.5 text-sm text-amber-700">좋아요를 가장 많이 받은 Better 100선</p>
+          <p className="mt-0.5 text-sm text-amber-700">{t('hot.subtitle100')}</p>
         </div>
       </div>
 
@@ -107,7 +110,7 @@ export default async function HotPage({
                 : 'border border-border bg-card text-muted-foreground hover:bg-accent',
             ].join(' ')}
           >
-            {f.emoji} {f.label}
+            {f.emoji} {f.id === 'all' ? t('categories.all') : t(`categories.${f.id}` as Parameters<typeof t>[0])}
           </Link>
         ))}
       </div>
@@ -115,8 +118,8 @@ export default async function HotPage({
       {entries.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border py-20 text-center">
           <div className="mb-3 text-4xl">🔥</div>
-          <p className="font-bold">아직 좋아요가 없어요</p>
-          <p className="mt-1 text-sm text-muted-foreground">랜덤 Better에서 마음에 드는 Better에 좋아요를 눌러보세요</p>
+          <p className="font-bold">{t('hot.noLikes')}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t('hot.noLikesDesc')}</p>
         </div>
       ) : (
         <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
@@ -149,7 +152,7 @@ export default async function HotPage({
                       className="hidden shrink-0 items-center gap-0.5 rounded-full px-2 py-0.5 text-xs font-semibold sm:inline-flex"
                       style={{ background: catStyle.bg, color: catStyle.text }}
                     >
-                      {cat.emoji} {cat.label}
+                      {cat.emoji} {t(`categories.${entry.category}` as Parameters<typeof t>[0])}
                     </span>
 
                     {/* 미리보기 이미지 */}

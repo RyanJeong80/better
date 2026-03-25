@@ -495,7 +495,7 @@ export function RandomBetterViewer({
                 )}
                 {sep}
                 <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                  {t('vote.participated')} {accuracyTotal}개
+                  {t('vote.participated')} {accuracyTotal}{t('participation.unit')}
                 </span>
               </>
             )
@@ -682,17 +682,17 @@ export function RandomBetterViewer({
                 >
                   <span style={{ color: '#6366F1', fontSize: '14px', flexShrink: 0 }}>#</span>
                   <span style={{ flex: 1, color: '#000000', fontSize: '15px', fontWeight: 600 }}>{s.name}</span>
-                  <span style={{ color: '#888888', fontSize: '12px' }}>{s.betterCount}개</span>
+                  <span style={{ color: '#888888', fontSize: '12px' }}>{s.betterCount}{t('participation.unit')}</span>
                 </button>
               ))}
             </div>
           ) : tagInput.replace(/^#+/, '').trim() ? (
             <div style={{ marginTop: '16px', textAlign: 'center', color: '#cccccc', fontSize: '14px' }}>
-              일치하는 태그가 없어요
+              {t('vote.tagNoMatch')}
             </div>
           ) : (
             <div style={{ marginTop: '16px', textAlign: 'center', color: '#aaaaaa', fontSize: '13px' }}>
-              태그명을 입력하면 검색 결과가 표시돼요
+              {t('vote.tagSearchPrompt')}
             </div>
           )}
         </div>,
@@ -828,7 +828,7 @@ export function RandomBetterViewer({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={battle.imageAUrl}
-                alt="사진 A"
+                alt="A"
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />
               {/* 상단 그라데이션 (제목 가독성) */}
@@ -1000,7 +1000,7 @@ export function RandomBetterViewer({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={battle.imageBUrl}
-                alt="사진 B"
+                alt="B"
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />
               {/* 상단 그라데이션 */}
@@ -1060,10 +1060,10 @@ export function RandomBetterViewer({
                   }} />
                   <div style={{ position: 'absolute', top: 8, left: 12, right: 12, zIndex: 4, display: 'flex', gap: 6 }}>
                     {selectedChoice === 'B' && (
-                      <span style={{ background: '#6366F1', color: 'white', fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999 }}>내 선택</span>
+                      <span style={{ background: '#6366F1', color: 'white', fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999 }}>{t('vote.myChoice')}</span>
                     )}
                     {isBWinning && (
-                      <span style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999 }}>🏆 우세</span>
+                      <span style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999 }}>{t('vote.leading')}</span>
                     )}
                   </div>
                   <div style={{
@@ -1299,10 +1299,10 @@ export function RandomBetterViewer({
                     opacity: historyStack.length === 0 ? 0.3 : 1,
                   }}
                 >
-                  <ChevronUp size={16} /> 이전
+                  <ChevronUp size={16} /> {t('vote.prevButton')}
                 </button>
 
-                <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem' }}>↑ 위로 스와이프</span>
+                <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem' }}>{t('swipe.up')}</span>
 
                 <button
                   onClick={handleNext}
@@ -1315,7 +1315,7 @@ export function RandomBetterViewer({
                     boxShadow: '0 4px 16px rgba(99,102,241,0.45)',
                   }}
                 >
-                  다음 <ChevronRight size={16} />
+                  {t('vote.nextButton')} <ChevronRight size={16} />
                 </button>
               </div>
             )
@@ -1328,7 +1328,7 @@ export function RandomBetterViewer({
               textAlign: 'center', pointerEvents: 'none',
             }}>
               <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.72rem' }}>
-                ↑ 스와이프로 넘기기
+                {t('swipe.hint')}
               </span>
             </div>
           )}
@@ -1393,7 +1393,7 @@ function PhotoDetailModal({
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={url}
-          alt={`사진 ${side}`}
+          alt={side}
           style={{
             width: '100%', height: '100%',
             objectFit: 'contain', objectPosition: 'center',
