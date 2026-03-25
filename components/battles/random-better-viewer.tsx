@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { ArrowLeft, Check, Heart, ChevronDown, ChevronRight, ChevronUp, Share2, X, Search, Hash } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
@@ -47,6 +47,15 @@ export function RandomBetterViewer({
 }) {
   const router = useRouter()
   const t = useTranslations()
+  const locale = useLocale()
+
+  // ── 자동 번역 ──────────────────────────────────────────────────────────
+  const [translated, setTranslated] = useState<{
+    title: string
+    descA: string | null
+    descB: string | null
+  } | null>(null)
+
   // onClose 우선, 없으면 showBack 시 router.back()
   const handleClose = onClose ?? (showBack ? () => router.back() : undefined)
 
@@ -102,6 +111,33 @@ export function RandomBetterViewer({
   const seenIdsRef = useRef<string[]>(seenIds)    // seenIds 최신값 ref (async 클로저용)
   const categoryRef = useRef<CategoryFilter>(initialCategory)
   const tagFilterRef = useRef<string | null>(null)
+
+  // ── 자동 번역 useEffect ────────────────────────────────────────────────
+  useEffect(() => {
+    setTranslated(null)
+    if (!battle || locale === 'ko') return
+
+    const texts = [
+      battle.title,
+      battle.imageADescription ?? '',
+      battle.imageBDescription ?? '',
+    ]
+
+    fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texts, target: locale }),
+    })
+      .then((r) => r.json())
+      .then(({ translations }: { translations: string[] }) => {
+        setTranslated({
+          title: translations[0] || battle.title,
+          descA: translations[1] || battle.imageADescription,
+          descB: translations[2] || battle.imageBDescription,
+        })
+      })
+      .catch(() => {}) // 실패 시 원문 유지
+  }, [battle?.id, locale]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     try {
@@ -848,7 +884,7 @@ export function RandomBetterViewer({
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
                 }}>
-                  {battle.imageADescription}
+                  {translated?.descA ?? battle.imageADescription}
                 </p>
               )}
 
@@ -1020,7 +1056,7 @@ export function RandomBetterViewer({
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
                 }}>
-                  {battle.imageBDescription}
+                  {translated?.descB ?? battle.imageBDescription}
                 </p>
               )}
 
@@ -1107,8 +1143,22 @@ export function RandomBetterViewer({
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
                     }}>
-                      {battle.title}
+                      {translated?.title ?? battle.title}
                     </h2>
+                    {translated && (
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 3,
+                        marginTop: 4,
+                        background: 'rgba(255,255,255,0.15)',
+                        backdropFilter: 'blur(6px)',
+                        color: 'rgba(255,255,255,0.7)',
+                        fontSize: '0.58rem', fontWeight: 700,
+                        padding: '2px 6px', borderRadius: 999,
+                        letterSpacing: '0.02em',
+                      }}>
+                        ✦ AI
+                      </span>
+                    )}
                     <p style={{
                       margin: '4px 0 0', color: 'rgba(255,255,255,0.7)',
                       fontSize: '0.72rem',
