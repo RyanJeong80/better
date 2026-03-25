@@ -824,7 +824,7 @@ export function RandomBetterViewer({
                 style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
               />
               {/* 상단 그라데이션 (제목 가독성) */}
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.65) 0%, transparent 45%)', pointerEvents: 'none' }} />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.4) 40%, transparent 60%)', pointerEvents: 'none' }} />
               {/* 하단 그라데이션 (설명 가독성) */}
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)', pointerEvents: 'none' }} />
 
@@ -1100,8 +1100,12 @@ export function RandomBetterViewer({
                     </span>
                     <h2 style={{
                       margin: 0, color: 'white', fontWeight: 800,
-                      fontSize: '0.92rem', lineHeight: 1.35,
-                      textShadow: '0 1px 8px rgba(0,0,0,0.9)',
+                      fontSize: '1.25rem', lineHeight: 1.35,
+                      textShadow: '0 2px 10px rgba(0,0,0,0.95)',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
                     }}>
                       {battle.title}
                     </h2>
