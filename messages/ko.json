@@ -215,7 +215,11 @@
     "hot100Recommend": "Hot100에 추천하기",
     "subtitle100": "좋아요를 가장 많이 받은 Better 100선",
     "noLikes": "아직 좋아요가 없어요",
-    "noLikesDesc": "랜덤 Better에서 마음에 드는 Better에 좋아요를 눌러보세요"
+    "noLikesDesc": "랜덤 Better에서 마음에 드는 Better에 좋아요를 눌러보세요",
+    "popular": "인기순",
+    "recent": "최신순",
+    "viewAll": "전체 보기 →",
+    "viewConfirmed": "🔥 {category} {count}개 확인 완료"
   },
   "explore": {
     "title": "랜덤 탐색"

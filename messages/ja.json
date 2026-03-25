@@ -215,7 +215,11 @@
     "hot100Recommend": "Hot100に推薦",
     "subtitle100": "いいね数トップ100のBetter",
     "noLikes": "まだいいねがありません",
-    "noLikesDesc": "ランダム探索で気に入ったBetterにいいねしましょう"
+    "noLikesDesc": "ランダム探索で気に入ったBetterにいいねしましょう",
+    "popular": "人気順",
+    "recent": "新着順",
+    "viewAll": "すべて見る →",
+    "viewConfirmed": "🔥 {category} {count}件 表示完了"
   },
   "explore": {
     "title": "ランダム探索"

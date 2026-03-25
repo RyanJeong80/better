@@ -215,7 +215,11 @@
     "hot100Recommend": "Recommander au Hot100",
     "subtitle100": "Les 100 Betters les plus aimés",
     "noLikes": "Pas encore de j'aime",
-    "noLikesDesc": "Aimez un Better dans l'exploration aléatoire"
+    "noLikesDesc": "Aimez un Better dans l'exploration aléatoire",
+    "popular": "Populaire",
+    "recent": "Récent",
+    "viewAll": "Voir tout →",
+    "viewConfirmed": "🔥 {count} {category} affichés"
   },
   "explore": {
     "title": "Explorer"

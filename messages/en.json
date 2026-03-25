@@ -215,7 +215,11 @@
     "hot100Recommend": "Recommend to Hot100",
     "subtitle100": "Top 100 most liked Betters",
     "noLikes": "No likes yet",
-    "noLikesDesc": "Like a Better from random explore"
+    "noLikesDesc": "Like a Better from random explore",
+    "popular": "Popular",
+    "recent": "Recent",
+    "viewAll": "View all →",
+    "viewConfirmed": "🔥 {count} {category} shown"
   },
   "explore": {
     "title": "Explore"

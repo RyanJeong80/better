@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Flame, Heart } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { CATEGORY_FILTERS, CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
@@ -16,6 +17,7 @@ type HotThumb = {
 }
 
 export function HotBattlesCard() {
+  const t = useTranslations()
   const ref = useRef<HTMLDivElement>(null)
   const [battles, setBattles] = useState<HotThumb[]>([])
   const [filter, setFilter] = useState<CategoryFilter>('all')
@@ -67,7 +69,7 @@ export function HotBattlesCard() {
                 : 'border border-border text-muted-foreground hover:bg-accent',
             ].join(' ')}
           >
-            {f.emoji} {f.label}
+            {f.emoji} {f.id === 'all' ? t('categories.all') : t(`categories.${f.id}Short` as Parameters<typeof t>[0])}
           </button>
         ))}
       </div>
@@ -84,7 +86,7 @@ export function HotBattlesCard() {
             </li>
           ))
         ) : filtered.length === 0 ? (
-          <li className="py-4 text-center text-xs text-muted-foreground">아직 데이터가 없어요</li>
+          <li className="py-4 text-center text-xs text-muted-foreground">{t('hot.noData')}</li>
         ) : (
           filtered.slice(0, 5).map((b, i) => (
             <li key={b.id} className="flex items-center gap-2">
@@ -117,7 +119,7 @@ export function HotBattlesCard() {
         className="mt-auto text-xs font-bold"
         style={{ color: '#F59E0B' }}
       >
-        전체 보기 →
+        {t('hot.viewAll')}
       </Link>
     </div>
   )

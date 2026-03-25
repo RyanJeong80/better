@@ -215,7 +215,11 @@
     "hot100Recommend": "推荐到Hot100",
     "subtitle100": "点赞最多的100个Better",
     "noLikes": "还没有喜欢",
-    "noLikesDesc": "在随机探索中为您喜欢的Better点赞"
+    "noLikesDesc": "在随机探索中为您喜欢的Better点赞",
+    "popular": "热门",
+    "recent": "最新",
+    "viewAll": "查看全部 →",
+    "viewConfirmed": "🔥 {category} {count}个 全部显示"
   },
   "explore": {
     "title": "随机探索"

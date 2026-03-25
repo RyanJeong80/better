@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Heart, Flame, ArrowUpDown } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 import type { PanelHotEntry } from '@/app/api/panels/hot/route'
@@ -24,15 +25,10 @@ const RANK_STYLE: Record<number, { bg: string; color: string }> = {
 
 type SortOrder = 'popular' | 'recent'
 
-const CATEGORY_TABS: { key: CategoryFilter; label: string }[] = [
-  { key: 'all', label: '전체' },
-  { key: 'fashion', label: '패션' },
-  { key: 'appearance', label: '외모' },
-  { key: 'love', label: '연애' },
-  { key: 'shopping', label: '쇼핑' },
-  { key: 'food', label: '맛집' },
-  { key: 'it', label: 'IT' },
-  { key: 'decision', label: '결정장애' },
+type CategoryTabKey = CategoryFilter
+
+const CATEGORY_TAB_KEYS: CategoryTabKey[] = [
+  'all', 'fashion', 'appearance', 'love', 'shopping', 'food', 'it', 'decision',
 ]
 
 function SkeletonItem() {
@@ -70,6 +66,7 @@ export function HotPanelClient({
 }: {
   onSelectBattle?: (entry: PanelHotEntry) => void
 }) {
+  const t = useTranslations()
   const [entries, setEntries] = useState<PanelHotEntry[]>([])
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
@@ -89,16 +86,13 @@ export function HotPanelClient({
     if (sortOrder === 'recent') {
       return [...base].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     }
-    // popular: already sorted by likeCount from API, but re-sort for safety after filter
     return [...base].sort((a, b) => b.likeCount - a.likeCount)
   }, [entries, category, sortOrder])
 
-  // Reset visible count when filter/sort changes
   useEffect(() => {
     setVisibleCount(PAGE_SIZE)
   }, [category, sortOrder])
 
-  // 스크롤 감지: sentinel이 뷰포트에 들어오면 더 렌더링
   useEffect(() => {
     if (status !== 'done' || visibleCount >= filtered.length) return
     const el = sentinelRef.current
@@ -117,6 +111,16 @@ export function HotPanelClient({
 
   if (status === 'loading') return <Skeleton />
 
+  const tabLabel = (key: CategoryTabKey) =>
+    key === 'all'
+      ? t('categories.all')
+      : t(`categories.${key}Short` as Parameters<typeof t>[0])
+
+  const categoryLabel = (key: CategoryFilter) =>
+    key === 'all'
+      ? t('categories.all')
+      : t(`categories.${key}` as Parameters<typeof t>[0])
+
   return (
     <div style={{ padding: '12px 12px 40px' }}>
       {/* 헤더 */}
@@ -131,7 +135,7 @@ export function HotPanelClient({
         <div style={{ flex: 1 }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 900, lineHeight: 1.2, margin: 0 }}>Hot Better</h2>
           <p style={{ fontSize: '0.72rem', color: 'var(--color-muted-foreground)', margin: '2px 0 0' }}>
-            좋아요를 가장 많이 받은 Better
+            {t('hot.subtitle')}
           </p>
         </div>
         {/* 정렬 토글 */}
@@ -148,7 +152,7 @@ export function HotPanelClient({
           }}
         >
           <ArrowUpDown size={11} />
-          {sortOrder === 'popular' ? '인기순' : '최신순'}
+          {sortOrder === 'popular' ? t('hot.popular') : t('hot.recent')}
         </button>
       </div>
 
@@ -158,12 +162,12 @@ export function HotPanelClient({
         paddingBottom: 4,
         scrollbarWidth: 'none',
       }}>
-        {CATEGORY_TABS.map(tab => {
-          const active = category === tab.key
+        {CATEGORY_TAB_KEYS.map(key => {
+          const active = category === key
           return (
             <button
-              key={tab.key}
-              onClick={() => setCategory(tab.key)}
+              key={key}
+              onClick={() => setCategory(key)}
               style={{
                 flexShrink: 0,
                 padding: '5px 12px',
@@ -176,7 +180,7 @@ export function HotPanelClient({
                 transition: 'all 0.15s',
               }}
             >
-              {tab.label}
+              {tabLabel(key)}
             </button>
           )
         })}
@@ -189,9 +193,9 @@ export function HotPanelClient({
           borderRadius: 16, border: '1.5px dashed var(--color-border)',
         }}>
           <p style={{ fontSize: '2rem', marginBottom: 8 }}>🔥</p>
-          <p style={{ fontWeight: 700, marginBottom: 4 }}>아직 좋아요가 없어요</p>
+          <p style={{ fontWeight: 700, marginBottom: 4 }}>{t('hot.noLikes')}</p>
           <p style={{ fontSize: '0.8rem', color: 'var(--color-muted-foreground)' }}>
-            랜덤 Better에서 마음에 드는 Better에 좋아요를 눌러보세요
+            {t('hot.noLikesDesc')}
           </p>
         </div>
       ) : (
@@ -217,7 +221,6 @@ export function HotPanelClient({
                       alt="A"
                       style={{ width: '50%', height: '100%', objectFit: 'cover', display: 'block' }}
                     />
-                    {/* VS 구분선 */}
                     <div style={{
                       position: 'relative', flexShrink: 0,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -241,7 +244,7 @@ export function HotPanelClient({
                     />
                   </div>
 
-                  {/* 순위 배지 (좌상단) */}
+                  {/* 순위 배지 */}
                   <div style={{
                     position: 'absolute', top: 8, left: 8,
                     background: rankStyle ? rankStyle.bg : 'rgba(0,0,0,0.7)',
@@ -257,7 +260,7 @@ export function HotPanelClient({
                     {rank}
                   </div>
 
-                  {/* 좋아요 수 (우하단) */}
+                  {/* 좋아요 수 */}
                   <div style={{
                     position: 'absolute', bottom: 8, right: 8,
                     display: 'flex', alignItems: 'center', gap: 4,
@@ -275,7 +278,6 @@ export function HotPanelClient({
 
                 {/* 정보 영역 */}
                 <div style={{ display: 'flex', gap: 10, marginTop: 10, alignItems: 'flex-start' }}>
-                  {/* 카테고리 아이콘 */}
                   <div style={{
                     width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
                     background: catColor.bg,
@@ -286,7 +288,6 @@ export function HotPanelClient({
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    {/* 제목 */}
                     <p style={{
                       margin: 0,
                       fontSize: '0.88rem', fontWeight: 700, lineHeight: 1.4,
@@ -298,7 +299,6 @@ export function HotPanelClient({
                     }}>
                       {entry.title}
                     </p>
-                    {/* 메타 */}
                     <p style={{
                       margin: '4px 0 0',
                       fontSize: '0.75rem', color: 'var(--color-muted-foreground)',
@@ -310,7 +310,7 @@ export function HotPanelClient({
                         padding: '1px 7px', borderRadius: 999,
                         fontSize: '0.68rem', fontWeight: 700,
                       }}>
-                        {cat.label}
+                        {t(`categories.${entry.category}` as Parameters<typeof t>[0])}
                       </span>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
                         <Heart size={10} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
@@ -342,7 +342,7 @@ export function HotPanelClient({
           ) : (
             <div style={{ padding: '16px 0', textAlign: 'center' }}>
               <p style={{ fontSize: '0.78rem', color: 'var(--color-muted-foreground)' }}>
-                🔥 {category === 'all' ? '전체' : CATEGORY_MAP[category as BetterCategory]?.label} {filtered.length}개 확인 완료
+                {t('hot.viewConfirmed', { category: categoryLabel(category), count: filtered.length })}
               </p>
             </div>
           )}
