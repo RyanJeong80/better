@@ -2,23 +2,24 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { Trophy } from 'lucide-react'
 import { calcLevel } from '@/lib/level'
 import { LevelBadge } from '@/components/ui/level-badge'
 import type { PanelRankEntry, PanelRankResponse } from '@/app/api/panels/ranking/route'
 
-const TABS = [
-  { key: 'all',        label: '전체',  emoji: '' },
-  { key: 'fashion',    label: '패션',  emoji: '👗' },
-  { key: 'appearance', label: '외모',  emoji: '💄' },
-  { key: 'love',       label: '연애',  emoji: '💕' },
-  { key: 'shopping',   label: '쇼핑',  emoji: '💰' },
-  { key: 'food',       label: '맛집',  emoji: '🍽️' },
-  { key: 'it',         label: 'IT',    emoji: '📱' },
-  { key: 'decision',   label: '결정',  emoji: '🤔' },
-] as const
+type TabKey = 'all' | 'fashion' | 'appearance' | 'love' | 'shopping' | 'food' | 'it' | 'decision'
 
-type TabKey = typeof TABS[number]['key']
+const TAB_KEYS: { key: TabKey; emoji: string }[] = [
+  { key: 'all',        emoji: '' },
+  { key: 'fashion',    emoji: '👗' },
+  { key: 'appearance', emoji: '💄' },
+  { key: 'love',       emoji: '💕' },
+  { key: 'shopping',   emoji: '💰' },
+  { key: 'food',       emoji: '🍽️' },
+  { key: 'it',         emoji: '📱' },
+  { key: 'decision',   emoji: '🤔' },
+]
 
 const RANK_COLOR = ['#D97706', '#6B7280', '#92400E']
 
@@ -34,7 +35,6 @@ function Skeleton() {
           <div style={{ width: 140, height: 12, borderRadius: 4, background: 'var(--color-muted)' }} className="animate-pulse" />
         </div>
       </div>
-      {/* 탭 스켈레톤 */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
         {[60, 44, 44, 44, 44].map((w, i) => (
           <div key={i} style={{ width: w, height: 30, borderRadius: 999, background: 'var(--color-muted)' }} className="animate-pulse" />
@@ -54,6 +54,7 @@ function Skeleton() {
 }
 
 export function RankingPanelClient() {
+  const t = useTranslations()
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [data, setData] = useState<PanelRankResponse | null>(null)
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
@@ -63,12 +64,8 @@ export function RankingPanelClient() {
     setStatus('loading')
     fetch(`/api/panels/ranking?category=${activeTab}`)
       .then(r => r.json())
-      .then((d: PanelRankResponse) => {
-        console.log('[RankingPanel] response:', d)
-        setData(d)
-        setStatus('done')
-      })
-      .catch((e) => { console.error('[RankingPanel] error:', e); setStatus('error') })
+      .then((d: PanelRankResponse) => { setData(d); setStatus('done') })
+      .catch(() => setStatus('error'))
   }, [activeTab])
 
   if (status === 'loading' && !data) return <Skeleton />
@@ -76,7 +73,11 @@ export function RankingPanelClient() {
   const entries: PanelRankEntry[] = data?.entries ?? []
   const myEntry = data?.myEntry ?? null
   const isCategoryMode = activeTab !== 'all'
-  const tab = TABS.find(t => t.key === activeTab)!
+  const activeTabInfo = TAB_KEYS.find(t => t.key === activeTab)!
+
+  const tabLabel = (key: TabKey) =>
+    key === 'all' ? t('categories.all') : t(`categories.${key}Short` as Parameters<typeof t>[0])
+  const tabEmoji = (key: TabKey) => TAB_KEYS.find(t => t.key === key)?.emoji ?? ''
 
   return (
     <div style={{ padding: '12px 12px 40px' }}>
@@ -90,9 +91,11 @@ export function RankingPanelClient() {
           <Trophy size={20} color="white" />
         </div>
         <div>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 900, lineHeight: 1.2, margin: 0 }}>Better 랭킹</h2>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: 900, lineHeight: 1.2, margin: 0 }}>{t('ranking.title')}</h2>
           <p style={{ fontSize: '0.72rem', color: 'var(--color-muted-foreground)', marginTop: 2 }}>
-            {isCategoryMode ? `${tab.emoji} ${tab.label} 적중률 TOP 30` : '참여 횟수 TOP 30'}
+            {isCategoryMode
+              ? t('ranking.topAccuracy', { emoji: activeTabInfo.emoji, label: tabLabel(activeTab) })
+              : t('ranking.topParticipation')}
           </p>
         </div>
       </div>
@@ -110,12 +113,13 @@ export function RankingPanelClient() {
           touchAction: 'pan-x',
         }}
       >
-        {TABS.map(t => {
-          const active = activeTab === t.key
+        {TAB_KEYS.map(({ key, emoji }) => {
+          const active = activeTab === key
+          const label = tabLabel(key)
           return (
             <button
-              key={t.key}
-              onClick={() => setActiveTab(t.key)}
+              key={key}
+              onClick={() => setActiveTab(key)}
               style={{
                 flexShrink: 0, padding: '5px 12px', borderRadius: 999,
                 border: active ? 'none' : '1.5px solid var(--color-border)',
@@ -126,7 +130,7 @@ export function RankingPanelClient() {
                 whiteSpace: 'nowrap',
               }}
             >
-              {t.emoji ? `${t.emoji} ${t.label}` : t.label}
+              {emoji ? `${emoji} ${label}` : label}
             </button>
           )
         })}
@@ -146,16 +150,16 @@ export function RankingPanelClient() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '0.7rem', fontWeight: 900, color: 'white',
           }}>
-            나
+            {t('vote.me')}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700 }}>내 랭킹</p>
+            <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700 }}>{t('ranking.myRanking')}</p>
             <p style={{ margin: '2px 0 0', fontSize: '0.7rem', color: 'var(--color-muted-foreground)' }}>
               {isCategoryMode
                 ? myEntry.accuracy !== null
-                  ? `${tab.emoji} ${tab.label} 적중률 ${myEntry.accuracy}% · 참여 ${myEntry.participated}건`
-                  : `${tab.emoji} ${tab.label} 판정된 투표 없음 · 참여 ${myEntry.participated}건`
-                : `참여 ${myEntry.participated}건`}
+                  ? t('ranking.myAccuracyStats', { emoji: activeTabInfo.emoji, label: tabLabel(activeTab), accuracy: myEntry.accuracy, count: myEntry.participated })
+                  : t('ranking.noJudgedVotes', { emoji: activeTabInfo.emoji, label: tabLabel(activeTab), count: myEntry.participated })
+                : t('ranking.myStats', { count: myEntry.participated })}
             </p>
           </div>
           {myEntry.rank !== null ? (
@@ -163,11 +167,11 @@ export function RankingPanelClient() {
               fontSize: '1rem', fontWeight: 900, color: '#6366F1',
               fontVariantNumeric: 'tabular-nums',
             }}>
-              {myEntry.rank}위
+              {t('ranking.rank', { n: myEntry.rank })}
             </span>
           ) : (
             <span style={{ fontSize: '0.72rem', color: 'var(--color-muted-foreground)' }}>
-              {myEntry.participated === 0 ? '미참여' : '30위 밖'}
+              {myEntry.participated === 0 ? t('ranking.notParticipated') : t('ranking.outOfTop30')}
             </span>
           )}
         </div>
@@ -191,10 +195,12 @@ export function RankingPanelClient() {
         }}>
           <p style={{ fontSize: '2rem', marginBottom: 8 }}>🏆</p>
           <p style={{ fontWeight: 700, marginBottom: 4 }}>
-            {isCategoryMode ? `${tab.emoji} ${tab.label} 랭킹 데이터 없음` : '아직 데이터가 없어요'}
+            {isCategoryMode
+              ? t('ranking.categoryNoData', { emoji: tabEmoji(activeTab), label: tabLabel(activeTab) })
+              : t('ranking.noData')}
           </p>
           <p style={{ fontSize: '0.8rem', color: 'var(--color-muted-foreground)' }}>
-            {isCategoryMode ? '이 카테고리에서 투표하면 랭킹에 반영돼요' : '투표에 참여하면 여기에 나타납니다'}
+            {isCategoryMode ? t('ranking.categoryVoteToAppear') : t('ranking.voteToAppear')}
           </p>
         </div>
       ) : (
@@ -235,12 +241,12 @@ export function RankingPanelClient() {
                       {entry.accuracy}%
                     </span>
                     <span style={{ fontSize: '0.68rem', color: 'var(--color-muted-foreground)', marginLeft: 4 }}>
-                      {entry.participated}건
+                      {entry.participated}{t('ranking.countUnit')}
                     </span>
                   </div>
                 ) : (
                   <span style={{ fontSize: '0.82rem', fontWeight: 800, color: '#6366F1', fontVariantNumeric: 'tabular-nums' }}>
-                    {entry.participated}건
+                    {entry.participated}{t('ranking.countUnit')}
                   </span>
                 )}
               </div>
@@ -259,7 +265,7 @@ export function RankingPanelClient() {
           textDecoration: 'none',
         }}
       >
-        전체 랭킹 보기 →
+        {t('ranking.viewAll')}
       </Link>
     </div>
   )

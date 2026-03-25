@@ -1,3 +1,6 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
 import type { LevelInfo } from '@/lib/level'
 
 type Size = 'xs' | 'sm' | 'md'
@@ -11,6 +14,7 @@ export function LevelBadge({
   size?: Size
   showName?: boolean
 }) {
+  const t = useTranslations('levels')
   const fontSize = size === 'xs' ? '0.62rem' : size === 'sm' ? '0.7rem' : '0.8rem'
   const emojiSize = size === 'xs' ? '0.72rem' : size === 'sm' ? '0.82rem' : '0.95rem'
   const padding = size === 'xs' ? '2px 6px' : size === 'sm' ? '3px 7px' : '4px 10px'
@@ -33,7 +37,7 @@ export function LevelBadge({
       }}
     >
       <span style={{ fontSize: emojiSize }}>{level.emoji}</span>
-      {showName && level.levelName}
+      {showName && t(level.levelKey)}
     </span>
   )
 }

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { ArrowLeft, Check, Heart, ChevronDown, ChevronRight, ChevronUp, Share2, X, Search, Hash } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
@@ -45,6 +46,7 @@ export function RandomBetterViewer({
   showBack?: boolean
 }) {
   const router = useRouter()
+  const t = useTranslations()
   // onClose 우선, 없으면 showBack 시 router.back()
   const handleClose = onClose ?? (showBack ? () => router.back() : undefined)
 
@@ -462,15 +464,15 @@ export function RandomBetterViewer({
           {tagFilter ? (
             <span style={{ color: '#A5B4FC', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
               <Hash size={10} strokeWidth={2.5} />
-              {tagFilter} 검색 중
+              {tagFilter} {t('vote.tagSearching')}
             </span>
           ) : accuracyStatus === 'no-auth' ? (
             <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-              로그인하면 내 기록을 볼 수 있어요
+              {t('vote.loginPrompt')}
             </span>
           ) : accuracyStatus === 'loading' ? (
             <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-              불러오는 중...
+              {t('vote.loading')}
             </span>
           ) : (() => {
             const li = calcLevel(accuracyTotal, accuracy)
@@ -479,21 +481,21 @@ export function RandomBetterViewer({
               <>
                 <span style={{ color: 'white', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3 }}>
                   <span style={{ fontSize: '0.75rem' }}>{li.emoji}</span>
-                  {li.levelName}
+                  {t(`levels.${li.levelKey}` as Parameters<typeof t>[0])}
                 </span>
                 {sep}
                 {accuracy !== null ? (
                   <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                    적중률 {accuracy}%
+                    {t('vote.accuracy')} {accuracy}%
                   </span>
                 ) : (
                   <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                    적중률 -
+                    {t('vote.accuracy')} -
                   </span>
                 )}
                 {sep}
                 <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                  참여 {accuracyTotal}개
+                  {t('vote.participated')} {accuracyTotal}개
                 </span>
               </>
             )
@@ -526,9 +528,9 @@ export function RandomBetterViewer({
                   position: 'relative', zIndex: 9991,
                 }}
               >
-                <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>카테고리</span>
+                <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>{t('vote.category')}</span>
                 <span style={{ maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {CATEGORY_FILTERS.find(f => f.id === categoryFilter)?.label ?? '전체'}
+                  {categoryFilter === 'all' ? t('categories.all') : t(`categories.${categoryFilter}` as Parameters<typeof t>[0])}
                 </span>
                 <ChevronDown size={11} style={{ flexShrink: 0, transform: catDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s' }} />
               </button>
@@ -564,7 +566,7 @@ export function RandomBetterViewer({
                           fontWeight: isActive ? 800 : 400,
                           color: isActive ? '#A5B4FC' : 'rgba(255,255,255,0.85)',
                         }}>
-                          {f.label}
+                          {f.id === 'all' ? t('categories.all') : t(`categories.${f.id}` as Parameters<typeof t>[0])}
                         </span>
                         {isActive && <Check size={14} style={{ color: '#A5B4FC', flexShrink: 0 }} />}
                       </button>
@@ -633,7 +635,7 @@ export function RandomBetterViewer({
                 if (e.key === 'Escape') setSearchOpen(false)
                 if (e.key === 'Enter' && tagSuggestions.length > 0) handleTagChange(tagSuggestions[0].name)
               }}
-              placeholder="태그 검색..."
+              placeholder={t('vote.tagSearchPlaceholder')}
               style={{
                 flex: 1,
                 border: 'none',
@@ -726,13 +728,13 @@ export function RandomBetterViewer({
             textAlign: 'center',
           }}>
             <p style={{ color: 'white', fontWeight: 800, marginBottom: 20, fontSize: '1.05rem', letterSpacing: '-0.01em' }}>
-              사용 방법
+              {t('hint.title')}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {([
-                { icon: '↕️', text: '위아래 스와이프 → 다음 Better' },
-                { icon: '↔️', text: '좌우 스와이프 → Top100 / 랭킹' },
-                { icon: '👆', text: '사진 탭 → 투표  |  상세보기 → 크게 보기' },
+                { icon: '↕️', text: t('hint.swipeVertical') },
+                { icon: '↔️', text: t('hint.swipeHorizontal') },
+                { icon: '👆', text: t('hint.tap') },
               ] as const).map(({ icon, text }) => (
                 <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left' }}>
                   <span style={{ fontSize: '1.3rem', flexShrink: 0 }}>{icon}</span>
@@ -740,7 +742,7 @@ export function RandomBetterViewer({
                 </div>
               ))}
             </div>
-            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem', marginTop: 22 }}>탭하면 닫힙니다</p>
+            <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.72rem', marginTop: 22 }}>{t('hint.dismiss')}</p>
           </div>
         </div>
       )}
@@ -775,10 +777,10 @@ export function RandomBetterViewer({
             <>
               <div style={{ fontSize: '3rem', marginBottom: 16 }}>🏷️</div>
               <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>
-                #{tagFilter} Better가 없어요
+                {t('vote.tagEmpty', { tag: tagFilter! })}
               </p>
               <p style={{ margin: '10px 0 0', color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', lineHeight: 1.6 }}>
-                해당 태그의 Better가 아직 없거나<br />모두 확인했어요.
+                {t('vote.tagEmptyDesc')}
               </p>
               <button
                 onClick={() => handleTagChange(null)}
@@ -788,15 +790,15 @@ export function RandomBetterViewer({
                   color: 'white', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer',
                 }}
               >
-                태그 필터 해제
+                {t('vote.clearTagFilter')}
               </button>
             </>
           ) : (
             <>
               <div style={{ fontSize: '3.5rem', marginBottom: 20 }}>🎉</div>
-              <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>모두 다 봤어요!</p>
+              <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>{t('vote.allSeen')}</p>
               <p style={{ margin: '10px 0 0', color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-                새로운 Better가 올라오면 다시 돌아오세요.
+                {t('vote.allSeenDesc')}
               </p>
             </>
           )}
@@ -888,10 +890,10 @@ export function RandomBetterViewer({
                   {/* 배지 */}
                   <div style={{ position: 'absolute', top: 50, left: 12, right: 12, zIndex: 4, display: 'flex', gap: 6 }}>
                     {selectedChoice === 'A' && (
-                      <span style={{ background: '#6366F1', color: 'white', fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999 }}>내 선택</span>
+                      <span style={{ background: '#6366F1', color: 'white', fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999 }}>{t('vote.myChoice')}</span>
                     )}
                     {isAWinning && (
-                      <span style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999 }}>🏆 우세</span>
+                      <span style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999 }}>{t('vote.leading')}</span>
                     )}
                   </div>
                   {/* 퍼센트 — 중앙 */}
@@ -909,7 +911,7 @@ export function RandomBetterViewer({
                       transition: 'font-size 0.4s',
                     }}>{pctA}%</p>
                     <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.78rem', fontWeight: 600 }}>
-                      {voteResult.votesA}명 선택
+                      {t('vote.votesCount', { count: voteResult.votesA })}
                     </p>
                   </div>
                 </>
@@ -1078,7 +1080,7 @@ export function RandomBetterViewer({
                       transition: 'font-size 0.4s',
                     }}>{pctB}%</p>
                     <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.78rem', fontWeight: 600 }}>
-                      {voteResult.votesB}명 선택
+                      {t('vote.votesCount', { count: voteResult.votesB })}
                     </p>
                   </div>
                 </>
@@ -1102,7 +1104,7 @@ export function RandomBetterViewer({
                       padding: '2px 8px', borderRadius: 999,
                       marginBottom: 5,
                     }}>
-                      {cat.emoji} {cat.label}
+                      {cat.emoji} {t(`categories.${battle.category}` as Parameters<typeof t>[0])}
                     </span>
                     <h2 style={{
                       margin: 0, color: 'white', fontWeight: 800,
@@ -1116,9 +1118,9 @@ export function RandomBetterViewer({
                       fontSize: '0.72rem',
                       textShadow: '0 1px 4px rgba(0,0,0,0.8)',
                     }}>
-                      {phase === 'voting' && '사진을 눌러 선택하세요'}
-                      {(phase === 'picked' || phase === 'submitting') && '이유를 남기고 투표하세요'}
-                      {phase === 'voted' && '투표 완료!'}
+                      {phase === 'voting' && t('vote.tapToSelect')}
+                      {(phase === 'picked' || phase === 'submitting') && t('vote.addReasonOptional')}
+                      {phase === 'voted' && t('vote.voteDone')}
                     </p>
                   </>
                 )
@@ -1194,7 +1196,7 @@ export function RandomBetterViewer({
                 <Share2 size={20} color="white" />
               </span>
               <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>
-                공유
+                {t('vote.share')}
               </span>
             </button>
           </div>
@@ -1215,12 +1217,12 @@ export function RandomBetterViewer({
                 <p style={{ color: '#EF4444', fontSize: '0.85rem', margin: '0 0 8px' }}>{error}</p>
               )}
               <p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#6B7280', fontWeight: 600 }}>
-                {selectedChoice} 선택 · 이유를 남겨주세요 (선택사항)
+                {t('vote.reasonLabel', { choice: selectedChoice ?? '' })}
               </p>
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="이유를 남겨주세요..."
+                placeholder={t('vote.reasonPlaceholder')}
                 maxLength={200}
                 rows={2}
                 disabled={phase === 'submitting'}
@@ -1240,7 +1242,7 @@ export function RandomBetterViewer({
                     border: '1px solid #E5E7EB', background: 'white',
                     fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer',
                   }}
-                >취소</button>
+                >{t('vote.cancel')}</button>
                 <button
                   onClick={handleSubmit}
                   disabled={phase === 'submitting'}
@@ -1250,7 +1252,7 @@ export function RandomBetterViewer({
                     color: 'white', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer',
                   }}
                 >
-                  {phase === 'submitting' ? '투표 중…' : '투표하기'}
+                  {phase === 'submitting' ? t('vote.submitting') : t('vote.submit')}
                 </button>
               </div>
             </div>
@@ -1274,7 +1276,7 @@ export function RandomBetterViewer({
                     color: 'white', fontSize: '0.88rem', fontWeight: 700, cursor: 'pointer',
                   }}
                 >
-                  목록으로
+                  {t('vote.backToList')}
                 </button>
               </div>
             ) : (

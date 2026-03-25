@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "title": "Better — ¿Cuál es mejor?",
+    "description": "Sube dos fotos y deja que la gente elija"
+  },
+  "nav": {
+    "home": "Inicio",
+    "explore": "Explorar",
+    "create": "Crear",
+    "hot": "Hot",
+    "me": "Yo"
+  },
+  "sections": {
+    "ranking": "Ranking",
+    "better": "Better",
+    "hot": "Hot"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "signup": "Registrarse",
+    "tagline": "Pregunta a la gente cuál es mejor",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "signingIn": "Iniciando sesión...",
+    "googleLogin": "Continuar con Google",
+    "or": "o",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?",
+    "name": "Nombre",
+    "namePlaceholder": "Tu nombre",
+    "passwordConfirm": "Confirmar contraseña",
+    "signingUp": "Registrando..."
+  },
+  "menu": {
+    "myProfile": "Mi perfil",
+    "myBetters": "Mis Betters",
+    "myVotes": "Mis votos",
+    "myRanking": "Mi precisión / Ranking",
+    "user": "Usuario"
+  },
+  "create": {
+    "pageTitle": "Crear Better",
+    "titleLabel": "Título",
+    "titlePlaceholder": "¿Qué estás comparando?",
+    "descriptionALabel": "Descripción foto A (opcional)",
+    "descriptionBLabel": "Descripción foto B (opcional)",
+    "categoryLabel": "Categoría",
+    "tagsLabel": "Etiquetas",
+    "tagsPlaceholder": "Añadir etiquetas (espacio o enter)",
+    "submit": "Publicar",
+    "uploading": "Subiendo...",
+    "errors": {
+      "titleRequired": "Por favor ingresa un título",
+      "photoARequired": "La subida de la foto A no está completa",
+      "photoBRequired": "La subida de la foto B no está completa"
+    }
+  },
+  "vote": {
+    "tapToSelect": "Toca una foto para elegir",
+    "addReasonOptional": "Añade un motivo y vota",
+    "voteDone": "¡Votado!",
+    "myChoice": "Mi elección",
+    "leading": "🏆 Ganando",
+    "votesCount": "{count} votos",
+    "reasonLabel": "Elegiste {choice} · Deja un motivo (opcional)",
+    "reasonPlaceholder": "Deja un motivo...",
+    "cancel": "Cancelar",
+    "submit": "Votar",
+    "submitting": "Votando...",
+    "backToList": "Volver",
+    "share": "Compartir",
+    "loginPrompt": "Inicia sesión para ver tus estadísticas",
+    "allSeen": "¡Ya los viste todos!",
+    "allSeenDesc": "Vuelve cuando haya nuevos Betters.",
+    "tagEmpty": "No hay Betters con #{tag}",
+    "tagEmptyDesc": "Aún no hay Betters con esta etiqueta, o ya los viste todos.",
+    "clearTagFilter": "Quitar filtro de etiqueta",
+    "tagSearching": "Buscando",
+    "tagSearchPlaceholder": "Buscar etiquetas...",
+    "accuracy": "Precisión",
+    "participated": "Votos",
+    "category": "Categoría",
+    "loading": "Cargando...",
+    "me": "Yo"
+  },
+  "hint": {
+    "title": "Cómo usar",
+    "swipeVertical": "Desliza arriba/abajo → Siguiente Better",
+    "swipeHorizontal": "Desliza izq/der → Top100 / Ranking",
+    "tap": "Toca foto → Votar  |  Detalle → Ampliar",
+    "dismiss": "Toca para cerrar"
+  },
+  "categories": {
+    "all": "Todos",
+    "fashion": "Moda",
+    "appearance": "Apariencia",
+    "love": "Amor & Psicología",
+    "shopping": "Compras",
+    "food": "Comida & Café",
+    "it": "IT & Tecnología",
+    "decision": "Decisiones",
+    "fashionShort": "Moda",
+    "appearanceShort": "Look",
+    "loveShort": "Amor",
+    "shoppingShort": "Compras",
+    "foodShort": "Comida",
+    "itShort": "IT",
+    "decisionShort": "Decidir"
+  },
+  "levels": {
+    "iron": "Hierro",
+    "bronze": "Bronce",
+    "silver": "Plata",
+    "gold": "Oro",
+    "platinum": "Platino",
+    "diamond": "Diamante"
+  },
+  "ranking": {
+    "title": "Ranking de Better",
+    "topParticipation": "Más participaciones TOP 30",
+    "topAccuracy": "{emoji} {label} Precisión TOP 30",
+    "myRanking": "Mi ranking",
+    "myStats": "{count} votos",
+    "myAccuracyStats": "{emoji} {label} Precisión {accuracy}% · {count} votos",
+    "noJudgedVotes": "{emoji} {label} Sin votos juzgados · {count} participados",
+    "rank": "#{n}",
+    "notParticipated": "Sin votos",
+    "outOfTop30": "Fuera del Top 30",
+    "noData": "Aún no hay datos",
+    "categoryNoData": "{emoji} {label} Sin datos de ranking",
+    "voteToAppear": "Vota para aparecer aquí",
+    "categoryVoteToAppear": "Vota en esta categoría para entrar al ranking",
+    "viewAll": "Ver ranking completo →",
+    "countUnit": " votos"
+  },
+  "profile": {
+    "title": "Mi perfil",
+    "loginRequired": "Inicio de sesión requerido",
+    "loginRequiredDesc": "Por favor inicia sesión para ver tu perfil",
+    "goLogin": "Iniciar sesión",
+    "myBetters": "Mis Betters",
+    "totalVotes": "Total de votos",
+    "accuracy": "Precisión",
+    "level": "Nivel",
+    "noBetters": "Aún no hay Betters",
+    "createFirst": "¡Crea tu primer Better!",
+    "me": "Yo",
+    "expert": "Experto en {category}",
+    "bestCategory": "Mejor categoría"
+  },
+  "hot": {
+    "title": "Hot 100",
+    "subtitle": "Los Betters con más likes",
+    "likes": "Me gusta",
+    "share": "Compartir",
+    "noData": "Aún no hay datos",
+    "voteCount": "{count} votos",
+    "hot100Recommend": "Recomendar a Hot100"
+  },
+  "explore": {
+    "title": "Explorar"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error",
+    "retry": "Reintentar",
+    "close": "Cerrar",
+    "back": "Volver",
+    "search": "Buscar"
+  }
+}

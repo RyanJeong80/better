@@ -3,10 +3,12 @@
 import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { signIn, signInWithGoogle, type AuthState } from '@/actions/auth'
 
 function SubmitButton() {
   const { pending } = useFormStatus()
+  const t = useTranslations('auth')
   return (
     <button
       type="submit"
@@ -19,10 +21,10 @@ function SubmitButton() {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
-          로그인 중…
+          {t('signingIn')}
         </span>
       ) : (
-        '로그인'
+        t('login')
       )}
     </button>
   )
@@ -30,6 +32,7 @@ function SubmitButton() {
 
 export function LoginForm({ message }: { message?: string }) {
   const [state, formAction] = useActionState<AuthState, FormData>(signIn, null)
+  const t = useTranslations('auth')
 
   return (
     <div className="space-y-4">
@@ -45,13 +48,13 @@ export function LoginForm({ message }: { message?: string }) {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
           </svg>
-          Google로 로그인
+          {t('googleLogin')}
         </button>
       </form>
 
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-border" />
-        <span className="text-xs text-muted-foreground">또는</span>
+        <span className="text-xs text-muted-foreground">{t('or')}</span>
         <div className="h-px flex-1 bg-border" />
       </div>
 
@@ -76,7 +79,7 @@ export function LoginForm({ message }: { message?: string }) {
         )}
 
         <div className="space-y-1.5">
-          <label htmlFor="email" className="text-sm font-medium">이메일</label>
+          <label htmlFor="email" className="text-sm font-medium">{t('email')}</label>
           <input
             id="email"
             name="email"
@@ -89,7 +92,7 @@ export function LoginForm({ message }: { message?: string }) {
         </div>
 
         <div className="space-y-1.5">
-          <label htmlFor="password" className="text-sm font-medium">비밀번호</label>
+          <label htmlFor="password" className="text-sm font-medium">{t('password')}</label>
           <input
             id="password"
             name="password"
@@ -104,9 +107,9 @@ export function LoginForm({ message }: { message?: string }) {
         <SubmitButton />
 
         <p className="text-center text-sm text-muted-foreground">
-          계정이 없으신가요?{' '}
+          {t('noAccount')}{' '}
           <Link href="/signup" className="font-semibold text-foreground underline-offset-4 hover:underline">
-            회원가입
+            {t('signup')}
           </Link>
         </p>
       </form>

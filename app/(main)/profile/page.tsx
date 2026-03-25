@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
 import { betters, votes, likes, users, userStats } from '@/lib/db/schema'
 import { signOut } from '@/actions/auth'
+import { getTranslations } from 'next-intl/server'
 import { calcLevel, CATEGORY_LABELS } from '@/lib/level'
 import { LevelBadge } from '@/components/ui/level-badge'
 import { LevelUpToast } from '@/components/profile/level-up-toast'
@@ -11,6 +12,7 @@ import { UsernameEditor } from '@/components/profile/username-editor'
 import { ProfileBetterList, type BattleWithStats } from '@/components/profile/profile-better-list'
 
 export default async function ProfilePage() {
+  const t = await getTranslations('categories')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -138,7 +140,7 @@ export default async function ProfilePage() {
               <LevelBadge level={levelInfo} size="xs" />
               {bestCat && (
                 <span style={{ fontSize: '0.65rem', color: 'var(--color-muted-foreground)' }}>
-                  {CATEGORY_LABELS[bestCat.key].emoji} {CATEGORY_LABELS[bestCat.key].label} 전문
+                  {CATEGORY_LABELS[bestCat.key].emoji} {t(bestCat.key as Parameters<typeof t>[0])} 전문
                 </span>
               )}
             </div>
@@ -210,7 +212,7 @@ export default async function ProfilePage() {
                   }}
                 >
                   {CATEGORY_LABELS[c.key].emoji}
-                  <span style={{ color: '#6B7280' }}>{CATEGORY_LABELS[c.key].label}</span>
+                  <span style={{ color: '#6B7280' }}>{t(c.key as Parameters<typeof t>[0])}</span>
                   <span style={{ color: levelInfo.color }}>{parseFloat(c.value).toFixed(0)}%</span>
                 </span>
               ))}

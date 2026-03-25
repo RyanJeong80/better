@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Plus_Jakarta_Sans, M_PLUS_Rounded_1c, Noto_Sans_SC } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -35,13 +37,16 @@ export const metadata: Metadata = {
   description: '두 장의 사진을 올리고 사람들의 선택을 받아보세요',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const locale = await getLocale()
+  const messages = await getMessages()
+
   return (
-    <html lang="ko" className={`${plusJakarta.variable} ${mPlusRounded.variable} ${notoSansSC.variable}`}>
+    <html lang={locale} className={`${plusJakarta.variable} ${mPlusRounded.variable} ${notoSansSC.variable}`}>
       <head>
         <link
           href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable.css"
@@ -49,7 +54,9 @@ export default function RootLayout({
         />
       </head>
       <body className="font-sans antialiased">
-        {children}
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          {children}
+        </NextIntlClientProvider>
       </body>
     </html>
   )

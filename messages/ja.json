@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "title": "Better — どっちがいい？",
+    "description": "2枚の写真をアップして、みんなに選んでもらおう"
+  },
+  "nav": {
+    "home": "ホーム",
+    "explore": "ランダム",
+    "create": "作成",
+    "hot": "Hot",
+    "me": "自分"
+  },
+  "sections": {
+    "ranking": "ランキング",
+    "better": "Better",
+    "hot": "Hot"
+  },
+  "auth": {
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "signup": "新規登録",
+    "tagline": "どっちがいいか、みんなに聞いてみよう",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "signingIn": "ログイン中…",
+    "googleLogin": "Googleでログイン",
+    "or": "または",
+    "noAccount": "アカウントをお持ちでない方は",
+    "hasAccount": "すでにアカウントをお持ちの方は",
+    "name": "名前",
+    "namePlaceholder": "山田太郎",
+    "passwordConfirm": "パスワード確認",
+    "signingUp": "登録中…"
+  },
+  "menu": {
+    "myProfile": "マイプロフィール",
+    "myBetters": "投稿したBetter",
+    "myVotes": "投票履歴",
+    "myRanking": "正解率 / ランキング",
+    "user": "ユーザー"
+  },
+  "create": {
+    "pageTitle": "Betterを作る",
+    "titleLabel": "タイトル",
+    "titlePlaceholder": "何を比較しますか？",
+    "descriptionALabel": "写真Aの説明（任意）",
+    "descriptionBLabel": "写真Bの説明（任意）",
+    "categoryLabel": "カテゴリ",
+    "tagsLabel": "タグ",
+    "tagsPlaceholder": "タグを入力（スペースまたはEnterで追加）",
+    "submit": "投稿",
+    "uploading": "アップロード中...",
+    "errors": {
+      "titleRequired": "タイトルを入力してください",
+      "photoARequired": "写真Aのアップロードが完了していません",
+      "photoBRequired": "写真Bのアップロードが完了していません"
+    }
+  },
+  "vote": {
+    "tapToSelect": "写真をタップして選んでください",
+    "addReasonOptional": "理由を書いて投票しよう",
+    "voteDone": "投票完了！",
+    "myChoice": "私の選択",
+    "leading": "🏆 優勢",
+    "votesCount": "{count}人が選択",
+    "reasonLabel": "{choice}を選択 · 理由を書いてください（任意）",
+    "reasonPlaceholder": "理由を書いてください...",
+    "cancel": "キャンセル",
+    "submit": "投票する",
+    "submitting": "投票中…",
+    "backToList": "一覧に戻る",
+    "share": "シェア",
+    "loginPrompt": "ログインすると記録が確認できます",
+    "allSeen": "すべて見ました！",
+    "allSeenDesc": "新しいBetterが追加されたらまた来てください。",
+    "tagEmpty": "#{tag} Betterがありません",
+    "tagEmptyDesc": "このタグのBetterはまだないか、すべて確認しました。",
+    "clearTagFilter": "タグフィルターを解除",
+    "tagSearching": "検索中",
+    "tagSearchPlaceholder": "タグを検索...",
+    "accuracy": "正解率",
+    "participated": "参加",
+    "category": "カテゴリ",
+    "loading": "読み込み中...",
+    "me": "自分"
+  },
+  "hint": {
+    "title": "使い方",
+    "swipeVertical": "上下スワイプ → 次のBetter",
+    "swipeHorizontal": "左右スワイプ → Top100 / ランキング",
+    "tap": "写真タップ → 投票  |  詳細 → 拡大",
+    "dismiss": "タップして閉じる"
+  },
+  "categories": {
+    "all": "すべて",
+    "fashion": "ファッション",
+    "appearance": "外見",
+    "love": "恋愛・心理",
+    "shopping": "ショッピング",
+    "food": "グルメ",
+    "it": "IT・テック",
+    "decision": "決断",
+    "fashionShort": "ファッション",
+    "appearanceShort": "外見",
+    "loveShort": "恋愛",
+    "shoppingShort": "買い物",
+    "foodShort": "グルメ",
+    "itShort": "IT",
+    "decisionShort": "決断"
+  },
+  "levels": {
+    "iron": "アイアン",
+    "bronze": "ブロンズ",
+    "silver": "シルバー",
+    "gold": "ゴールド",
+    "platinum": "プラチナ",
+    "diamond": "ダイヤモンド"
+  },
+  "ranking": {
+    "title": "Betterランキング",
+    "topParticipation": "参加数 TOP 30",
+    "topAccuracy": "{emoji} {label} 正解率 TOP 30",
+    "myRanking": "マイランキング",
+    "myStats": "{count}件参加",
+    "myAccuracyStats": "{emoji} {label} 正解率 {accuracy}% · {count}件参加",
+    "noJudgedVotes": "{emoji} {label} 判定済み投票なし · {count}件参加",
+    "rank": "{n}位",
+    "notParticipated": "未参加",
+    "outOfTop30": "30位圏外",
+    "noData": "まだデータがありません",
+    "categoryNoData": "{emoji} {label} ランキングデータなし",
+    "voteToAppear": "投票するとここに表示されます",
+    "categoryVoteToAppear": "このカテゴリで投票するとランキングに反映されます",
+    "viewAll": "全ランキングを見る →",
+    "countUnit": "件"
+  },
+  "profile": {
+    "title": "マイプロフィール",
+    "loginRequired": "ログインが必要です",
+    "loginRequiredDesc": "プロフィールを見るにはログインしてください",
+    "goLogin": "ログイン",
+    "myBetters": "マイBetter",
+    "totalVotes": "総投票数",
+    "accuracy": "正解率",
+    "level": "レベル",
+    "noBetters": "まだBetterがありません",
+    "createFirst": "最初のBetterを作ってみよう！",
+    "me": "自分",
+    "expert": "{category}エキスパート",
+    "bestCategory": "最も得意なカテゴリ"
+  },
+  "hot": {
+    "title": "Hot 100",
+    "subtitle": "最もいいねされたBetter",
+    "likes": "いいね",
+    "share": "シェア",
+    "noData": "まだデータがありません",
+    "voteCount": "{count}票",
+    "hot100Recommend": "Hot100に推薦"
+  },
+  "explore": {
+    "title": "ランダム探索"
+  },
+  "common": {
+    "loading": "読み込み中...",
+    "error": "エラーが発生しました",
+    "retry": "再試行",
+    "close": "閉じる",
+    "back": "戻る",
+    "search": "検索"
+  }
+}

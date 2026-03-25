@@ -1,5 +1,8 @@
+export type LevelKey = 'iron' | 'bronze' | 'silver' | 'gold' | 'platinum' | 'diamond'
+
 export type LevelInfo = {
   level: number
+  levelKey: LevelKey
   levelName: string
   emoji: string
   color: string
@@ -7,12 +10,12 @@ export type LevelInfo = {
 }
 
 export const LEVEL_LIST: LevelInfo[] = [
-  { level: 1, levelName: '아이언',     emoji: '🪨', color: '#6B7280', bgColor: '#F3F4F6' },
-  { level: 2, levelName: '브론즈',     emoji: '🥉', color: '#92400E', bgColor: '#FEF3C7' },
-  { level: 3, levelName: '실버',       emoji: '🥈', color: '#374151', bgColor: '#F3F4F6' },
-  { level: 4, levelName: '골드',       emoji: '🥇', color: '#D97706', bgColor: '#FFFBEB' },
-  { level: 5, levelName: '플래티넘',   emoji: '💠', color: '#0284C7', bgColor: '#E0F2FE' },
-  { level: 6, levelName: '다이아몬드', emoji: '💎', color: '#7C3AED', bgColor: '#EDE9FE' },
+  { level: 1, levelKey: 'iron',     levelName: '아이언',     emoji: '🪨', color: '#6B7280', bgColor: '#F3F4F6' },
+  { level: 2, levelKey: 'bronze',   levelName: '브론즈',     emoji: '🥉', color: '#92400E', bgColor: '#FEF3C7' },
+  { level: 3, levelKey: 'silver',   levelName: '실버',       emoji: '🥈', color: '#374151', bgColor: '#F3F4F6' },
+  { level: 4, levelKey: 'gold',     levelName: '골드',       emoji: '🥇', color: '#D97706', bgColor: '#FFFBEB' },
+  { level: 5, levelKey: 'platinum', levelName: '플래티넘',   emoji: '💠', color: '#0284C7', bgColor: '#E0F2FE' },
+  { level: 6, levelKey: 'diamond',  levelName: '다이아몬드', emoji: '💎', color: '#7C3AED', bgColor: '#EDE9FE' },
 ]
 
 export function calcLevel(totalVotes: number, accuracy: number | null): LevelInfo {
@@ -24,12 +27,12 @@ export function calcLevel(totalVotes: number, accuracy: number | null): LevelInf
   return LEVEL_LIST[0]
 }
 
-export const CATEGORY_LABELS: Record<string, { label: string; emoji: string }> = {
-  fashion:    { label: '패션',   emoji: '👗' },
-  appearance: { label: '외모',   emoji: '💄' },
-  love:       { label: '연애',   emoji: '💕' },
-  shopping:   { label: '쇼핑',   emoji: '💰' },
-  food:       { label: '맛집',   emoji: '🍽️' },
-  it:         { label: 'IT',     emoji: '📱' },
-  decision:   { label: '결정',   emoji: '🤔' },
+export const CATEGORY_LABELS: Record<string, { emoji: string }> = {
+  fashion:    { emoji: '👗' },
+  appearance: { emoji: '💄' },
+  love:       { emoji: '💕' },
+  shopping:   { emoji: '💰' },
+  food:       { emoji: '🍽️' },
+  it:         { emoji: '📱' },
+  decision:   { emoji: '🤔' },
 }

@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "title": "Better — 哪个更好？",
+    "description": "上传两张照片，让大家来投票"
+  },
+  "nav": {
+    "home": "首页",
+    "explore": "探索",
+    "create": "创建",
+    "hot": "热门",
+    "me": "我"
+  },
+  "sections": {
+    "ranking": "排行榜",
+    "better": "Better",
+    "hot": "热门"
+  },
+  "auth": {
+    "login": "登录",
+    "logout": "退出登录",
+    "signup": "注册",
+    "tagline": "问问大家哪个更好",
+    "email": "电子邮件",
+    "password": "密码",
+    "signingIn": "登录中…",
+    "googleLogin": "使用Google登录",
+    "or": "或",
+    "noAccount": "还没有账户？",
+    "hasAccount": "已有账户？",
+    "name": "姓名",
+    "namePlaceholder": "您的姓名",
+    "passwordConfirm": "确认密码",
+    "signingUp": "注册中…"
+  },
+  "menu": {
+    "myProfile": "我的主页",
+    "myBetters": "我的Better",
+    "myVotes": "投票记录",
+    "myRanking": "我的准确率 / 排名",
+    "user": "用户"
+  },
+  "create": {
+    "pageTitle": "创建Better",
+    "titleLabel": "标题",
+    "titlePlaceholder": "你在比较什么？",
+    "descriptionALabel": "照片A说明（可选）",
+    "descriptionBLabel": "照片B说明（可选）",
+    "categoryLabel": "类别",
+    "tagsLabel": "标签",
+    "tagsPlaceholder": "添加标签（空格或回车确认）",
+    "submit": "发布",
+    "uploading": "上传中...",
+    "errors": {
+      "titleRequired": "请输入标题",
+      "photoARequired": "照片A上传未完成",
+      "photoBRequired": "照片B上传未完成"
+    }
+  },
+  "vote": {
+    "tapToSelect": "点击照片进行选择",
+    "addReasonOptional": "留下理由并投票",
+    "voteDone": "投票完成！",
+    "myChoice": "我的选择",
+    "leading": "🏆 领先",
+    "votesCount": "{count}人选择",
+    "reasonLabel": "选择了{choice} · 留下理由（可选）",
+    "reasonPlaceholder": "留下您的理由...",
+    "cancel": "取消",
+    "submit": "投票",
+    "submitting": "投票中…",
+    "backToList": "返回列表",
+    "share": "分享",
+    "loginPrompt": "登录后可查看您的记录",
+    "allSeen": "都看完了！",
+    "allSeenDesc": "有新的Better时再来吧。",
+    "tagEmpty": "没有 #{tag} 的Better",
+    "tagEmptyDesc": "此标签下还没有Better，或您已全部查看。",
+    "clearTagFilter": "清除标签筛选",
+    "tagSearching": "搜索中",
+    "tagSearchPlaceholder": "搜索标签...",
+    "accuracy": "准确率",
+    "participated": "参与",
+    "category": "类别",
+    "loading": "加载中...",
+    "me": "我"
+  },
+  "hint": {
+    "title": "使用方法",
+    "swipeVertical": "上下滑动 → 下一个Better",
+    "swipeHorizontal": "左右滑动 → Top100 / 排行榜",
+    "tap": "点击照片 → 投票  |  详情 → 放大",
+    "dismiss": "点击关闭"
+  },
+  "categories": {
+    "all": "全部",
+    "fashion": "时尚穿搭",
+    "appearance": "外貌比较",
+    "love": "恋爱心理",
+    "shopping": "购物理财",
+    "food": "美食咖啡",
+    "it": "IT数码",
+    "decision": "选择困难",
+    "fashionShort": "时尚",
+    "appearanceShort": "外貌",
+    "loveShort": "恋爱",
+    "shoppingShort": "购物",
+    "foodShort": "美食",
+    "itShort": "IT",
+    "decisionShort": "选择"
+  },
+  "levels": {
+    "iron": "青铜",
+    "bronze": "铜牌",
+    "silver": "银牌",
+    "gold": "金牌",
+    "platinum": "铂金",
+    "diamond": "钻石"
+  },
+  "ranking": {
+    "title": "Better排行榜",
+    "topParticipation": "参与次数 TOP 30",
+    "topAccuracy": "{emoji} {label} 准确率 TOP 30",
+    "myRanking": "我的排名",
+    "myStats": "参与{count}次",
+    "myAccuracyStats": "{emoji} {label} 准确率{accuracy}% · 参与{count}次",
+    "noJudgedVotes": "{emoji} {label} 无已判定投票 · 参与{count}次",
+    "rank": "第{n}名",
+    "notParticipated": "未参与",
+    "outOfTop30": "30名以外",
+    "noData": "暂无数据",
+    "categoryNoData": "{emoji} {label} 暂无排行数据",
+    "voteToAppear": "参与投票即可出现在这里",
+    "categoryVoteToAppear": "在此类别投票即可进入排行",
+    "viewAll": "查看完整排行榜 →",
+    "countUnit": "次"
+  },
+  "profile": {
+    "title": "我的主页",
+    "loginRequired": "需要登录",
+    "loginRequiredDesc": "请登录查看您的主页",
+    "goLogin": "登录",
+    "myBetters": "我的Better",
+    "totalVotes": "总投票数",
+    "accuracy": "准确率",
+    "level": "等级",
+    "noBetters": "还没有Better",
+    "createFirst": "创建您的第一个Better！",
+    "me": "我",
+    "expert": "{category}专家",
+    "bestCategory": "最擅长的类别"
+  },
+  "hot": {
+    "title": "Hot 100",
+    "subtitle": "获得最多点赞的Better",
+    "likes": "点赞",
+    "share": "分享",
+    "noData": "暂无数据",
+    "voteCount": "{count}票",
+    "hot100Recommend": "推荐到Hot100"
+  },
+  "explore": {
+    "title": "随机探索"
+  },
+  "common": {
+    "loading": "加载中...",
+    "error": "发生错误",
+    "retry": "重试",
+    "close": "关闭",
+    "back": "返回",
+    "search": "搜索"
+  }
+}

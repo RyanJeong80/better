@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "title": "Better — Which is better?",
+    "description": "Upload two photos and let people decide"
+  },
+  "nav": {
+    "home": "Home",
+    "explore": "Explore",
+    "create": "Create",
+    "hot": "Hot",
+    "me": "Me"
+  },
+  "sections": {
+    "ranking": "Ranking",
+    "better": "Better",
+    "hot": "Hot"
+  },
+  "auth": {
+    "login": "Log In",
+    "logout": "Log Out",
+    "signup": "Sign Up",
+    "tagline": "Ask people which one is better",
+    "email": "Email",
+    "password": "Password",
+    "signingIn": "Signing in...",
+    "googleLogin": "Continue with Google",
+    "or": "or",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "passwordConfirm": "Confirm Password",
+    "signingUp": "Signing up..."
+  },
+  "menu": {
+    "myProfile": "My Profile",
+    "myBetters": "My Betters",
+    "myVotes": "Vote History",
+    "myRanking": "My Accuracy / Ranking",
+    "user": "User"
+  },
+  "create": {
+    "pageTitle": "Create Better",
+    "titleLabel": "Title",
+    "titlePlaceholder": "What are you comparing?",
+    "descriptionALabel": "Photo A description (optional)",
+    "descriptionBLabel": "Photo B description (optional)",
+    "categoryLabel": "Category",
+    "tagsLabel": "Tags",
+    "tagsPlaceholder": "Add tags (space or enter)",
+    "submit": "Post",
+    "uploading": "Uploading...",
+    "errors": {
+      "titleRequired": "Please enter a title",
+      "photoARequired": "Photo A upload incomplete",
+      "photoBRequired": "Photo B upload incomplete"
+    }
+  },
+  "vote": {
+    "tapToSelect": "Tap a photo to choose",
+    "addReasonOptional": "Add a reason and vote",
+    "voteDone": "Voted!",
+    "myChoice": "My pick",
+    "leading": "🏆 Leading",
+    "votesCount": "{count} votes",
+    "reasonLabel": "Chose {choice} · Leave a reason (optional)",
+    "reasonPlaceholder": "Leave a reason...",
+    "cancel": "Cancel",
+    "submit": "Vote",
+    "submitting": "Voting...",
+    "backToList": "Back",
+    "share": "Share",
+    "loginPrompt": "Log in to track your stats",
+    "allSeen": "All caught up!",
+    "allSeenDesc": "Come back when new Betters are posted.",
+    "tagEmpty": "No #{tag} Betters",
+    "tagEmptyDesc": "No Betters with this tag yet, or you've seen them all.",
+    "clearTagFilter": "Clear tag filter",
+    "tagSearching": "Searching",
+    "tagSearchPlaceholder": "Search tags...",
+    "accuracy": "Accuracy",
+    "participated": "Votes",
+    "category": "Category",
+    "loading": "Loading...",
+    "me": "Me"
+  },
+  "hint": {
+    "title": "How to use",
+    "swipeVertical": "Swipe up/down → Next Better",
+    "swipeHorizontal": "Swipe left/right → Top100 / Ranking",
+    "tap": "Tap photo → Vote  |  Long press → Zoom",
+    "dismiss": "Tap to dismiss"
+  },
+  "categories": {
+    "all": "All",
+    "fashion": "Fashion",
+    "appearance": "Appearance",
+    "love": "Love & Psych",
+    "shopping": "Shopping",
+    "food": "Food & Cafe",
+    "it": "IT & Tech",
+    "decision": "Decisions",
+    "fashionShort": "Fashion",
+    "appearanceShort": "Looks",
+    "loveShort": "Love",
+    "shoppingShort": "Shop",
+    "foodShort": "Food",
+    "itShort": "IT",
+    "decisionShort": "Decide"
+  },
+  "levels": {
+    "iron": "Iron",
+    "bronze": "Bronze",
+    "silver": "Silver",
+    "gold": "Gold",
+    "platinum": "Platinum",
+    "diamond": "Diamond"
+  },
+  "ranking": {
+    "title": "Better Ranking",
+    "topParticipation": "Most Participated TOP 30",
+    "topAccuracy": "{emoji} {label} Accuracy TOP 30",
+    "myRanking": "My Ranking",
+    "myStats": "{count} votes",
+    "myAccuracyStats": "{emoji} {label} Accuracy {accuracy}% · {count} votes",
+    "noJudgedVotes": "{emoji} {label} No judged votes · {count} participated",
+    "rank": "#{n}",
+    "notParticipated": "No votes",
+    "outOfTop30": "Outside Top 30",
+    "noData": "No data yet",
+    "categoryNoData": "{emoji} {label} No ranking data",
+    "voteToAppear": "Vote to appear here",
+    "categoryVoteToAppear": "Vote in this category to be ranked",
+    "viewAll": "View full ranking →",
+    "countUnit": " votes"
+  },
+  "profile": {
+    "title": "My Profile",
+    "loginRequired": "Login required",
+    "loginRequiredDesc": "Please log in to view your profile",
+    "goLogin": "Log In",
+    "myBetters": "My Betters",
+    "totalVotes": "Total Votes",
+    "accuracy": "Accuracy",
+    "level": "Level",
+    "noBetters": "No Betters yet",
+    "createFirst": "Create your first Better!",
+    "me": "Me",
+    "expert": "{category} Expert",
+    "bestCategory": "Best category"
+  },
+  "hot": {
+    "title": "Hot 100",
+    "subtitle": "Most liked Betters",
+    "likes": "Likes",
+    "share": "Share",
+    "noData": "No data yet",
+    "voteCount": "{count} votes",
+    "hot100Recommend": "Recommend to Hot100"
+  },
+  "explore": {
+    "title": "Explore"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "close": "Close",
+    "back": "Back",
+    "search": "Search"
+  }
+}

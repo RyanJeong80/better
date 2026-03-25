@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { LoginForm } from '@/components/auth/login-form'
 
 export default async function LoginPage({
@@ -6,6 +7,7 @@ export default async function LoginPage({
   searchParams: Promise<{ message?: string }>
 }) {
   const { message } = await searchParams
+  const t = await getTranslations('auth')
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-background px-4">
@@ -23,13 +25,13 @@ export default async function LoginPage({
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-black tracking-tight">Better</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            어떤 게 더 나은지, 사람들에게 물어보세요
+            {t('tagline')}
           </p>
         </div>
 
         {/* 카드 */}
         <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
-          <h2 className="mb-6 text-lg font-semibold">로그인</h2>
+          <h2 className="mb-6 text-lg font-semibold">{t('login')}</h2>
           <LoginForm message={message} />
         </div>
       </div>

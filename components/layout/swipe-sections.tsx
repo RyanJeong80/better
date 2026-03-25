@@ -2,12 +2,11 @@
 
 import { useRef, useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { User, BarChart2, Vote, Trophy, LogOut, X, ChevronRight } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { LevelBadge } from '@/components/ui/level-badge'
 import type { UserInfo } from '@/app/(main)/page'
-
-const SECTION_LABELS = ['랭킹', 'Better', 'Hot']
 
 export function SwipeSections({
   rankingContent,
@@ -24,9 +23,19 @@ export function SwipeSections({
   active: number
   onActiveChange: (v: number) => void
 }) {
+  const t = useTranslations()
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
   const [menuOpen, setMenuOpen] = useState(false)
+
+  const SECTION_LABELS = [t('sections.ranking'), t('sections.better'), t('sections.hot')]
+
+  const menuItems = [
+    { icon: <User size={18} />, label: t('menu.myProfile'), href: '/profile' },
+    { icon: <BarChart2 size={18} />, label: t('menu.myBetters'), href: '/profile' },
+    { icon: <Vote size={18} />, label: t('menu.myVotes'), href: '/profile' },
+    { icon: <Trophy size={18} />, label: t('menu.myRanking'), href: '/ranking' },
+  ]
 
   // 홈 마운트 중 body 스크롤 잠금
   useEffect(() => {
@@ -49,13 +58,6 @@ export function SwipeSections({
   }
 
   const panels = [rankingContent, betterContent, hotContent]
-
-  const menuItems = [
-    { icon: <User size={18} />, label: '내 프로필', href: '/profile' },
-    { icon: <BarChart2 size={18} />, label: '내가 올린 Better', href: '/profile' },
-    { icon: <Vote size={18} />, label: '내 투표 기록', href: '/profile' },
-    { icon: <Trophy size={18} />, label: '내 적중률 / 랭킹 확인', href: '/ranking' },
-  ]
 
   return (
     <div
@@ -130,7 +132,7 @@ export function SwipeSections({
           }}
         >
           <span style={{ fontSize: '1rem', marginTop: -1 }}>+</span>
-          만들기
+          {t('nav.create')}
         </Link>
 
         {/* 프로필 아이콘 / 로그인 버튼 */}
@@ -158,7 +160,7 @@ export function SwipeSections({
               lineHeight: 1,
             }}
           >
-            로그인
+            {t('auth.login')}
           </Link>
         )}
       </div>
@@ -247,7 +249,7 @@ export function SwipeSections({
                     margin: 0, fontWeight: 800, fontSize: '1rem',
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
-                    {user.name || '사용자'}
+                    {user.name || t('menu.user')}
                   </p>
                   <LevelBadge level={user.levelInfo} size="xs" />
                 </div>
@@ -304,7 +306,7 @@ export function SwipeSections({
                     }}
                   >
                     <LogOut size={18} style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>로그아웃</span>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>{t('auth.logout')}</span>
                   </button>
                 </form>
               </div>

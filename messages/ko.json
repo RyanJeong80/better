@@ -1,0 +1,172 @@
+{
+  "meta": {
+    "title": "Better — 어떤 게 더 나아?",
+    "description": "두 장의 사진을 올리고 사람들의 선택을 받아보세요"
+  },
+  "nav": {
+    "home": "홈",
+    "explore": "랜덤",
+    "create": "만들기",
+    "hot": "Hot",
+    "me": "나"
+  },
+  "sections": {
+    "ranking": "랭킹",
+    "better": "Better",
+    "hot": "Hot"
+  },
+  "auth": {
+    "login": "로그인",
+    "logout": "로그아웃",
+    "signup": "회원가입",
+    "tagline": "어떤 게 더 나은지, 사람들에게 물어보세요",
+    "email": "이메일",
+    "password": "비밀번호",
+    "signingIn": "로그인 중…",
+    "googleLogin": "Google로 로그인",
+    "or": "또는",
+    "noAccount": "계정이 없으신가요?",
+    "hasAccount": "이미 계정이 있으신가요?",
+    "name": "이름",
+    "namePlaceholder": "홍길동",
+    "passwordConfirm": "비밀번호 확인",
+    "signingUp": "가입 중…"
+  },
+  "menu": {
+    "myProfile": "내 프로필",
+    "myBetters": "내가 올린 Better",
+    "myVotes": "내 투표 기록",
+    "myRanking": "내 적중률 / 랭킹 확인",
+    "user": "사용자"
+  },
+  "create": {
+    "pageTitle": "Better 만들기",
+    "titleLabel": "제목",
+    "titlePlaceholder": "어떤 걸 비교하시나요?",
+    "descriptionALabel": "사진 A 설명 (선택)",
+    "descriptionBLabel": "사진 B 설명 (선택)",
+    "categoryLabel": "카테고리",
+    "tagsLabel": "태그",
+    "tagsPlaceholder": "태그 입력 (스페이스/엔터로 추가)",
+    "submit": "올리기",
+    "uploading": "업로드 중...",
+    "errors": {
+      "titleRequired": "제목을 입력해주세요",
+      "photoARequired": "사진 A 업로드가 완료되지 않았습니다",
+      "photoBRequired": "사진 B 업로드가 완료되지 않았습니다"
+    }
+  },
+  "vote": {
+    "tapToSelect": "사진을 눌러 선택하세요",
+    "addReasonOptional": "이유를 남기고 투표하세요",
+    "voteDone": "투표 완료!",
+    "myChoice": "내 선택",
+    "leading": "🏆 우세",
+    "votesCount": "{count}명 선택",
+    "reasonLabel": "{choice} 선택 · 이유를 남겨주세요 (선택사항)",
+    "reasonPlaceholder": "이유를 남겨주세요...",
+    "cancel": "취소",
+    "submit": "투표하기",
+    "submitting": "투표 중…",
+    "backToList": "목록으로",
+    "share": "공유",
+    "loginPrompt": "로그인하면 내 기록을 볼 수 있어요",
+    "allSeen": "모두 다 봤어요!",
+    "allSeenDesc": "새로운 Better가 올라오면 다시 돌아오세요.",
+    "tagEmpty": "#{tag} Better가 없어요",
+    "tagEmptyDesc": "해당 태그의 Better가 아직 없거나 모두 확인했어요.",
+    "clearTagFilter": "태그 필터 해제",
+    "tagSearching": "검색 중",
+    "tagSearchPlaceholder": "태그 검색...",
+    "accuracy": "적중률",
+    "participated": "참여",
+    "category": "카테고리",
+    "loading": "불러오는 중...",
+    "me": "나"
+  },
+  "hint": {
+    "title": "사용 방법",
+    "swipeVertical": "위아래 스와이프 → 다음 Better",
+    "swipeHorizontal": "좌우 스와이프 → Top100 / 랭킹",
+    "tap": "사진 탭 → 투표  |  상세보기 → 크게 보기",
+    "dismiss": "탭하면 닫힙니다"
+  },
+  "categories": {
+    "all": "전체",
+    "fashion": "패션/코디",
+    "appearance": "외모비교",
+    "love": "연애/심리",
+    "shopping": "쇼핑/투자",
+    "food": "맛집/카페",
+    "it": "IT/전자",
+    "decision": "결정장애",
+    "fashionShort": "패션",
+    "appearanceShort": "외모",
+    "loveShort": "연애",
+    "shoppingShort": "쇼핑",
+    "foodShort": "맛집",
+    "itShort": "IT",
+    "decisionShort": "결정"
+  },
+  "levels": {
+    "iron": "아이언",
+    "bronze": "브론즈",
+    "silver": "실버",
+    "gold": "골드",
+    "platinum": "플래티넘",
+    "diamond": "다이아몬드"
+  },
+  "ranking": {
+    "title": "Better 랭킹",
+    "topParticipation": "참여 횟수 TOP 30",
+    "topAccuracy": "{emoji} {label} 적중률 TOP 30",
+    "myRanking": "내 랭킹",
+    "myStats": "참여 {count}건",
+    "myAccuracyStats": "{emoji} {label} 적중률 {accuracy}% · 참여 {count}건",
+    "noJudgedVotes": "{emoji} {label} 판정된 투표 없음 · 참여 {count}건",
+    "rank": "{n}위",
+    "notParticipated": "미참여",
+    "outOfTop30": "30위 밖",
+    "noData": "아직 데이터가 없어요",
+    "categoryNoData": "{emoji} {label} 랭킹 데이터 없음",
+    "voteToAppear": "투표에 참여하면 여기에 나타납니다",
+    "categoryVoteToAppear": "이 카테고리에서 투표하면 랭킹에 반영돼요",
+    "viewAll": "전체 랭킹 보기 →",
+    "countUnit": "건"
+  },
+  "profile": {
+    "title": "내 프로필",
+    "loginRequired": "로그인이 필요합니다",
+    "loginRequiredDesc": "프로필을 보려면 로그인하세요",
+    "goLogin": "로그인하기",
+    "myBetters": "내 Better",
+    "totalVotes": "총 투표",
+    "accuracy": "적중률",
+    "level": "레벨",
+    "noBetters": "아직 올린 Better가 없어요",
+    "createFirst": "첫 번째 Better를 만들어보세요!",
+    "me": "나",
+    "expert": "{category} 전문가",
+    "bestCategory": "가장 잘 맞히는 카테고리"
+  },
+  "hot": {
+    "title": "Hot 100",
+    "subtitle": "가장 많은 좋아요를 받은 Better",
+    "likes": "좋아요",
+    "share": "공유",
+    "noData": "아직 데이터가 없어요",
+    "voteCount": "{count}표",
+    "hot100Recommend": "Hot100에 추천하기"
+  },
+  "explore": {
+    "title": "랜덤 탐색"
+  },
+  "common": {
+    "loading": "불러오는 중...",
+    "error": "오류가 발생했습니다",
+    "retry": "다시 시도",
+    "close": "닫기",
+    "back": "뒤로",
+    "search": "검색"
+  }
+}

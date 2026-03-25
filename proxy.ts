@@ -4,6 +4,19 @@ import { NextResponse, type NextRequest } from 'next/server'
 const PROTECTED_PATHS = ['/battles/new', '/profile', '/onboarding']
 const AUTH_PATHS = ['/login', '/signup']
 
+const SUPPORTED_LOCALES = ['ko', 'en', 'ja', 'zh', 'es', 'fr']
+const DEFAULT_LOCALE = 'en'
+
+function detectLocale(acceptLang: string, cookieLocale?: string): string {
+  if (cookieLocale && SUPPORTED_LOCALES.includes(cookieLocale)) return cookieLocale
+  for (const part of acceptLang.split(',').map(l => l.split(';')[0].trim().toLowerCase())) {
+    if (SUPPORTED_LOCALES.includes(part)) return part
+    const short = part.split('-')[0]
+    if (SUPPORTED_LOCALES.includes(short)) return short
+  }
+  return DEFAULT_LOCALE
+}
+
 export async function proxy(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
   if (!supabaseUrl || supabaseUrl.includes('your-project')) {
@@ -62,6 +75,18 @@ export async function proxy(request: NextRequest) {
   } else {
     // 로그인 상태에서 auth 페이지 접근 → 홈으로
     if (isAuthPage) return redirect('/')
+  }
+
+  // 로케일 감지 후 쿠키 설정 (이미 올바른 쿠키가 있으면 덮어쓰지 않음)
+  const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value
+  const acceptLang = request.headers.get('accept-language') ?? ''
+  const locale = detectLocale(acceptLang, cookieLocale)
+  if (cookieLocale !== locale) {
+    supabaseResponse.cookies.set('NEXT_LOCALE', locale, {
+      maxAge: 60 * 60 * 24 * 365,
+      path: '/',
+      sameSite: 'lax',
+    })
   }
 
   return supabaseResponse

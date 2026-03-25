@@ -2,18 +2,20 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { Home, Shuffle, PlusCircle, Flame, User } from 'lucide-react'
-
-const NAV_ITEMS = [
-  { href: '/', icon: Home, label: '홈' },
-  { href: '/explore', icon: Shuffle, label: '랜덤' },
-  { href: '/battles/new', icon: PlusCircle, label: '만들기', primary: true },
-  { href: '/hot', icon: Flame, label: 'Hot' },
-  { href: '/profile', icon: User, label: '나' },
-]
 
 export function BottomNav({ isLoggedIn }: { isLoggedIn: boolean }) {
   const pathname = usePathname()
+  const t = useTranslations('nav')
+
+  const NAV_ITEMS = [
+    { href: '/', icon: Home, label: t('home') },
+    { href: '/explore', icon: Shuffle, label: t('explore') },
+    { href: '/battles/new', icon: PlusCircle, label: t('create'), primary: true },
+    { href: '/hot', icon: Flame, label: t('hot') },
+    { href: '/profile', icon: User, label: t('me') },
+  ]
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
