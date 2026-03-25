@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { User, BarChart2, Vote, Trophy, LogOut, X, ChevronRight } from 'lucide-react'
 import { signOut } from '@/actions/auth'
 import { LevelBadge } from '@/components/ui/level-badge'
+import { LanguageSwitcher } from '@/components/layout/language-switcher'
 import type { UserInfo } from '@/app/(main)/page'
 
 export function SwipeSections({
@@ -134,6 +135,9 @@ export function SwipeSections({
           <span style={{ fontSize: '1rem', marginTop: -1 }}>+</span>
           {t('nav.create')}
         </Link>
+
+        {/* 언어 변경 */}
+        <LanguageSwitcher />
 
         {/* 프로필 아이콘 / 로그인 버튼 */}
         {user ? (
