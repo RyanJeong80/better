@@ -181,23 +181,33 @@ export function SwipeSections({
           ))}
         </div>
 
-        {/* ── 하단 섹션 인디케이터 ── */}
+      </div>
+
+      {/* ── 하단 섹션 인디케이터 (fixed) ── */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 16,
+          left: 0,
+          right: 0,
+          zIndex: 50,
+          display: 'flex',
+          justifyContent: 'center',
+          pointerEvents: 'none',
+        }}
+      >
         <div
           style={{
-            position: 'absolute',
-            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 10,
-            display: 'flex',
+            display: 'inline-flex',
             alignItems: 'center',
-            gap: 2,
-            background: 'rgba(0,0,0,0.55)',
+            gap: 0,
+            background: 'rgba(0,0,0,0.4)',
             backdropFilter: 'blur(12px)',
             WebkitBackdropFilter: 'blur(12px)',
             borderRadius: 999,
-            padding: '6px 4px',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+            padding: '5px 6px',
+            boxShadow: '0 2px 16px rgba(0,0,0,0.15)',
+            pointerEvents: 'auto',
           }}
         >
           {/* 이전 화살표 */}
@@ -205,61 +215,84 @@ export function SwipeSections({
             onClick={() => active > 0 && onActiveChange(active - 1)}
             disabled={active === 0}
             style={{
-              width: 28, height: 28,
+              width: 30, height: 30,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'none', border: 'none', cursor: active > 0 ? 'pointer' : 'default',
-              color: active > 0 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)',
+              background: 'none', border: 'none',
+              cursor: active > 0 ? 'pointer' : 'default',
+              color: active > 0 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.2)',
               flexShrink: 0,
               transition: 'color 0.15s',
               padding: 0,
             }}
             aria-label="previous section"
           >
-            <ChevronLeft size={16} strokeWidth={2.5} />
+            <ChevronLeft size={15} strokeWidth={2.5} />
           </button>
 
-          {/* 번호 + 이름 */}
-          <div
-            style={{
-              display: 'flex', alignItems: 'center', gap: 5,
-              padding: '0 6px',
-              minWidth: 0,
-            }}
-          >
-            <span style={{
-              fontSize: '0.68rem', fontWeight: 900,
-              color: 'rgba(255,255,255,0.45)',
-              letterSpacing: '0.02em',
-              flexShrink: 0,
-            }}>
-              {active + 1}<span style={{ opacity: 0.5 }}>/4</span>
-            </span>
-            <span style={{
-              fontSize: '0.78rem', fontWeight: 800,
-              color: 'white',
-              whiteSpace: 'nowrap',
-              letterSpacing: '-0.01em',
-            }}>
-              {SECTION_LABELS[active]}
-            </span>
+          {/* 섹션 번호들 */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 2, padding: '0 4px' }}>
+            {SECTION_LABELS.map((label, i) => {
+              const isCurrent = i === active
+              return (
+                <button
+                  key={i}
+                  onClick={() => onActiveChange(i)}
+                  style={{
+                    background: 'none', border: 'none', cursor: 'pointer', padding: '2px 5px',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0,
+                    borderRadius: 6,
+                    transition: 'all 0.2s',
+                  }}
+                  aria-label={label}
+                >
+                  <span style={{
+                    fontSize: isCurrent ? '1rem' : '0.72rem',
+                    fontWeight: isCurrent ? 900 : 500,
+                    color: isCurrent ? 'white' : 'rgba(255,255,255,0.3)',
+                    lineHeight: 1,
+                    transition: 'all 0.2s',
+                  }}>
+                    {i + 1}
+                  </span>
+                </button>
+              )
+            })}
           </div>
+
+          {/* 구분점 + 섹션명 */}
+          <span style={{
+            fontSize: '0.7rem', fontWeight: 700,
+            color: 'rgba(255,255,255,0.5)',
+            padding: '0 2px 0 4px',
+            userSelect: 'none',
+          }}>·</span>
+          <span style={{
+            fontSize: '0.75rem', fontWeight: 800,
+            color: 'white',
+            whiteSpace: 'nowrap',
+            padding: '0 4px',
+            letterSpacing: '-0.01em',
+          }}>
+            {SECTION_LABELS[active]}
+          </span>
 
           {/* 다음 화살표 */}
           <button
             onClick={() => active < 3 && onActiveChange(active + 1)}
             disabled={active === 3}
             style={{
-              width: 28, height: 28,
+              width: 30, height: 30,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: 'none', border: 'none', cursor: active < 3 ? 'pointer' : 'default',
-              color: active < 3 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)',
+              background: 'none', border: 'none',
+              cursor: active < 3 ? 'pointer' : 'default',
+              color: active < 3 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.2)',
               flexShrink: 0,
               transition: 'color 0.15s',
               padding: 0,
             }}
             aria-label="next section"
           >
-            <ChevronRight size={16} strokeWidth={2.5} />
+            <ChevronRight size={15} strokeWidth={2.5} />
           </button>
         </div>
       </div>
