@@ -13,7 +13,8 @@
   "sections": {
     "ranking": "ランキング",
     "better": "Better",
-    "hot": "Hot"
+    "hot": "Hot",
+    "profile": "プロフィール"
   },
   "auth": {
     "login": "ログイン",
@@ -30,7 +31,9 @@
     "name": "名前",
     "namePlaceholder": "山田太郎",
     "passwordConfirm": "パスワード確認",
-    "signingUp": "登録中…"
+    "signingUp": "登録中…",
+    "loginRequired": "ログインが必要です",
+    "loginToSeeProfile": "プロフィールを見るにはログインしてください"
   },
   "menu": {
     "myProfile": "マイプロフィール",
@@ -203,7 +206,8 @@
     "noBettersYet": "まだBetterがありません",
     "noBettersDesc": "2枚の写真をアップして選んでもらいましょう",
     "createFirstBetter": "最初のBetterを作成",
-    "noCategoryBetters": "このカテゴリのBetterがありません"
+    "noCategoryBetters": "このカテゴリのBetterがありません",
+    "loadError": "プロフィールを読み込めませんでした"
   },
   "hot": {
     "title": "Hot 100",

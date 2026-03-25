@@ -13,7 +13,8 @@
   "sections": {
     "ranking": "Ranking",
     "better": "Better",
-    "hot": "Hot"
+    "hot": "Hot",
+    "profile": "Profile"
   },
   "auth": {
     "login": "Log In",
@@ -30,7 +31,9 @@
     "name": "Name",
     "namePlaceholder": "Your name",
     "passwordConfirm": "Confirm Password",
-    "signingUp": "Signing up..."
+    "signingUp": "Signing up...",
+    "loginRequired": "Login Required",
+    "loginToSeeProfile": "Log in to see your profile"
   },
   "menu": {
     "myProfile": "My Profile",
@@ -203,7 +206,8 @@
     "noBettersYet": "No Betters yet",
     "noBettersDesc": "Upload two photos and let people choose",
     "createFirstBetter": "Create first Better",
-    "noCategoryBetters": "No Betters in this category"
+    "noCategoryBetters": "No Betters in this category",
+    "loadError": "Could not load profile"
   },
   "hot": {
     "title": "Hot 100",

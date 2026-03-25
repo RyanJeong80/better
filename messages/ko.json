@@ -13,7 +13,8 @@
   "sections": {
     "ranking": "랭킹",
     "better": "Better",
-    "hot": "Hot"
+    "hot": "Hot",
+    "profile": "profile"
   },
   "auth": {
     "login": "로그인",
@@ -30,7 +31,9 @@
     "name": "이름",
     "namePlaceholder": "홍길동",
     "passwordConfirm": "비밀번호 확인",
-    "signingUp": "가입 중…"
+    "signingUp": "가입 중…",
+    "loginRequired": "로그인이 필요해요",
+    "loginToSeeProfile": "내 프로필을 보려면 로그인하세요"
   },
   "menu": {
     "myProfile": "내 프로필",
@@ -203,7 +206,8 @@
     "noBettersYet": "아직 Better가 없어요",
     "noBettersDesc": "두 사진을 올리고 사람들의 선택을 받아보세요",
     "createFirstBetter": "첫 Better 만들기",
-    "noCategoryBetters": "이 카테고리의 Better가 없어요"
+    "noCategoryBetters": "이 카테고리의 Better가 없어요",
+    "loadError": "프로필을 불러올 수 없어요"
   },
   "hot": {
     "title": "Hot 100",

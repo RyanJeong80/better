@@ -13,7 +13,8 @@
   "sections": {
     "ranking": "Classement",
     "better": "Better",
-    "hot": "Hot"
+    "hot": "Hot",
+    "profile": "Profil"
   },
   "auth": {
     "login": "Connexion",
@@ -30,7 +31,9 @@
     "name": "Nom",
     "namePlaceholder": "Votre nom",
     "passwordConfirm": "Confirmer le mot de passe",
-    "signingUp": "Inscription en cours…"
+    "signingUp": "Inscription en cours…",
+    "loginRequired": "Connexion requise",
+    "loginToSeeProfile": "Connectez-vous pour voir votre profil"
   },
   "menu": {
     "myProfile": "Mon profil",
@@ -203,7 +206,8 @@
     "noBettersYet": "Pas encore de Betters",
     "noBettersDesc": "Téléchargez deux photos et laissez les gens choisir",
     "createFirstBetter": "Créer le premier Better",
-    "noCategoryBetters": "Pas de Betters dans cette catégorie"
+    "noCategoryBetters": "Pas de Betters dans cette catégorie",
+    "loadError": "Impossible de charger le profil"
   },
   "hot": {
     "title": "Hot 100",

@@ -5,6 +5,7 @@ import { SwipeSections } from '@/components/layout/swipe-sections'
 import { RandomBetterViewer } from '@/components/battles/random-better-viewer'
 import { RankingPanelClient } from '@/components/home/ranking-panel-client'
 import { HotPanelClient } from '@/components/home/hot-panel-client'
+import { ProfilePanelClient } from '@/components/profile/profile-panel-client'
 import type { BattleForVoting } from '@/actions/battles'
 import type { PanelHotEntry } from '@/app/api/panels/hot/route'
 import type { UserInfo } from '@/app/(main)/page'
@@ -51,6 +52,7 @@ export function HomeClient({
         </div>
       }
       hotContent={<HotPanelClient onSelectBattle={handleSelectFromHot} />}
+      profileContent={<ProfilePanelClient user={user} />}
     />
   )
 }

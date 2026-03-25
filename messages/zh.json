@@ -13,7 +13,8 @@
   "sections": {
     "ranking": "排行榜",
     "better": "Better",
-    "hot": "热门"
+    "hot": "热门",
+    "profile": "我的"
   },
   "auth": {
     "login": "登录",
@@ -30,7 +31,9 @@
     "name": "姓名",
     "namePlaceholder": "您的姓名",
     "passwordConfirm": "确认密码",
-    "signingUp": "注册中…"
+    "signingUp": "注册中…",
+    "loginRequired": "需要登录",
+    "loginToSeeProfile": "登录以查看您的个人资料"
   },
   "menu": {
     "myProfile": "我的主页",
@@ -203,7 +206,8 @@
     "noBettersYet": "还没有Better",
     "noBettersDesc": "上传两张照片，让大家来选择",
     "createFirstBetter": "创建第一个Better",
-    "noCategoryBetters": "此分类中没有Better"
+    "noCategoryBetters": "此分类中没有Better",
+    "loadError": "无法加载个人资料"
   },
   "hot": {
     "title": "Hot 100",

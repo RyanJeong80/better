@@ -1,0 +1,226 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useTranslations } from 'next-intl'
+import { LogIn } from 'lucide-react'
+import { signOut } from '@/actions/auth'
+import { LevelBadge } from '@/components/ui/level-badge'
+import { LevelUpToast } from '@/components/profile/level-up-toast'
+import { UsernameEditor } from '@/components/profile/username-editor'
+import { ProfileBetterList } from '@/components/profile/profile-better-list'
+import { CATEGORY_LABELS } from '@/lib/level'
+import type { UserInfo } from '@/app/(main)/page'
+import type { UserProfileData } from '@/app/api/user/profile/route'
+import type { BattleWithStats } from '@/components/profile/profile-better-list'
+
+function Skeleton() {
+  return (
+    <div style={{ padding: '20px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 24 }}>
+        <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'var(--color-muted)' }} className="animate-pulse" />
+        <div style={{ flex: 1 }}>
+          <div style={{ height: 18, width: 120, borderRadius: 6, background: 'var(--color-muted)', marginBottom: 8 }} className="animate-pulse" />
+          <div style={{ height: 14, width: 80, borderRadius: 6, background: 'var(--color-muted)' }} className="animate-pulse" />
+        </div>
+      </div>
+      <div style={{ height: 100, borderRadius: 16, background: 'var(--color-muted)', marginBottom: 16 }} className="animate-pulse" />
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
+        {[0, 1, 2].map(i => (
+          <div key={i} style={{ height: 72, borderRadius: 12, background: 'var(--color-muted)' }} className="animate-pulse" />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
+  const t = useTranslations()
+  const [data, setData] = useState<UserProfileData | null>(null)
+  const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
+
+  useEffect(() => {
+    if (!user) { setStatus('done'); return }
+    fetch('/api/user/profile')
+      .then(r => r.json())
+      .then((d: UserProfileData) => { setData(d); setStatus('done') })
+      .catch(() => setStatus('error'))
+  }, [user])
+
+  if (!user) {
+    return (
+      <div style={{
+        height: '100%', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        padding: '32px 24px', gap: 16,
+      }}>
+        <span style={{ fontSize: '3rem' }}>👤</span>
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ fontWeight: 800, fontSize: '1.1rem', marginBottom: 6 }}>{t('auth.loginRequired')}</p>
+          <p style={{ fontSize: '0.82rem', color: 'var(--color-muted-foreground)' }}>{t('auth.loginToSeeProfile')}</p>
+        </div>
+        <Link
+          href="/login"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+            color: 'white', fontWeight: 700, fontSize: '0.9rem',
+            padding: '12px 28px', borderRadius: 999,
+            textDecoration: 'none',
+          }}
+        >
+          <LogIn size={16} />
+          {t('auth.login')}
+        </Link>
+      </div>
+    )
+  }
+
+  if (status === 'loading') return <Skeleton />
+
+  if (!data) {
+    return (
+      <div style={{ padding: '40px 16px', textAlign: 'center', color: 'var(--color-muted-foreground)' }}>
+        <p>{t('profile.loadError')}</p>
+      </div>
+    )
+  }
+
+  const battles: BattleWithStats[] = data.battles.map(b => ({
+    ...b,
+    createdAt: new Date(b.createdAt),
+  }))
+
+  return (
+    <div style={{ padding: '16px 16px 60px', overflowY: 'auto' }}>
+      <LevelUpToast
+        currentLevel={data.levelInfo.level}
+        levelName={data.levelInfo.levelName}
+        emoji={data.levelInfo.emoji}
+      />
+
+      {/* 유저 헤더 */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
+            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '1.3rem', fontWeight: 900, color: 'white',
+          }}>
+            {data.initial}
+          </div>
+          <div>
+            <UsernameEditor currentUsername={data.username} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+              <LevelBadge level={data.levelInfo} size="xs" />
+              {data.bestCat && (
+                <span style={{ fontSize: '0.62rem', color: 'var(--color-muted-foreground)' }}>
+                  {CATEGORY_LABELS[data.bestCat.key].emoji}{' '}
+                  {t('profile.expertBadge', { category: t(`categories.${data.bestCat.key}` as Parameters<typeof t>[0]) })}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <form action={signOut}>
+          <button
+            type="submit"
+            style={{
+              padding: '6px 14px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700,
+              border: '1.5px solid var(--color-border)', background: 'transparent',
+              cursor: 'pointer', color: 'var(--color-foreground)',
+            }}
+          >
+            {t('auth.logout')}
+          </button>
+        </form>
+      </div>
+
+      {/* 레벨 카드 */}
+      <div style={{
+        borderRadius: 20, padding: '16px 18px', marginBottom: 14,
+        background: `linear-gradient(135deg, ${data.levelInfo.bgColor}, white)`,
+        border: `1.5px solid ${data.levelInfo.color}30`,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <span style={{ fontSize: '2.6rem', lineHeight: 1 }}>{data.levelInfo.emoji}</span>
+          <div style={{ flex: 1 }}>
+            <p style={{ fontSize: '0.68rem', fontWeight: 700, color: data.levelInfo.color, letterSpacing: '0.06em', marginBottom: 4 }}>
+              Lv.{data.levelInfo.level} · {data.levelInfo.levelName}
+            </p>
+            <div style={{ display: 'flex', gap: 14 }}>
+              <div>
+                <p style={{ fontSize: '0.62rem', color: '#6B7280', margin: 0 }}>{t('profile.totalVotesLabel')}</p>
+                <p style={{ fontSize: '1.15rem', fontWeight: 900, color: data.levelInfo.color, lineHeight: 1.1, margin: 0 }}>
+                  {data.totalVotes}
+                  <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>{t('ranking.countUnit')}</span>
+                </p>
+              </div>
+              <div>
+                <p style={{ fontSize: '0.62rem', color: '#6B7280', margin: 0 }}>{t('profile.accuracy')}</p>
+                <p style={{ fontSize: '1.15rem', fontWeight: 900, color: data.levelInfo.color, lineHeight: 1.1, margin: 0 }}>
+                  {data.accuracyRate != null ? `${data.accuracyRate.toFixed(1)}%` : '-'}
+                </p>
+              </div>
+              {data.bestCat && (
+                <div>
+                  <p style={{ fontSize: '0.62rem', color: '#6B7280', margin: 0 }}>{t('profile.specialtyLabel')}</p>
+                  <p style={{ fontSize: '1.15rem', fontWeight: 900, color: data.levelInfo.color, lineHeight: 1.1, margin: 0 }}>
+                    {CATEGORY_LABELS[data.bestCat.key].emoji}
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, marginLeft: 2 }}>
+                      {data.bestCat.value.toFixed(0)}%
+                    </span>
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* 카테고리별 적중률 */}
+        {data.catAccuracies.length > 0 && (
+          <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            {[...data.catAccuracies]
+              .sort((a, b) => b.value - a.value)
+              .map(c => (
+                <span
+                  key={c.key}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 3,
+                    padding: '2px 7px', borderRadius: 999,
+                    background: 'white', border: `1px solid ${data.levelInfo.color}30`,
+                    fontSize: '0.65rem', fontWeight: 700, color: '#374151',
+                  }}
+                >
+                  {CATEGORY_LABELS[c.key].emoji}
+                  <span style={{ color: '#6B7280' }}>{t(`categories.${c.key}` as Parameters<typeof t>[0])}</span>
+                  <span style={{ color: data.levelInfo.color }}>{c.value.toFixed(0)}%</span>
+                </span>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* 요약 통계 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 20 }}>
+        {[
+          { label: t('profile.myBetters'), value: t('profile.betterCountValue', { count: battles.length }) },
+          { label: t('profile.totalVotesLabel'), value: t('profile.totalVotesValue', { count: data.battlesVoteTotal }) },
+          { label: t('profile.likesLabel'), value: `${data.battlesLikesTotal}` },
+        ].map(({ label, value }) => (
+          <div key={label} style={{
+            borderRadius: 14, border: '1px solid var(--color-border)',
+            background: 'var(--color-card)', padding: '12px 10px', textAlign: 'center',
+          }}>
+            <p style={{ fontSize: '0.68rem', color: 'var(--color-muted-foreground)', margin: 0 }}>{label}</p>
+            <p style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--color-foreground)', margin: '4px 0 0' }}>{value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Better 목록 */}
+      <ProfileBetterList battles={battles} />
+    </div>
+  )
+}

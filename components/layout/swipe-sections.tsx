@@ -1,11 +1,8 @@
 'use client'
 
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { User, BarChart2, Vote, Trophy, LogOut, X, ChevronRight } from 'lucide-react'
-import { signOut } from '@/actions/auth'
-import { LevelBadge } from '@/components/ui/level-badge'
 import { LanguageSwitcher } from '@/components/layout/language-switcher'
 import type { UserInfo } from '@/app/(main)/page'
 
@@ -13,6 +10,7 @@ export function SwipeSections({
   rankingContent,
   betterContent,
   hotContent,
+  profileContent,
   user,
   active,
   onActiveChange,
@@ -20,6 +18,7 @@ export function SwipeSections({
   rankingContent: React.ReactNode
   betterContent: React.ReactNode
   hotContent: React.ReactNode
+  profileContent: React.ReactNode
   user: UserInfo | null
   active: number
   onActiveChange: (v: number) => void
@@ -27,16 +26,8 @@ export function SwipeSections({
   const t = useTranslations()
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
-  const [menuOpen, setMenuOpen] = useState(false)
 
-  const SECTION_LABELS = [t('sections.ranking'), t('sections.better'), t('sections.hot')]
-
-  const menuItems = [
-    { icon: <User size={18} />, label: t('menu.myProfile'), href: '/profile' },
-    { icon: <BarChart2 size={18} />, label: t('menu.myBetters'), href: '/profile' },
-    { icon: <Vote size={18} />, label: t('menu.myVotes'), href: '/profile' },
-    { icon: <Trophy size={18} />, label: t('menu.myRanking'), href: '/ranking' },
-  ]
+  const SECTION_LABELS = [t('sections.ranking'), t('sections.better'), t('sections.hot'), t('sections.profile')]
 
   // 홈 마운트 중 body 스크롤 잠금
   useEffect(() => {
@@ -54,11 +45,11 @@ export function SwipeSections({
     const dx = e.changedTouches[0].clientX - touchStartX.current
     const dy = e.changedTouches[0].clientY - touchStartY.current
     if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy)) return
-    if (dx < 0 && active < 2) onActiveChange(active + 1)
+    if (dx < 0 && active < 3) onActiveChange(active + 1)
     if (dx > 0 && active > 0) onActiveChange(active - 1)
   }
 
-  const panels = [rankingContent, betterContent, hotContent]
+  const panels = [rankingContent, betterContent, hotContent, profileContent]
 
   return (
     <div
@@ -142,13 +133,18 @@ export function SwipeSections({
         {/* 프로필 아이콘 / 로그인 버튼 */}
         {user ? (
           <button
-            onClick={() => setMenuOpen(true)}
+            onClick={() => onActiveChange(3)}
             style={{
               width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-              border: 'none', cursor: 'pointer',
+              background: active === 3
+                ? 'linear-gradient(135deg, #6366F1, #8B5CF6)'
+                : 'var(--color-muted)',
+              border: active === 3 ? 'none' : '2px solid var(--color-border)',
+              cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '0.82rem', fontWeight: 800, color: 'white',
+              fontSize: '0.82rem', fontWeight: 800,
+              color: active === 3 ? 'white' : 'var(--color-foreground)',
+              transition: 'all 0.2s',
             }}
           >
             {user.initial}
@@ -175,13 +171,13 @@ export function SwipeSections({
         onTouchStart={onTouchStart}
         onTouchEnd={onTouchEnd}
       >
-        {/* 트랙: 3패널 가로 나열 */}
+        {/* 트랙: 4패널 가로 나열 */}
         <div
           style={{
             display: 'flex',
-            width: '300%',
+            width: '400%',
             height: '100%',
-            transform: `translateX(calc(-${100 / 3}% * ${active}))`,
+            transform: `translateX(calc(-${100 / 4}% * ${active}))`,
             transition: 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)',
             willChange: 'transform',
           }}
@@ -190,7 +186,7 @@ export function SwipeSections({
             <div
               key={i}
               style={{
-                width: `${100 / 3}%`,
+                width: `${100 / 4}%`,
                 height: '100%',
                 overflowY: i === 1 ? 'hidden' : 'auto',
                 overflowX: 'hidden',
@@ -202,125 +198,6 @@ export function SwipeSections({
           ))}
         </div>
       </div>
-
-      {/* ── 프로필 메뉴 (bottom sheet) ── */}
-      {menuOpen && user && (
-        <>
-          {/* 배경 오버레이 */}
-          <div
-            onClick={() => setMenuOpen(false)}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 200,
-              background: 'rgba(0,0,0,0.45)',
-            }}
-          />
-          {/* 시트 */}
-          <div
-            style={{
-              position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 201,
-              background: 'var(--color-background)',
-              borderTopLeftRadius: 20, borderTopRightRadius: 20,
-              boxShadow: '0 -4px 32px rgba(0,0,0,0.15)',
-              animation: '_slideUpSheet 0.28s cubic-bezier(0.25, 1, 0.5, 1)',
-            }}
-          >
-            <style>{`
-              @keyframes _slideUpSheet { from { transform: translateY(100%) } to { transform: translateY(0) } }
-            `}</style>
-
-            {/* 닫기 핸들 */}
-            <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 10, paddingBottom: 4 }}>
-              <div style={{ width: 36, height: 4, borderRadius: 999, background: 'var(--color-border)' }} />
-            </div>
-
-            {/* 유저 정보 헤더 */}
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 14,
-              padding: '14px 20px 16px',
-              borderBottom: '1px solid var(--color-border)',
-            }}>
-              <div style={{
-                width: 48, height: 48, borderRadius: '50%', flexShrink: 0,
-                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '1.2rem', fontWeight: 900, color: 'white',
-              }}>
-                {user.initial}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                  <p style={{
-                    margin: 0, fontWeight: 800, fontSize: '1rem',
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                  }}>
-                    {user.name || t('menu.user')}
-                  </p>
-                  <LevelBadge level={user.levelInfo} size="xs" />
-                </div>
-                <p style={{
-                  margin: 0, fontSize: '0.78rem', color: 'var(--color-muted-foreground)',
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>
-                  {user.email}
-                </p>
-              </div>
-              <button
-                onClick={() => setMenuOpen(false)}
-                style={{
-                  width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                  background: 'var(--color-muted)', border: 'none', cursor: 'pointer',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            {/* 메뉴 아이템 */}
-            <div style={{ padding: '8px 0' }}>
-              {menuItems.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  onClick={() => setMenuOpen(false)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 14,
-                    padding: '14px 20px',
-                    textDecoration: 'none',
-                    color: 'var(--color-foreground)',
-                  }}
-                >
-                  <span style={{ color: '#6366F1', flexShrink: 0 }}>{item.icon}</span>
-                  <span style={{ flex: 1, fontSize: '0.95rem', fontWeight: 600 }}>{item.label}</span>
-                  <ChevronRight size={16} style={{ color: 'var(--color-muted-foreground)', flexShrink: 0 }} />
-                </Link>
-              ))}
-
-              {/* 로그아웃 */}
-              <div style={{ borderTop: '1px solid var(--color-border)', marginTop: 4, paddingTop: 4 }}>
-                <form action={signOut}>
-                  <button
-                    type="submit"
-                    style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 14,
-                      padding: '14px 20px',
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      textAlign: 'left',
-                      color: '#EF4444',
-                    }}
-                  >
-                    <LogOut size={18} style={{ flexShrink: 0 }} />
-                    <span style={{ fontSize: '0.95rem', fontWeight: 600 }}>{t('auth.logout')}</span>
-                  </button>
-                </form>
-              </div>
-            </div>
-
-            {/* iOS safe area */}
-            <div style={{ height: 'env(safe-area-inset-bottom, 16px)' }} />
-          </div>
-        </>
-      )}
     </div>
   )
 }
