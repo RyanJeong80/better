@@ -484,18 +484,10 @@ export function RandomBetterViewer({
                   {t(`levels.${li.levelKey}` as Parameters<typeof t>[0])}
                 </span>
                 {sep}
-                {accuracy !== null ? (
-                  <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                    {t('vote.accuracy')} {accuracy}%
-                  </span>
-                ) : (
-                  <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
-                    {t('vote.accuracy')} -
-                  </span>
-                )}
-                {sep}
                 <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
-                  {t('vote.participated')} {accuracyTotal}{t('participation.unit')}
+                  {accuracy !== null ? `${accuracy}%` : '-'}
+                  <span style={{ color: 'rgba(255,255,255,0.4)', margin: '0 4px' }}>/</span>
+                  {accuracyTotal}{t('participation.unit')}
                 </span>
               </>
             )
