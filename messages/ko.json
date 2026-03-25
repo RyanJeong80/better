@@ -12,9 +12,9 @@
   },
   "sections": {
     "ranking": "랭킹",
-    "better": "Better",
-    "hot": "Hot",
-    "profile": "profile"
+    "better": "랜덤 Better",
+    "hot": "Hot Better",
+    "profile": "프로필"
   },
   "auth": {
     "login": "로그인",

@@ -12,8 +12,8 @@
   },
   "sections": {
     "ranking": "Ranking",
-    "better": "Better",
-    "hot": "Hot",
+    "better": "Random Better",
+    "hot": "Hot Better",
     "profile": "Perfil"
   },
   "auth": {

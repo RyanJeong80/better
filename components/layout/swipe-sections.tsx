@@ -3,21 +3,22 @@
 import { useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { LanguageSwitcher } from '@/components/layout/language-switcher'
 import type { UserInfo } from '@/app/(main)/page'
 
 export function SwipeSections({
-  rankingContent,
   betterContent,
   hotContent,
+  rankingContent,
   profileContent,
   user,
   active,
   onActiveChange,
 }: {
-  rankingContent: React.ReactNode
   betterContent: React.ReactNode
   hotContent: React.ReactNode
+  rankingContent: React.ReactNode
   profileContent: React.ReactNode
   user: UserInfo | null
   active: number
@@ -27,9 +28,14 @@ export function SwipeSections({
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
 
-  const SECTION_LABELS = [t('sections.ranking'), t('sections.better'), t('sections.hot'), t('sections.profile')]
+  // 패널 순서: 0=랜덤Better, 1=Hot Better, 2=랭킹, 3=프로필
+  const SECTION_LABELS = [
+    t('sections.better'),
+    t('sections.hot'),
+    t('sections.ranking'),
+    t('sections.profile'),
+  ]
 
-  // 홈 마운트 중 body 스크롤 잠금
   useEffect(() => {
     const prev = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -49,7 +55,7 @@ export function SwipeSections({
     if (dx > 0 && active > 0) onActiveChange(active - 1)
   }
 
-  const panels = [rankingContent, betterContent, hotContent, profileContent]
+  const panels = [betterContent, hotContent, rankingContent, profileContent]
 
   return (
     <div
@@ -85,31 +91,8 @@ export function SwipeSections({
           Better
         </span>
 
-        {/* 섹션 인디케이터 dots (중앙) */}
-        <div
-          style={{
-            flex: 1,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: 6,
-          }}
-        >
-          {panels.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => onActiveChange(i)}
-              aria-label={SECTION_LABELS[i]}
-              style={{
-                width: active === i ? 20 : 7,
-                height: 7,
-                borderRadius: 999,
-                background: active === i ? '#6366F1' : '#D1D5DB',
-                border: 'none', cursor: 'pointer', padding: 0,
-                transition: 'all 0.22s cubic-bezier(0.25, 1, 0.5, 1)',
-                flexShrink: 0,
-              }}
-            />
-          ))}
-        </div>
+        {/* 중앙 spacer */}
+        <div style={{ flex: 1 }} />
 
         {/* 만들기 버튼 */}
         <Link
@@ -188,7 +171,7 @@ export function SwipeSections({
               style={{
                 width: `${100 / 4}%`,
                 height: '100%',
-                overflowY: i === 1 ? 'hidden' : 'auto',
+                overflowY: i === 0 ? 'hidden' : 'auto',
                 overflowX: 'hidden',
                 WebkitOverflowScrolling: 'touch' as React.CSSProperties['WebkitOverflowScrolling'],
               }}
@@ -196,6 +179,88 @@ export function SwipeSections({
               {content}
             </div>
           ))}
+        </div>
+
+        {/* ── 하단 섹션 인디케이터 ── */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 'calc(env(safe-area-inset-bottom, 0px) + 14px)',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 10,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            background: 'rgba(0,0,0,0.55)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderRadius: 999,
+            padding: '6px 4px',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+          }}
+        >
+          {/* 이전 화살표 */}
+          <button
+            onClick={() => active > 0 && onActiveChange(active - 1)}
+            disabled={active === 0}
+            style={{
+              width: 28, height: 28,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'none', border: 'none', cursor: active > 0 ? 'pointer' : 'default',
+              color: active > 0 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)',
+              flexShrink: 0,
+              transition: 'color 0.15s',
+              padding: 0,
+            }}
+            aria-label="previous section"
+          >
+            <ChevronLeft size={16} strokeWidth={2.5} />
+          </button>
+
+          {/* 번호 + 이름 */}
+          <div
+            style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '0 6px',
+              minWidth: 0,
+            }}
+          >
+            <span style={{
+              fontSize: '0.68rem', fontWeight: 900,
+              color: 'rgba(255,255,255,0.45)',
+              letterSpacing: '0.02em',
+              flexShrink: 0,
+            }}>
+              {active + 1}<span style={{ opacity: 0.5 }}>/4</span>
+            </span>
+            <span style={{
+              fontSize: '0.78rem', fontWeight: 800,
+              color: 'white',
+              whiteSpace: 'nowrap',
+              letterSpacing: '-0.01em',
+            }}>
+              {SECTION_LABELS[active]}
+            </span>
+          </div>
+
+          {/* 다음 화살표 */}
+          <button
+            onClick={() => active < 3 && onActiveChange(active + 1)}
+            disabled={active === 3}
+            style={{
+              width: 28, height: 28,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              background: 'none', border: 'none', cursor: active < 3 ? 'pointer' : 'default',
+              color: active < 3 ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.2)',
+              flexShrink: 0,
+              transition: 'color 0.15s',
+              padding: 0,
+            }}
+            aria-label="next section"
+          >
+            <ChevronRight size={16} strokeWidth={2.5} />
+          </button>
         </div>
       </div>
     </div>

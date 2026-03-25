@@ -17,10 +17,10 @@ export function HomeClient({
   initialBattle: BattleForVoting | null
   user: UserInfo | null
 }) {
-  const [activePanel, setActivePanel] = useState(1) // 0=랭킹, 1=Better, 2=Hot
+  const [activePanel, setActivePanel] = useState(0) // 0=랜덤Better, 1=Hot Better, 2=랭킹, 3=프로필
   const [currentBattle, setCurrentBattle] = useState<BattleForVoting | null>(initialBattle)
 
-  // Top100 카드 클릭 시 호출 — 패널 전환 + 해당 Better 표시를 동시에 처리
+  // Hot Better 카드 클릭 시 호출 — 랜덤Better 패널(0)로 전환 + 해당 Better 표시
   const handleSelectFromHot = useCallback((entry: PanelHotEntry) => {
     setCurrentBattle({
       id: entry.id,
@@ -33,7 +33,7 @@ export function HomeClient({
       isLiked: false,
       category: entry.category,
     })
-    setActivePanel(1) // Better 패널로 즉시 전환
+    setActivePanel(0) // 랜덤Better 패널로 전환
   }, [])
 
   return (
@@ -41,10 +41,8 @@ export function HomeClient({
       active={activePanel}
       onActiveChange={setActivePanel}
       user={user}
-      rankingContent={<RankingPanelClient />}
       betterContent={
         <div style={{ height: '100%' }}>
-          {/* key로 battle이 바뀌면 뷰어를 새로 마운트 */}
           <RandomBetterViewer
             key={currentBattle?.id ?? 'empty'}
             initialBattle={currentBattle}
@@ -52,6 +50,7 @@ export function HomeClient({
         </div>
       }
       hotContent={<HotPanelClient onSelectBattle={handleSelectFromHot} />}
+      rankingContent={<RankingPanelClient />}
       profileContent={<ProfilePanelClient user={user} />}
     />
   )

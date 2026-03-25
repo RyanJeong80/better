@@ -11,9 +11,9 @@
     "me": "我"
   },
   "sections": {
-    "ranking": "排行榜",
-    "better": "Better",
-    "hot": "热门",
+    "ranking": "排名",
+    "better": "随机 Better",
+    "hot": "Hot Better",
     "profile": "我的"
   },
   "auth": {

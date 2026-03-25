@@ -12,8 +12,8 @@
   },
   "sections": {
     "ranking": "ランキング",
-    "better": "Better",
-    "hot": "Hot",
+    "better": "ランダムBetter",
+    "hot": "Hot Better",
     "profile": "プロフィール"
   },
   "auth": {
