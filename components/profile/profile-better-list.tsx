@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { CATEGORY_FILTERS } from '@/lib/constants/categories'
@@ -34,7 +35,10 @@ export function ProfileBetterList({ battles }: { battles: BattleWithStats[] }) {
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const t = useTranslations()
+
+  useEffect(() => { setMounted(true) }, [])
 
   async function handleDelete(id: string) {
     console.log('삭제 시작:', id)
@@ -126,8 +130,7 @@ export function ProfileBetterList({ battles }: { battles: BattleWithStats[] }) {
         </div>
       )}
 
-      {/* 삭제 확인 다이얼로그 */}
-      {deleteTargetId && (
+      {mounted && deleteTargetId && createPortal(
         <div
           onClick={() => !deleting && setDeleteTargetId(null)}
           style={{
@@ -186,7 +189,8 @@ export function ProfileBetterList({ battles }: { battles: BattleWithStats[] }) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   )
