@@ -1174,7 +1174,7 @@ export function RandomBetterViewer({
 
             {/* 배틀 제목 + 카테고리 배지 (A 사진 상단 오버레이) */}
             <div style={{
-              position: 'absolute', top: 44, left: 12, right: 76, zIndex: 8,
+              position: 'absolute', top: 34, left: 12, right: 76, zIndex: 8,
               pointerEvents: 'none',
             }}>
               {(() => {
@@ -1251,10 +1251,9 @@ export function RandomBetterViewer({
 
           {/* ── 우측 액션 버튼 (좋아요 + 공유, VS 선 기준 중앙 배치) ── */}
           <div style={{
-            position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+            position: 'absolute', right: 12, top: '60%', transform: 'translateY(-50%)',
             zIndex: 25,
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
-            marginTop: -10,
           }}>
             {/* 좋아요 */}
             <button
