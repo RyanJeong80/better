@@ -37,12 +37,22 @@ export function ProfileBetterList({ battles }: { battles: BattleWithStats[] }) {
   const t = useTranslations()
 
   async function handleDelete(id: string) {
+    console.log('삭제 시작:', id)
     setDeleting(true)
-    const result = await deleteBattle(id)
-    setDeleting(false)
-    if (!result.error) {
-      setDeletedIds(prev => new Set([...prev, id]))
-      setDeleteTargetId(null)
+    try {
+      const result = await deleteBattle(id)
+      console.log('삭제 결과:', result)
+      if (result.success) {
+        setDeletedIds(prev => new Set([...prev, id]))
+        setDeleteTargetId(null)
+      } else {
+        alert('삭제에 실패했습니다: ' + (result.error ?? '알 수 없는 오류'))
+      }
+    } catch (e) {
+      console.error('삭제 오류:', e)
+      alert('삭제 중 오류가 발생했습니다')
+    } finally {
+      setDeleting(false)
     }
   }
 

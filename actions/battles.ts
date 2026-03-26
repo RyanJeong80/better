@@ -312,18 +312,17 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
   }
 }
 
-export async function deleteBattle(id: string): Promise<{ error?: string }> {
+export async function deleteBattle(id: string): Promise<{ success?: boolean; error?: string }> {
   try {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: '로그인이 필요합니다' }
 
-    // 소유권 확인 + 이미지 URL 조회
+    // 소유권 확인 + 이미지 URL 조회 (isTextOnly 제외 — 컬럼 미존재 환경 호환)
     const [battle] = await db
       .select({
         imageAUrl: betters.imageAUrl,
         imageBUrl: betters.imageBUrl,
-        isTextOnly: betters.isTextOnly,
       })
       .from(betters)
       .where(and(eq(betters.id, id), eq(betters.userId, user.id)))
@@ -334,22 +333,17 @@ export async function deleteBattle(id: string): Promise<{ error?: string }> {
     // DB 삭제 (CASCADE → votes, likes, comments 자동 삭제)
     await db.delete(betters).where(and(eq(betters.id, id), eq(betters.userId, user.id)))
 
-    // Storage 이미지 삭제 (text-only는 이미지 없음)
-    if (!battle.isTextOnly) {
-      const extractPath = (url: string) => {
-        const match = url.match(/battle-images\/(.+)$/)
-        return match?.[1] ?? null
-      }
-      const paths = [battle.imageAUrl, battle.imageBUrl]
-        .map(extractPath)
-        .filter((p): p is string => !!p)
-      if (paths.length > 0) {
-        await supabase.storage.from('battle-images').remove(paths).catch(() => {})
-      }
+    // Storage 이미지 삭제 (URL에 battle-images/ 포함된 경우만)
+    const extractPath = (url: string) => url.match(/battle-images\/(.+)$/)?.[1] ?? null
+    const paths = [battle.imageAUrl, battle.imageBUrl]
+      .map(extractPath)
+      .filter((p): p is string => !!p)
+    if (paths.length > 0) {
+      await supabase.storage.from('battle-images').remove(paths).catch(() => {})
     }
 
     revalidatePath('/')
-    return {}
+    return { success: true }
   } catch (e) {
     return { error: `삭제 중 오류가 발생했습니다: ${(e as Error)?.message ?? String(e)}` }
   }
