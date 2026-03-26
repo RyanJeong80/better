@@ -250,5 +250,11 @@
     "edit": "Modifier",
     "cancel": "Annuler",
     "available": "Ce nom d'utilisateur est disponible"
+  },
+  "better": {
+    "deleteTitle": "Supprimer Better",
+    "deleteMessage": "Supprimer ce Better supprimera également toutes les données de vote. Êtes-vous sûr ?",
+    "deleteConfirmBtn": "Supprimer",
+    "deleting": "Suppression..."
   }
 }

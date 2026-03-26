@@ -250,5 +250,11 @@
     "edit": "変更",
     "cancel": "キャンセル",
     "available": "このユーザー名は使用できます"
+  },
+  "better": {
+    "deleteTitle": "Betterを削除",
+    "deleteMessage": "このBetterを削除すると、投票データもすべて削除されます。削除しますか？",
+    "deleteConfirmBtn": "削除する",
+    "deleting": "削除中..."
   }
 }

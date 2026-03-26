@@ -250,5 +250,11 @@
     "edit": "변경",
     "cancel": "취소",
     "available": "사용 가능한 닉네임이에요"
+  },
+  "better": {
+    "deleteTitle": "Better 삭제",
+    "deleteMessage": "이 Better를 삭제하면 투표 데이터도 모두 삭제됩니다. 삭제하시겠어요?",
+    "deleteConfirmBtn": "삭제하기",
+    "deleting": "삭제 중..."
   }
 }

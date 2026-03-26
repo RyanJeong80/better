@@ -311,3 +311,46 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
     return null
   }
 }
+
+export async function deleteBattle(id: string): Promise<{ error?: string }> {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: '로그인이 필요합니다' }
+
+    // 소유권 확인 + 이미지 URL 조회
+    const [battle] = await db
+      .select({
+        imageAUrl: betters.imageAUrl,
+        imageBUrl: betters.imageBUrl,
+        isTextOnly: betters.isTextOnly,
+      })
+      .from(betters)
+      .where(and(eq(betters.id, id), eq(betters.userId, user.id)))
+      .limit(1)
+
+    if (!battle) return { error: '해당 Better를 찾을 수 없거나 권한이 없습니다' }
+
+    // DB 삭제 (CASCADE → votes, likes, comments 자동 삭제)
+    await db.delete(betters).where(and(eq(betters.id, id), eq(betters.userId, user.id)))
+
+    // Storage 이미지 삭제 (text-only는 이미지 없음)
+    if (!battle.isTextOnly) {
+      const extractPath = (url: string) => {
+        const match = url.match(/battle-images\/(.+)$/)
+        return match?.[1] ?? null
+      }
+      const paths = [battle.imageAUrl, battle.imageBUrl]
+        .map(extractPath)
+        .filter((p): p is string => !!p)
+      if (paths.length > 0) {
+        await supabase.storage.from('battle-images').remove(paths).catch(() => {})
+      }
+    }
+
+    revalidatePath('/')
+    return {}
+  } catch (e) {
+    return { error: `삭제 중 오류가 발생했습니다: ${(e as Error)?.message ?? String(e)}` }
+  }
+}

@@ -250,5 +250,11 @@
     "edit": "Edit",
     "cancel": "Cancel",
     "available": "Username is available"
+  },
+  "better": {
+    "deleteTitle": "Delete Better",
+    "deleteMessage": "Deleting this Better will remove all vote data as well. Are you sure?",
+    "deleteConfirmBtn": "Delete",
+    "deleting": "Deleting..."
   }
 }

@@ -22,17 +22,24 @@ export interface BattleWithStats {
   total: number
   reasons: { choice: 'A' | 'B'; reason: string }[]
   createdAt: Date
+  closedAt: Date | null
+  winner: 'A' | 'B' | null
   likesCount: number
   category: BetterCategory
 }
 
 export function ProfileBetterList({ battles }: { battles: BattleWithStats[] }) {
   const [filter, setFilter] = useState<CategoryFilter>('all')
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set())
   const t = useTranslations()
 
-  const filtered = filter === 'all' ? battles : battles.filter((b) => b.category === filter)
+  const handleDeleteSuccess = (id: string) =>
+    setDeletedIds(prev => new Set([...prev, id]))
 
-  if (battles.length === 0) {
+  const visible = battles.filter(b => !deletedIds.has(b.id))
+  const filtered = filter === 'all' ? visible : visible.filter((b) => b.category === filter)
+
+  if (visible.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-border py-20 text-center">
         <div className="mb-3 text-4xl">📸</div>
@@ -79,7 +86,11 @@ export function ProfileBetterList({ battles }: { battles: BattleWithStats[] }) {
       ) : (
         <div className="space-y-5">
           {filtered.map((battle) => (
-            <MyBetterCard key={battle.id} battle={battle} />
+            <MyBetterCard
+              key={battle.id}
+              battle={battle}
+              onDeleteSuccess={handleDeleteSuccess}
+            />
           ))}
         </div>
       )}

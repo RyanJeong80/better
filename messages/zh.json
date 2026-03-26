@@ -250,5 +250,11 @@
     "edit": "修改",
     "cancel": "取消",
     "available": "用户名可用"
+  },
+  "better": {
+    "deleteTitle": "删除 Better",
+    "deleteMessage": "删除此 Better 将同时删除所有投票数据。确定要删除吗？",
+    "deleteConfirmBtn": "删除",
+    "deleting": "删除中..."
   }
 }

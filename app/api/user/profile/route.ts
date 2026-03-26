@@ -22,6 +22,8 @@ export type ProfileBattleStats = {
   total: number
   reasons: { choice: 'A' | 'B'; reason: string }[]
   createdAt: string
+  closedAt: string | null
+  winner: 'A' | 'B' | null
   likesCount: number
   category: BetterCategory
 }
@@ -97,6 +99,8 @@ export async function GET() {
       isTextOnly: betters.isTextOnly,
       category: betters.category,
       createdAt: betters.createdAt,
+      closedAt: betters.closedAt,
+      winner: betters.winner,
     })
       .from(betters)
       .where(eq(betters.userId, user.id))
@@ -128,6 +132,8 @@ export async function GET() {
         return {
           ...b,
           createdAt: b.createdAt.toISOString(),
+          closedAt: b.closedAt ? b.closedAt.toISOString() : null,
+          winner: b.winner ?? null,
           votesA: bvotes.filter(v => v.choice === 'A').length,
           votesB: bvotes.filter(v => v.choice === 'B').length,
           total: bvotes.length,

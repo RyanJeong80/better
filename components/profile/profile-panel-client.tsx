@@ -89,6 +89,8 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
   const battles: BattleWithStats[] = data.battles.map(b => ({
     ...b,
     createdAt: new Date(b.createdAt),
+    closedAt: b.closedAt ? new Date(b.closedAt) : null,
+    winner: b.winner,
   }))
 
   return (
