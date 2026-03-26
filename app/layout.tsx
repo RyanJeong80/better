@@ -33,8 +33,17 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Better — 어떤 게 더 나아?',
+  title: 'Touched — 어떤 게 더 나아?',
   description: '두 장의 사진을 올리고 사람들의 선택을 받아보세요',
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Touched',
+  },
+  icons: {
+    apple: '/icons/apple-touch-icon.png',
+  },
 }
 
 export default async function RootLayout({

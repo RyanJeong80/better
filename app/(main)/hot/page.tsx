@@ -91,7 +91,7 @@ export default async function HotPage({
           <Flame size={28} color="white" />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-gray-900">Hot 100 Better</h2>
+          <h2 className="text-2xl font-black text-gray-900">Hot 100 Touched</h2>
           <p className="mt-0.5 text-sm text-amber-700">{t('hot.subtitle100')}</p>
         </div>
       </div>

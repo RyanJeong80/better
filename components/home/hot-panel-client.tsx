@@ -133,7 +133,7 @@ export function HotPanelClient({
           <Flame size={18} color="white" />
         </div>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: '1rem', fontWeight: 900, lineHeight: 1.2, margin: 0 }}>Hot Better</h2>
+          <h2 style={{ fontSize: '1rem', fontWeight: 900, lineHeight: 1.2, margin: 0 }}>Hot Touched</h2>
           <p style={{ fontSize: '0.72rem', color: 'var(--color-muted-foreground)', margin: '2px 0 0' }}>
             {t('hot.subtitle')}
           </p>

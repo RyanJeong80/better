@@ -90,7 +90,7 @@ export function SwipeSections({
             flexShrink: 0, lineHeight: 1,
           }}
         >
-          Better
+          Touched
         </span>
 
         {/* 중앙 spacer */}

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Better — Which is better?",
+    "title": "Touched — Which is better?",
     "description": "Upload two photos and let people decide"
   },
   "nav": {
@@ -12,8 +12,8 @@
   },
   "sections": {
     "ranking": "Ranking",
-    "better": "Random Better",
-    "hot": "Hot Better",
+    "better": "Random Touched",
+    "hot": "Hot Touched",
     "profile": "Profile"
   },
   "auth": {
@@ -37,13 +37,13 @@
   },
   "menu": {
     "myProfile": "My Profile",
-    "myBetters": "My Betters",
+    "myBetters": "My Touches",
     "myVotes": "Vote History",
     "myRanking": "My Accuracy / Ranking",
     "user": "User"
   },
   "create": {
-    "pageTitle": "Create Better",
+    "pageTitle": "Create Touched",
     "titleLabel": "Title",
     "titlePlaceholder": "What are you comparing?",
     "descriptionALabel": "Photo A description (optional)",
@@ -58,7 +58,7 @@
       "photoARequired": "Photo A upload incomplete",
       "photoBRequired": "Photo B upload incomplete"
     },
-    "newTitle": "Create New Better",
+    "newTitle": "Create New Touched",
     "subtitle": "Upload two photos and get people's choice",
     "changePhoto": "Change photo",
     "clickOrDrag": "Click or drag",
@@ -79,7 +79,7 @@
     "goBack": "Edit",
     "submitButton": "Post as is",
     "uploadStep1": "Uploading images... (1/2)",
-    "saveStep2": "Saving Better... (2/2)",
+    "saveStep2": "Saving Touched... (2/2)",
     "done": "Done! 🎉",
     "categoryFirst": "Please select a category first",
     "titleNeeded": "Please enter a title",
@@ -106,9 +106,9 @@
     "share": "Share",
     "loginPrompt": "Log in to track your stats",
     "allSeen": "All caught up!",
-    "allSeenDesc": "Come back when new Betters are posted.",
-    "tagEmpty": "No #{tag} Betters",
-    "tagEmptyDesc": "No Betters with this tag yet, or you've seen them all.",
+    "allSeenDesc": "Come back when new Touches are posted.",
+    "tagEmpty": "No #{tag} Touches",
+    "tagEmptyDesc": "No Touches with this tag yet, or you've seen them all.",
     "clearTagFilter": "Clear tag filter",
     "tagSearching": "Searching",
     "tagSearchPlaceholder": "Search tags...",
@@ -128,7 +128,7 @@
   },
   "hint": {
     "title": "How to use",
-    "swipeVertical": "Swipe up/down → Next Better",
+    "swipeVertical": "Swipe up/down → Next Touched",
     "swipeHorizontal": "Swipe left/right → Top100 / Ranking",
     "tap": "Tap photo → Vote  |  Long press → Zoom",
     "dismiss": "Tap to dismiss"
@@ -166,7 +166,7 @@
     "diamond": "Diamond"
   },
   "ranking": {
-    "title": "Better Ranking",
+    "title": "Touched Ranking",
     "topParticipation": "Most Participated TOP 30",
     "topAccuracy": "{emoji} {label} Accuracy TOP 30",
     "myRanking": "My Ranking",
@@ -188,12 +188,12 @@
     "loginRequired": "Login required",
     "loginRequiredDesc": "Please log in to view your profile",
     "goLogin": "Log In",
-    "myBetters": "My Betters",
+    "myBetters": "My Touches",
     "totalVotes": "Total Votes",
     "accuracy": "Accuracy",
     "level": "Level",
-    "noBetters": "No Betters yet",
-    "createFirst": "Create your first Better!",
+    "noBetters": "No Touches yet",
+    "createFirst": "Create your first Touched!",
     "me": "Me",
     "expert": "{category} Expert",
     "bestCategory": "Best category",
@@ -203,23 +203,23 @@
     "likesLabel": "Likes",
     "betterCountValue": "{count}",
     "totalVotesValue": "{count} votes",
-    "noBettersYet": "No Betters yet",
+    "noBettersYet": "No Touches yet",
     "noBettersDesc": "Upload two photos and let people choose",
-    "createFirstBetter": "Create first Better",
-    "noCategoryBetters": "No Betters in this category",
+    "createFirstBetter": "Create first Touched",
+    "noCategoryBetters": "No Touches in this category",
     "loadError": "Could not load profile"
   },
   "hot": {
     "title": "Hot 100",
-    "subtitle": "Most liked Betters",
+    "subtitle": "Most liked Touches",
     "likes": "Likes",
     "share": "Share",
     "noData": "No data yet",
     "voteCount": "{count} votes",
     "hot100Recommend": "Recommend to Hot100",
-    "subtitle100": "Top 100 most liked Betters",
+    "subtitle100": "Top 100 most liked Touches",
     "noLikes": "No likes yet",
-    "noLikesDesc": "Like a Better from random explore",
+    "noLikesDesc": "Like a Touched from random explore",
     "popular": "Popular",
     "recent": "Recent",
     "viewAll": "View all →",
@@ -252,8 +252,8 @@
     "available": "Username is available"
   },
   "better": {
-    "deleteTitle": "Delete Better",
-    "deleteMessage": "Deleting this Better will remove all vote data as well. Are you sure?",
+    "deleteTitle": "Delete Touched",
+    "deleteMessage": "Deleting this Touched will remove all vote data as well. Are you sure?",
     "deleteConfirmBtn": "Delete",
     "deleting": "Deleting..."
   }

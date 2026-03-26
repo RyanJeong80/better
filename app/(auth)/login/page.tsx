@@ -23,7 +23,7 @@ export default async function LoginPage({
       <div className="relative w-full max-w-sm">
         {/* 브랜드 */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-black tracking-tight">Better</h1>
+          <h1 className="text-4xl font-black tracking-tight">Touched</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {t('tagline')}
           </p>

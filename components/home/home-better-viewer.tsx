@@ -47,7 +47,7 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
 
   const [, startTransition] = useTransition()
 
-  // 다음 배틀 로드 (사용자 액션으로만 호출)
+  // 다음 터치 로드 (사용자 액션으로만 호출)
   const loadNext = useCallback((cat: CategoryFilter, resetSeen = false) => {
     if (isLoadingRef.current) return
     isLoadingRef.current = true
@@ -150,7 +150,7 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
             <Shuffle size={16} color="white" />
           </div>
           <h2 style={{ fontWeight: 900, fontSize: '1.05rem', color: 'var(--color-foreground)', margin: 0 }}>
-            랜덤 Better 보기
+            랜덤 Touched 보기
           </h2>
         </div>
 
@@ -182,7 +182,7 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
         }}>
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
             <div className="animate-spin" style={{ width: 28, height: 28, border: '3px solid var(--color-border)', borderTopColor: 'var(--color-primary)', borderRadius: '50%' }} />
-            <p style={{ color: 'var(--color-muted-foreground)', fontSize: '0.85rem' }}>Better 불러오는 중…</p>
+            <p style={{ color: 'var(--color-muted-foreground)', fontSize: '0.85rem' }}>Touched 불러오는 중…</p>
           </div>
         </div>
       ) : isEmpty || !card ? (
@@ -192,7 +192,7 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
         }}>
           <span style={{ fontSize: '2rem' }}>{seenIdsRef.current.length > 0 ? '🎉' : '😶'}</span>
           <p style={{ fontWeight: 700, fontSize: '0.9rem' }}>
-            {seenIdsRef.current.length > 0 ? '모든 Better를 봤어요!' : '현재 표시할 Better가 없습니다'}
+            {seenIdsRef.current.length > 0 ? '모든 Touched를 봤어요!' : '현재 표시할 Touched가 없습니다'}
           </p>
           <button
             onClick={() => { seenIdsRef.current = []; loadNext(categoryFilter, true) }}
@@ -217,7 +217,7 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
   )
 }
 
-// ─── 개별 배틀 카드 ────────────────────────────────────────────────
+// ─── 개별 터치 카드 ────────────────────────────────────────────────
 
 function BattleCard({ card, onVote, onNext, onLike }: {
   card: CardData
@@ -383,7 +383,7 @@ function BattleCard({ card, onVote, onNext, onLike }: {
                 color: 'white', fontWeight: 700, fontSize: '0.85rem',
               }}
             >
-              다음 Better <ChevronRight size={16} />
+              다음 Touched <ChevronRight size={16} />
             </button>
           )}
         </div>

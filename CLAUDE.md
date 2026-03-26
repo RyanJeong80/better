@@ -61,9 +61,9 @@ app/
 │   ├── layout.tsx              # Header + BottomNav
 │   ├── page.tsx                # 홈 (기능 카드)
 │   ├── battles/
-│   │   ├── new/page.tsx        # 배틀 생성 (로그인 필요)
-│   │   └── [id]/page.tsx       # 배틀 상세
-│   ├── explore/page.tsx        # 랜덤 배틀 탐색
+│   │   ├── new/page.tsx        # 터치 생성 (로그인 필요)
+│   │   └── [id]/page.tsx       # 터치 상세
+│   ├── explore/page.tsx        # 랜덤 터치 탐색
 │   ├── hot/page.tsx            # 좋아요 Top 100
 │   ├── ranking/page.tsx        # 유저 랭킹
 │   └── profile/page.tsx        # 내 프로필 (로그인 필요)
@@ -186,23 +186,23 @@ npm run db:studio    # Drizzle Studio 열기
 ### 완료
 - 인증 (이메일/비밀번호 로그인·회원가입·로그아웃)
 - Google OAuth 로그인 (Supabase Auth)
-- 배틀 생성 (이미지 2장 클라이언트 직접 업로드 → URL만 Server Action에 전달)
+- 터치 생성 (이미지 2장 클라이언트 직접 업로드 → URL만 Server Action에 전달)
 - A/B 투표 (중복 방지, 이유 입력 옵션)
 - 실시간 투표 수 (Supabase Realtime)
-- 랜덤 탐색 (본인 배틀·이미 투표한 배틀 제외, sessionStorage로 중복 방지)
+- 랜덤 탐색 (본인 터치·이미 투표한 터치 제외, sessionStorage로 중복 방지)
 - 좋아요 토글 + Hot 100 랭킹 ("Hot100에 추천하기" 문구 포함)
 - 유저 랭킹 (참여 수 / 투표 적중률)
-- 프로필 (내 배틀, 통계, 받은 투표 이유)
+- 프로필 (내 터치, 통계, 받은 투표 이유)
 - 모바일 반응형 (하단 네비게이션)
 - 홈 피처 카드 전체 클릭 가능 (제목·썸네일·내용 모두 링크)
 - 이미지 업로드 시 canvas 리사이징 (1280px, JPEG 0.82) + blob URL 메모리 관리
 - 업로드 성공 후 홈 자동 리다이렉트 (메모리 해제)
 
 ### 미구현
-- 배틀 삭제 / 마감 (`closedAt` 필드 있으나 미사용)
+- 터치 삭제 / 마감 (`closedAt` 필드 있으나 미사용)
 - 유저 검색 / 팔로우
 - 신고·모더레이션
-- 배틀 카테고리·태그
+- 터치 카테고리·태그
 
 ---
 
@@ -216,7 +216,7 @@ npm run db:studio    # Drizzle Studio 열기
 - 마이그레이션만 Direct Connection 필요 → SQL Editor에서 직접 실행
 
 ### public.users FK 제약
-- **증상**: 투표·좋아요·배틀 생성 시 FK constraint 오류
+- **증상**: 투표·좋아요·터치 생성 시 FK constraint 오류
 - **원인**: OAuth 로그인 시 `public.users`에 유저가 생성되지 않음
 - **해결**:
   1. Supabase SQL Editor에서 `auth.users` INSERT 트리거 생성 (아래 참고)

@@ -46,7 +46,7 @@ export function RandomBattlesCard({
         <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: '#EEF2FF' }}>
           <Shuffle size={20} color="#6366F1" />
         </div>
-        <h3 className="font-bold text-lg">랜덤 Better 보기</h3>
+        <h3 className="font-bold text-lg">랜덤 Touched 보기</h3>
       </div>
 
       {/* 카테고리 탭 */}

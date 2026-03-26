@@ -39,7 +39,7 @@ export function RankingCard() {
         <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: '#F5F3FF' }}>
           <Trophy size={20} color="#8B5CF6" />
         </div>
-        <h3 className="font-bold text-base">Better 랭킹</h3>
+        <h3 className="font-bold text-base">Touched 랭킹</h3>
       </div>
 
       <ul className="flex-1 space-y-2">

@@ -25,7 +25,7 @@ export async function Header() {
           className="text-xl font-black tracking-tight"
           style={{ background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
         >
-          Better
+          Touched
         </Link>
 
         <div className="flex items-center gap-1">

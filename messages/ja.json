@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Better — どっちがいい？",
+    "title": "Touched — どっちがいい？",
     "description": "2枚の写真をアップして、みんなに選んでもらおう"
   },
   "nav": {
@@ -12,8 +12,8 @@
   },
   "sections": {
     "ranking": "ランキング",
-    "better": "ランダムBetter",
-    "hot": "Hot Better",
+    "better": "ランダムTouched",
+    "hot": "Hot Touched",
     "profile": "プロフィール"
   },
   "auth": {
@@ -37,13 +37,13 @@
   },
   "menu": {
     "myProfile": "マイプロフィール",
-    "myBetters": "投稿したBetter",
+    "myBetters": "投稿したTouched",
     "myVotes": "投票履歴",
     "myRanking": "正解率 / ランキング",
     "user": "ユーザー"
   },
   "create": {
-    "pageTitle": "Betterを作る",
+    "pageTitle": "Touchedを作る",
     "titleLabel": "タイトル",
     "titlePlaceholder": "何を比較しますか？",
     "descriptionALabel": "写真Aの説明（任意）",
@@ -58,7 +58,7 @@
       "photoARequired": "写真Aのアップロードが完了していません",
       "photoBRequired": "写真Bのアップロードが完了していません"
     },
-    "newTitle": "新しいBetterを作成",
+    "newTitle": "新しいTouchedを作成",
     "subtitle": "2枚の写真をアップして選んでもらいましょう",
     "changePhoto": "写真変更",
     "clickOrDrag": "クリックまたはドラッグ",
@@ -79,7 +79,7 @@
     "goBack": "編集する",
     "submitButton": "このまま投稿",
     "uploadStep1": "画像アップロード中... (1/2)",
-    "saveStep2": "Better保存中... (2/2)",
+    "saveStep2": "Touched保存中... (2/2)",
     "done": "完了! 🎉",
     "categoryFirst": "まずカテゴリを選択してください",
     "titleNeeded": "タイトルを入力してください",
@@ -106,9 +106,9 @@
     "share": "シェア",
     "loginPrompt": "ログインすると記録が確認できます",
     "allSeen": "すべて見ました！",
-    "allSeenDesc": "新しいBetterが追加されたらまた来てください。",
-    "tagEmpty": "#{tag} Betterがありません",
-    "tagEmptyDesc": "このタグのBetterはまだないか、すべて確認しました。",
+    "allSeenDesc": "新しいTouchedが追加されたらまた来てください。",
+    "tagEmpty": "#{tag} Touchedがありません",
+    "tagEmptyDesc": "このタグのTouchedはまだないか、すべて確認しました。",
     "clearTagFilter": "タグフィルターを解除",
     "tagSearching": "検索中",
     "tagSearchPlaceholder": "タグを検索...",
@@ -128,7 +128,7 @@
   },
   "hint": {
     "title": "使い方",
-    "swipeVertical": "上下スワイプ → 次のBetter",
+    "swipeVertical": "上下スワイプ → 次のTouched",
     "swipeHorizontal": "左右スワイプ → Top100 / ランキング",
     "tap": "写真タップ → 投票  |  詳細 → 拡大",
     "dismiss": "タップして閉じる"
@@ -166,7 +166,7 @@
     "diamond": "ダイヤモンド"
   },
   "ranking": {
-    "title": "Betterランキング",
+    "title": "Touchedランキング",
     "topParticipation": "参加数 TOP 30",
     "topAccuracy": "{emoji} {label} 正解率 TOP 30",
     "myRanking": "マイランキング",
@@ -188,12 +188,12 @@
     "loginRequired": "ログインが必要です",
     "loginRequiredDesc": "プロフィールを見るにはログインしてください",
     "goLogin": "ログイン",
-    "myBetters": "マイBetter",
+    "myBetters": "マイTouched",
     "totalVotes": "総投票数",
     "accuracy": "正解率",
     "level": "レベル",
-    "noBetters": "まだBetterがありません",
-    "createFirst": "最初のBetterを作ってみよう！",
+    "noBetters": "まだTouchedがありません",
+    "createFirst": "最初のTouchedを作ってみよう！",
     "me": "自分",
     "expert": "{category}エキスパート",
     "bestCategory": "最も得意なカテゴリ",
@@ -203,23 +203,23 @@
     "likesLabel": "いいね",
     "betterCountValue": "{count}件",
     "totalVotesValue": "{count}票",
-    "noBettersYet": "まだBetterがありません",
+    "noBettersYet": "まだTouchedがありません",
     "noBettersDesc": "2枚の写真をアップして選んでもらいましょう",
-    "createFirstBetter": "最初のBetterを作成",
-    "noCategoryBetters": "このカテゴリのBetterがありません",
+    "createFirstBetter": "最初のTouchedを作成",
+    "noCategoryBetters": "このカテゴリのTouchedがありません",
     "loadError": "プロフィールを読み込めませんでした"
   },
   "hot": {
     "title": "Hot 100",
-    "subtitle": "最もいいねされたBetter",
+    "subtitle": "最もいいねされたTouched",
     "likes": "いいね",
     "share": "シェア",
     "noData": "まだデータがありません",
     "voteCount": "{count}票",
     "hot100Recommend": "Hot100に推薦",
-    "subtitle100": "いいね数トップ100のBetter",
+    "subtitle100": "いいね数トップ100のTouched",
     "noLikes": "まだいいねがありません",
-    "noLikesDesc": "ランダム探索で気に入ったBetterにいいねしましょう",
+    "noLikesDesc": "ランダム探索で気に入ったTouchedにいいねしましょう",
     "popular": "人気順",
     "recent": "新着順",
     "viewAll": "すべて見る →",
@@ -252,8 +252,8 @@
     "available": "このユーザー名は使用できます"
   },
   "better": {
-    "deleteTitle": "Betterを削除",
-    "deleteMessage": "このBetterを削除すると、投票データもすべて削除されます。削除しますか？",
+    "deleteTitle": "Touchedを削除",
+    "deleteMessage": "このTouchedを削除すると、投票データもすべて削除されます。削除しますか？",
     "deleteConfirmBtn": "削除する",
     "deleting": "削除中..."
   }

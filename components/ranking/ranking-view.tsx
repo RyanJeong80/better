@@ -42,7 +42,7 @@ export function RankingView({
       )}
 
       <div>
-        <h2 className="text-2xl font-black">Better 랭킹</h2>
+        <h2 className="text-2xl font-black">Touched 랭킹</h2>
         <p className="mt-1 text-sm text-muted-foreground">참여 횟수와 적중률로 순위를 확인하세요</p>
       </div>
 
@@ -73,7 +73,7 @@ export function RankingView({
           <p className="mb-4 text-xs font-bold uppercase tracking-widest text-indigo-500">나의 기록</p>
           <div className="grid grid-cols-2 gap-3">
             <StatCard
-              label="참여한 Better"
+              label="참여한 Touched"
               value={`${myStats.participated}건`}
               color="#6366F1"
             />

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Better — Lequel est mieux ?",
+    "title": "Touched — Lequel est mieux ?",
     "description": "Postez deux photos et laissez les gens choisir"
   },
   "nav": {
@@ -12,8 +12,8 @@
   },
   "sections": {
     "ranking": "Classement",
-    "better": "Random Better",
-    "hot": "Hot Better",
+    "better": "Random Touched",
+    "hot": "Hot Touched",
     "profile": "Profil"
   },
   "auth": {
@@ -37,13 +37,13 @@
   },
   "menu": {
     "myProfile": "Mon profil",
-    "myBetters": "Mes Betters",
+    "myBetters": "Mes Touches",
     "myVotes": "Historique de votes",
     "myRanking": "Ma précision / Classement",
     "user": "Utilisateur"
   },
   "create": {
-    "pageTitle": "Créer un Better",
+    "pageTitle": "Créer un Touched",
     "titleLabel": "Titre",
     "titlePlaceholder": "Que comparez-vous ?",
     "descriptionALabel": "Description photo A (facultatif)",
@@ -58,7 +58,7 @@
       "photoARequired": "Le téléchargement de la photo A n'est pas complet",
       "photoBRequired": "Le téléchargement de la photo B n'est pas complet"
     },
-    "newTitle": "Créer un nouveau Better",
+    "newTitle": "Créer un nouveau Touched",
     "subtitle": "Téléchargez deux photos et obtenez le choix des gens",
     "changePhoto": "Changer la photo",
     "clickOrDrag": "Cliquer ou glisser",
@@ -79,7 +79,7 @@
     "goBack": "Modifier",
     "submitButton": "Publier tel quel",
     "uploadStep1": "Téléchargement d'images... (1/2)",
-    "saveStep2": "Enregistrement du Better... (2/2)",
+    "saveStep2": "Enregistrement du Touched... (2/2)",
     "done": "Terminé! 🎉",
     "categoryFirst": "Veuillez d'abord sélectionner une catégorie",
     "titleNeeded": "Veuillez entrer un titre",
@@ -106,9 +106,9 @@
     "share": "Partager",
     "loginPrompt": "Connectez-vous pour suivre vos stats",
     "allSeen": "Tout vu !",
-    "allSeenDesc": "Revenez quand de nouveaux Betters seront postés.",
-    "tagEmpty": "Pas de Betters #{tag}",
-    "tagEmptyDesc": "Pas encore de Betters avec ce tag, ou vous les avez tous vus.",
+    "allSeenDesc": "Revenez quand de nouveaux Touches seront postés.",
+    "tagEmpty": "Pas de Touches #{tag}",
+    "tagEmptyDesc": "Pas encore de Touches avec ce tag, ou vous les avez tous vus.",
     "clearTagFilter": "Effacer le filtre de tag",
     "tagSearching": "Recherche",
     "tagSearchPlaceholder": "Rechercher des tags...",
@@ -128,7 +128,7 @@
   },
   "hint": {
     "title": "Comment utiliser",
-    "swipeVertical": "Glisser haut/bas → Better suivant",
+    "swipeVertical": "Glisser haut/bas → Touched suivant",
     "swipeHorizontal": "Glisser gauche/droite → Top100 / Classement",
     "tap": "Appuyer → Voter  |  Détail → Agrandir",
     "dismiss": "Appuyer pour fermer"
@@ -166,7 +166,7 @@
     "diamond": "Diamant"
   },
   "ranking": {
-    "title": "Classement Better",
+    "title": "Classement Touched",
     "topParticipation": "Plus de participations TOP 30",
     "topAccuracy": "{emoji} {label} Précision TOP 30",
     "myRanking": "Mon classement",
@@ -188,12 +188,12 @@
     "loginRequired": "Connexion requise",
     "loginRequiredDesc": "Veuillez vous connecter pour voir votre profil",
     "goLogin": "Se connecter",
-    "myBetters": "Mes Betters",
+    "myBetters": "Mes Touches",
     "totalVotes": "Total des votes",
     "accuracy": "Précision",
     "level": "Niveau",
-    "noBetters": "Pas encore de Betters",
-    "createFirst": "Créez votre premier Better !",
+    "noBetters": "Pas encore de Touches",
+    "createFirst": "Créez votre premier Touched !",
     "me": "Moi",
     "expert": "Expert {category}",
     "bestCategory": "Meilleure catégorie",
@@ -203,23 +203,23 @@
     "likesLabel": "J'aime",
     "betterCountValue": "{count}",
     "totalVotesValue": "{count} votes",
-    "noBettersYet": "Pas encore de Betters",
+    "noBettersYet": "Pas encore de Touches",
     "noBettersDesc": "Téléchargez deux photos et laissez les gens choisir",
-    "createFirstBetter": "Créer le premier Better",
-    "noCategoryBetters": "Pas de Betters dans cette catégorie",
+    "createFirstBetter": "Créer le premier Touched",
+    "noCategoryBetters": "Pas de Touches dans cette catégorie",
     "loadError": "Impossible de charger le profil"
   },
   "hot": {
     "title": "Hot 100",
-    "subtitle": "Les Betters les plus aimés",
+    "subtitle": "Les Touches les plus aimés",
     "likes": "J'aime",
     "share": "Partager",
     "noData": "Pas encore de données",
     "voteCount": "{count} votes",
     "hot100Recommend": "Recommander au Hot100",
-    "subtitle100": "Les 100 Betters les plus aimés",
+    "subtitle100": "Les 100 Touches les plus aimés",
     "noLikes": "Pas encore de j'aime",
-    "noLikesDesc": "Aimez un Better dans l'exploration aléatoire",
+    "noLikesDesc": "Aimez un Touched dans l'exploration aléatoire",
     "popular": "Populaire",
     "recent": "Récent",
     "viewAll": "Voir tout →",
@@ -252,8 +252,8 @@
     "available": "Ce nom d'utilisateur est disponible"
   },
   "better": {
-    "deleteTitle": "Supprimer Better",
-    "deleteMessage": "Supprimer ce Better supprimera également toutes les données de vote. Êtes-vous sûr ?",
+    "deleteTitle": "Supprimer Touched",
+    "deleteMessage": "Supprimer ce Touched supprimera également toutes les données de vote. Êtes-vous sûr ?",
     "deleteConfirmBtn": "Supprimer",
     "deleting": "Suppression..."
   }

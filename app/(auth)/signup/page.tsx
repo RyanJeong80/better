@@ -15,7 +15,7 @@ export default function SignupPage() {
       <div className="relative w-full max-w-sm">
         {/* 브랜드 */}
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-black tracking-tight">Better</h1>
+          <h1 className="text-4xl font-black tracking-tight">Touched</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             어떤 게 더 나은지, 사람들에게 물어보세요
           </p>

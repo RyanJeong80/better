@@ -52,7 +52,7 @@ export function HotBattlesCard() {
         <div className="flex h-9 w-9 items-center justify-center rounded-xl" style={{ background: '#FFFBEB' }}>
           <Flame size={20} color="#F59E0B" />
         </div>
-        <h3 className="font-bold text-lg">Hot 100 Better</h3>
+        <h3 className="font-bold text-lg">Hot 100 Touched</h3>
       </div>
 
       {/* 카테고리 탭 */}

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Better — 哪个更好？",
+    "title": "Touched — 哪个更好？",
     "description": "上传两张照片，让大家来投票"
   },
   "nav": {
@@ -12,8 +12,8 @@
   },
   "sections": {
     "ranking": "排名",
-    "better": "随机 Better",
-    "hot": "Hot Better",
+    "better": "随机 Touched",
+    "hot": "Hot Touched",
     "profile": "我的"
   },
   "auth": {
@@ -37,13 +37,13 @@
   },
   "menu": {
     "myProfile": "我的主页",
-    "myBetters": "我的Better",
+    "myBetters": "我的Touched",
     "myVotes": "投票记录",
     "myRanking": "我的准确率 / 排名",
     "user": "用户"
   },
   "create": {
-    "pageTitle": "创建Better",
+    "pageTitle": "创建Touched",
     "titleLabel": "标题",
     "titlePlaceholder": "你在比较什么？",
     "descriptionALabel": "照片A说明（可选）",
@@ -58,7 +58,7 @@
       "photoARequired": "照片A上传未完成",
       "photoBRequired": "照片B上传未完成"
     },
-    "newTitle": "创建新的Better",
+    "newTitle": "创建新的Touched",
     "subtitle": "上传两张照片，让大家来选择",
     "changePhoto": "更换照片",
     "clickOrDrag": "点击或拖拽",
@@ -79,7 +79,7 @@
     "goBack": "重新编辑",
     "submitButton": "就这样发布",
     "uploadStep1": "上传图片中... (1/2)",
-    "saveStep2": "保存Better中... (2/2)",
+    "saveStep2": "保存Touched中... (2/2)",
     "done": "完成! 🎉",
     "categoryFirst": "请先选择分类",
     "titleNeeded": "请输入标题",
@@ -106,9 +106,9 @@
     "share": "分享",
     "loginPrompt": "登录后可查看您的记录",
     "allSeen": "都看完了！",
-    "allSeenDesc": "有新的Better时再来吧。",
-    "tagEmpty": "没有 #{tag} 的Better",
-    "tagEmptyDesc": "此标签下还没有Better，或您已全部查看。",
+    "allSeenDesc": "有新的Touched时再来吧。",
+    "tagEmpty": "没有 #{tag} 的Touched",
+    "tagEmptyDesc": "此标签下还没有Touched，或您已全部查看。",
     "clearTagFilter": "清除标签筛选",
     "tagSearching": "搜索中",
     "tagSearchPlaceholder": "搜索标签...",
@@ -128,7 +128,7 @@
   },
   "hint": {
     "title": "使用方法",
-    "swipeVertical": "上下滑动 → 下一个Better",
+    "swipeVertical": "上下滑动 → 下一个Touched",
     "swipeHorizontal": "左右滑动 → Top100 / 排行榜",
     "tap": "点击照片 → 投票  |  详情 → 放大",
     "dismiss": "点击关闭"
@@ -166,7 +166,7 @@
     "diamond": "钻石"
   },
   "ranking": {
-    "title": "Better排行榜",
+    "title": "Touched排行榜",
     "topParticipation": "参与次数 TOP 30",
     "topAccuracy": "{emoji} {label} 准确率 TOP 30",
     "myRanking": "我的排名",
@@ -188,12 +188,12 @@
     "loginRequired": "需要登录",
     "loginRequiredDesc": "请登录查看您的主页",
     "goLogin": "登录",
-    "myBetters": "我的Better",
+    "myBetters": "我的Touched",
     "totalVotes": "总投票数",
     "accuracy": "准确率",
     "level": "等级",
-    "noBetters": "还没有Better",
-    "createFirst": "创建您的第一个Better！",
+    "noBetters": "还没有Touched",
+    "createFirst": "创建您的第一个Touched！",
     "me": "我",
     "expert": "{category}专家",
     "bestCategory": "最擅长的类别",
@@ -203,23 +203,23 @@
     "likesLabel": "喜欢",
     "betterCountValue": "{count}个",
     "totalVotesValue": "{count}票",
-    "noBettersYet": "还没有Better",
+    "noBettersYet": "还没有Touched",
     "noBettersDesc": "上传两张照片，让大家来选择",
-    "createFirstBetter": "创建第一个Better",
-    "noCategoryBetters": "此分类中没有Better",
+    "createFirstBetter": "创建第一个Touched",
+    "noCategoryBetters": "此分类中没有Touched",
     "loadError": "无法加载个人资料"
   },
   "hot": {
     "title": "Hot 100",
-    "subtitle": "获得最多点赞的Better",
+    "subtitle": "获得最多点赞的Touched",
     "likes": "点赞",
     "share": "分享",
     "noData": "暂无数据",
     "voteCount": "{count}票",
     "hot100Recommend": "推荐到Hot100",
-    "subtitle100": "点赞最多的100个Better",
+    "subtitle100": "点赞最多的100个Touched",
     "noLikes": "还没有喜欢",
-    "noLikesDesc": "在随机探索中为您喜欢的Better点赞",
+    "noLikesDesc": "在随机探索中为您喜欢的Touched点赞",
     "popular": "热门",
     "recent": "最新",
     "viewAll": "查看全部 →",
@@ -252,8 +252,8 @@
     "available": "用户名可用"
   },
   "better": {
-    "deleteTitle": "删除 Better",
-    "deleteMessage": "删除此 Better 将同时删除所有投票数据。确定要删除吗？",
+    "deleteTitle": "删除 Touched",
+    "deleteMessage": "删除此 Touched 将同时删除所有投票数据。确定要删除吗？",
     "deleteConfirmBtn": "删除",
     "deleting": "删除中..."
   }

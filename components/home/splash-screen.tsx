@@ -64,7 +64,7 @@ export function SplashScreen() {
         }}>
           <span>Which</span>
           <SplashAnimatedWord />
-          <span>is <span style={{ color: '#8B5CF6' }}>Better</span>?</span>
+          <span>is <span style={{ color: '#8B5CF6' }}>Touched</span>?</span>
         </h1>
 
         <p style={{

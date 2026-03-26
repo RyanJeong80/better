@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Better — 어떤 게 더 나아?",
+    "title": "Touched — 어떤 게 더 나아?",
     "description": "두 장의 사진을 올리고 사람들의 선택을 받아보세요"
   },
   "nav": {
@@ -12,8 +12,8 @@
   },
   "sections": {
     "ranking": "랭킹",
-    "better": "랜덤 Better",
-    "hot": "Hot Better",
+    "better": "랜덤 Touched",
+    "hot": "Hot Touched",
     "profile": "프로필"
   },
   "auth": {
@@ -37,13 +37,13 @@
   },
   "menu": {
     "myProfile": "내 프로필",
-    "myBetters": "내가 올린 Better",
+    "myBetters": "내가 올린 Touched",
     "myVotes": "내 투표 기록",
     "myRanking": "내 적중률 / 랭킹 확인",
     "user": "사용자"
   },
   "create": {
-    "pageTitle": "Better 만들기",
+    "pageTitle": "Touched 만들기",
     "titleLabel": "제목",
     "titlePlaceholder": "어떤 걸 비교하시나요?",
     "descriptionALabel": "사진 A 설명 (선택)",
@@ -58,7 +58,7 @@
       "photoARequired": "사진 A 업로드가 완료되지 않았습니다",
       "photoBRequired": "사진 B 업로드가 완료되지 않았습니다"
     },
-    "newTitle": "새 Better 만들기",
+    "newTitle": "새 Touched 만들기",
     "subtitle": "두 사진을 올리고 사람들에게 선택을 받아보세요",
     "changePhoto": "사진 변경",
     "clickOrDrag": "클릭 또는 드래그",
@@ -79,7 +79,7 @@
     "goBack": "수정하기",
     "submitButton": "이대로 올리기",
     "uploadStep1": "이미지 업로드 중... (1/2)",
-    "saveStep2": "Better 저장 중... (2/2)",
+    "saveStep2": "Touched 저장 중... (2/2)",
     "done": "완료! 🎉",
     "categoryFirst": "카테고리를 먼저 선택해주세요",
     "titleNeeded": "제목을 입력해주세요",
@@ -106,9 +106,9 @@
     "share": "공유",
     "loginPrompt": "로그인하면 내 기록을 볼 수 있어요",
     "allSeen": "모두 다 봤어요!",
-    "allSeenDesc": "새로운 Better가 올라오면 다시 돌아오세요.",
-    "tagEmpty": "#{tag} Better가 없어요",
-    "tagEmptyDesc": "해당 태그의 Better가 아직 없거나 모두 확인했어요.",
+    "allSeenDesc": "새로운 Touched가 올라오면 다시 돌아오세요.",
+    "tagEmpty": "#{tag} Touched가 없어요",
+    "tagEmptyDesc": "해당 태그의 Touched가 아직 없거나 모두 확인했어요.",
     "clearTagFilter": "태그 필터 해제",
     "tagSearching": "검색 중",
     "tagSearchPlaceholder": "태그 검색...",
@@ -128,7 +128,7 @@
   },
   "hint": {
     "title": "사용 방법",
-    "swipeVertical": "위아래 스와이프 → 다음 Better",
+    "swipeVertical": "위아래 스와이프 → 다음 Touched",
     "swipeHorizontal": "좌우 스와이프 → Top100 / 랭킹",
     "tap": "사진 탭 → 투표  |  상세보기 → 크게 보기",
     "dismiss": "탭하면 닫힙니다"
@@ -166,7 +166,7 @@
     "diamond": "다이아몬드"
   },
   "ranking": {
-    "title": "Better 랭킹",
+    "title": "Touched 랭킹",
     "topParticipation": "참여 횟수 TOP 30",
     "topAccuracy": "{emoji} {label} 적중률 TOP 30",
     "myRanking": "내 랭킹",
@@ -188,12 +188,12 @@
     "loginRequired": "로그인이 필요합니다",
     "loginRequiredDesc": "프로필을 보려면 로그인하세요",
     "goLogin": "로그인하기",
-    "myBetters": "내 Better",
+    "myBetters": "내 Touched",
     "totalVotes": "총 투표",
     "accuracy": "적중률",
     "level": "레벨",
-    "noBetters": "아직 올린 Better가 없어요",
-    "createFirst": "첫 번째 Better를 만들어보세요!",
+    "noBetters": "아직 올린 Touched가 없어요",
+    "createFirst": "첫 번째 Touched를 만들어보세요!",
     "me": "나",
     "expert": "{category} 전문가",
     "bestCategory": "가장 잘 맞히는 카테고리",
@@ -203,23 +203,23 @@
     "likesLabel": "좋아요",
     "betterCountValue": "{count}개",
     "totalVotesValue": "{count}표",
-    "noBettersYet": "아직 Better가 없어요",
+    "noBettersYet": "아직 Touched가 없어요",
     "noBettersDesc": "두 사진을 올리고 사람들의 선택을 받아보세요",
-    "createFirstBetter": "첫 Better 만들기",
-    "noCategoryBetters": "이 카테고리의 Better가 없어요",
+    "createFirstBetter": "첫 Touched 만들기",
+    "noCategoryBetters": "이 카테고리의 Touched가 없어요",
     "loadError": "프로필을 불러올 수 없어요"
   },
   "hot": {
     "title": "Hot 100",
-    "subtitle": "가장 많은 좋아요를 받은 Better",
+    "subtitle": "가장 많은 좋아요를 받은 Touched",
     "likes": "좋아요",
     "share": "공유",
     "noData": "아직 데이터가 없어요",
     "voteCount": "{count}표",
     "hot100Recommend": "Hot100에 추천하기",
-    "subtitle100": "좋아요를 가장 많이 받은 Better 100선",
+    "subtitle100": "좋아요를 가장 많이 받은 Touched 100선",
     "noLikes": "아직 좋아요가 없어요",
-    "noLikesDesc": "랜덤 Better에서 마음에 드는 Better에 좋아요를 눌러보세요",
+    "noLikesDesc": "랜덤 Touched에서 마음에 드는 Touched에 좋아요를 눌러보세요",
     "popular": "인기순",
     "recent": "최신순",
     "viewAll": "전체 보기 →",
@@ -252,8 +252,8 @@
     "available": "사용 가능한 닉네임이에요"
   },
   "better": {
-    "deleteTitle": "Better 삭제",
-    "deleteMessage": "이 Better를 삭제하면 투표 데이터도 모두 삭제됩니다. 삭제하시겠어요?",
+    "deleteTitle": "Touched 삭제",
+    "deleteMessage": "이 Touched를 삭제하면 투표 데이터도 모두 삭제됩니다. 삭제하시겠어요?",
     "deleteConfirmBtn": "삭제하기",
     "deleting": "삭제 중..."
   }

@@ -872,7 +872,7 @@ export function RandomBetterViewer({
         </div>
       )}
 
-      {/* ── 메인 배틀 콘텐츠 ── */}
+      {/* ── 메인 터치 콘텐츠 ── */}
       {phase !== 'loading' && phase !== 'empty' && battle && (
         <>
           {/* ── 애니메이션 래퍼: 사진 A + VS + 사진 B + 제목 ── */}
@@ -1172,7 +1172,7 @@ export function RandomBetterViewer({
               )}
             </div>
 
-            {/* 배틀 제목 + 카테고리 배지 (A 사진 상단 오버레이) */}
+            {/* 터치 제목 + 카테고리 배지 (A 사진 상단 오버레이) */}
             <div style={{
               position: 'absolute', top: 34, left: 12, right: 76, zIndex: 8,
               pointerEvents: 'none',
