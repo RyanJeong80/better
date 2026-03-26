@@ -1,12 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, Heart, Trash2, X } from 'lucide-react'
+import { ChevronDown, Heart, Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { BetterCategory } from '@/lib/constants/categories'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
 import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
-import { deleteBattle } from '@/actions/battles'
 
 interface Reason {
   choice: 'A' | 'B'
@@ -148,7 +147,7 @@ function ImageResult({
       </div>
 
       {description && (
-        <p className="border-t border-border px-3 py-2 text-xs leading-relaxed text-muted-foreground">
+        <p style={{ borderTop: '1px solid var(--color-border)', padding: '8px 12px', fontSize: '0.75rem', lineHeight: 1.6, color: 'var(--color-muted-foreground)', margin: 0 }}>
           {description}
         </p>
       )}
@@ -156,98 +155,14 @@ function ImageResult({
   )
 }
 
-function DeleteConfirmDialog({
-  onConfirm, onCancel, loading, error,
-}: {
-  onConfirm: () => void
-  onCancel: () => void
-  loading: boolean
-  error: string | null
-}) {
-  const t = useTranslations()
-  return (
-    <>
-      {/* 오버레이 */}
-      <div
-        onClick={onCancel}
-        style={{
-          position: 'fixed', inset: 0, zIndex: 200,
-          background: 'rgba(0,0,0,0.45)',
-        }}
-      />
-      {/* 다이얼로그 */}
-      <div style={{
-        position: 'fixed', left: '50%', top: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 201, width: 'min(340px, calc(100vw - 32px))',
-        background: 'var(--color-background)',
-        borderRadius: 20,
-        boxShadow: '0 8px 40px rgba(0,0,0,0.18)',
-        padding: '24px 20px 20px',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-          <p style={{ fontWeight: 800, fontSize: '1rem', margin: 0 }}>
-            {t('better.deleteTitle')}
-          </p>
-          <button
-            onClick={onCancel}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--color-muted-foreground)' }}
-          >
-            <X size={18} />
-          </button>
-        </div>
-        <p style={{ fontSize: '0.85rem', color: 'var(--color-muted-foreground)', lineHeight: 1.6, margin: '0 0 16px' }}>
-          {t('better.deleteMessage')}
-        </p>
-
-        {error && (
-          <p style={{ fontSize: '0.78rem', color: '#EF4444', marginBottom: 12 }}>{error}</p>
-        )}
-
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={onCancel}
-            disabled={loading}
-            style={{
-              flex: 1, padding: '10px 0', borderRadius: 12,
-              border: '1.5px solid var(--color-border)', background: 'transparent',
-              fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer',
-              color: 'var(--color-foreground)',
-              opacity: loading ? 0.5 : 1,
-            }}
-          >
-            {t('common.cancel')}
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            style={{
-              flex: 1, padding: '10px 0', borderRadius: 12,
-              border: 'none', background: '#EF4444',
-              fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer',
-              color: 'white',
-              opacity: loading ? 0.6 : 1,
-            }}
-          >
-            {loading ? t('better.deleting') : t('better.deleteConfirmBtn')}
-          </button>
-        </div>
-      </div>
-    </>
-  )
-}
-
 export function MyBetterCard({
   battle,
-  onDeleteSuccess,
+  onDeleteClick,
 }: {
   battle: BattleStats
-  onDeleteSuccess?: (id: string) => void
+  onDeleteClick: (id: string) => void
 }) {
   const [showReasons, setShowReasons] = useState(false)
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
-  const [deleting, setDeleting] = useState(false)
-  const [deleteError, setDeleteError] = useState<string | null>(null)
   const t = useTranslations()
 
   const pctA = battle.total > 0 ? Math.round((battle.votesA / battle.total) * 100) : 0
@@ -259,147 +174,147 @@ export function MyBetterCard({
   const cat = CATEGORY_MAP[battle.category]
   const catStyle = CAT_BADGE[battle.category]
 
-  async function handleDeleteConfirm() {
-    setDeleting(true)
-    setDeleteError(null)
-    const result = await deleteBattle(battle.id)
-    setDeleting(false)
-    if (result.error) {
-      setDeleteError(result.error)
-    } else {
-      setShowDeleteDialog(false)
-      onDeleteSuccess?.(battle.id)
-    }
-  }
-
   return (
-    <>
-      <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
-        {/* 헤더 */}
-        <div className="flex items-start justify-between gap-3 px-4 py-4 md:px-5">
-          <div className="min-w-0 flex-1">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
-              <span
-                className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold"
-                style={{ background: catStyle.bg, color: catStyle.text }}
-              >
-                {cat.emoji} {cat.label}
-              </span>
-              {deadline && (
-                <span style={{
-                  display: 'inline-flex', alignItems: 'center',
-                  fontSize: '0.68rem', fontWeight: 700,
-                  color: deadline.color, background: deadline.bg,
-                  padding: '2px 8px', borderRadius: 999,
-                }}>
-                  {deadline.text}
-                </span>
-              )}
-            </div>
-            <h3 className="font-bold leading-snug text-foreground">{battle.title}</h3>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {battle.total > 0 ? `총 ${battle.total}표` : '아직 투표가 없어요'}
-            </p>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-            {battle.likesCount > 0 && (
-              <div className="flex shrink-0 items-center gap-1 rounded-full border border-rose-100 bg-rose-50 px-2.5 py-1">
-                <Heart size={12} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
-                <span className="text-xs font-bold tabular-nums" style={{ color: '#F43F5E' }}>{battle.likesCount}</span>
-              </div>
-            )}
-            <button
-              onClick={() => { setDeleteError(null); setShowDeleteDialog(true) }}
+    <div style={{ overflow: 'hidden', borderRadius: 24, border: '1px solid var(--color-border)', background: 'var(--color-card)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+      {/* 헤더 */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, padding: '16px 16px' }}>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>
+            <span
               style={{
-                width: 32, height: 32, borderRadius: 10,
-                border: '1.5px solid var(--color-border)',
-                background: 'transparent', cursor: 'pointer',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--color-muted-foreground)',
-                transition: 'all 0.15s',
+                display: 'inline-flex', alignItems: 'center', gap: 4,
+                borderRadius: 999, padding: '2px 8px', fontSize: '0.75rem', fontWeight: 600,
+                background: catStyle.bg, color: catStyle.text,
               }}
-              aria-label={t('better.deleteTitle')}
             >
-              <Trash2 size={14} />
-            </button>
-          </div>
-        </div>
-
-        {/* 이미지 */}
-        <div className="grid grid-cols-2 border-t border-border">
-          <ImageResult
-            imageUrl={battle.imageAUrl}
-            description={battle.imageADescription}
-            votes={battle.votesA}
-            total={battle.total}
-            pct={pctA}
-            side="A"
-            isWinner={aWins}
-            id={battle.id}
-            isTextOnly={battle.isTextOnly}
-            sideText={battle.imageAText}
-          />
-          <ImageResult
-            imageUrl={battle.imageBUrl}
-            description={battle.imageBDescription}
-            votes={battle.votesB}
-            total={battle.total}
-            pct={pctB}
-            side="B"
-            isWinner={bWins}
-            id={battle.id}
-            isTextOnly={battle.isTextOnly}
-            sideText={battle.imageBText}
-          />
-        </div>
-
-        {/* 이유 보기 */}
-        {battle.reasons.length > 0 && (
-          <div className="border-t border-border">
-            <button
-              onClick={() => setShowReasons((v) => !v)}
-              className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium transition-colors hover:bg-accent md:px-5"
-            >
-              <span className="text-muted-foreground">이유 보기</span>
-              <div className="flex items-center gap-1.5">
-                <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary">
-                  {battle.reasons.length}
-                </span>
-                <ChevronDown
-                  size={15}
-                  className={`text-muted-foreground transition-transform duration-200 ${showReasons ? 'rotate-180' : ''}`}
-                />
-              </div>
-            </button>
-
-            {showReasons && (
-              <ul className="divide-y divide-border border-t border-border">
-                {battle.reasons.map((r, i) => (
-                  <li key={i} className="flex items-start gap-3 px-4 py-3 md:px-5">
-                    <span className={`mt-0.5 shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                      r.choice === 'A' ? 'bg-indigo-100 text-indigo-600' : 'bg-purple-100 text-purple-600'
-                    }`}>
-                      {r.choice}
-                    </span>
-                    <p className="text-sm text-foreground/80">{r.reason}</p>
-                  </li>
-                ))}
-              </ul>
+              {cat.emoji} {cat.label}
+            </span>
+            {deadline && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center',
+                fontSize: '0.68rem', fontWeight: 700,
+                color: deadline.color, background: deadline.bg,
+                padding: '2px 8px', borderRadius: 999,
+              }}>
+                {deadline.text}
+              </span>
             )}
           </div>
-        )}
+          <h3 style={{ fontWeight: 700, lineHeight: 1.3, color: 'var(--color-foreground)', margin: 0 }}>{battle.title}</h3>
+          <p style={{ marginTop: 2, fontSize: '0.75rem', color: 'var(--color-muted-foreground)', margin: '2px 0 0' }}>
+            {battle.total > 0 ? `총 ${battle.total}표` : '아직 투표가 없어요'}
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          {battle.likesCount > 0 && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 4,
+              borderRadius: 999, border: '1px solid #FFE4E6', background: '#FFF1F2',
+              padding: '4px 10px',
+            }}>
+              <Heart size={12} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#F43F5E', fontVariantNumeric: 'tabular-nums' }}>{battle.likesCount}</span>
+            </div>
+          )}
+          <button
+            onClick={(e) => { e.stopPropagation(); onDeleteClick(battle.id) }}
+            style={{
+              width: 32, height: 32, borderRadius: 10,
+              border: '1.5px solid var(--color-border)',
+              background: 'transparent', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'var(--color-muted-foreground)',
+            }}
+            aria-label={t('better.deleteTitle')}
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
 
-      {/* 삭제 확인 다이얼로그 */}
-      {showDeleteDialog && (
-        <DeleteConfirmDialog
-          onConfirm={handleDeleteConfirm}
-          onCancel={() => setShowDeleteDialog(false)}
-          loading={deleting}
-          error={deleteError}
+      {/* 이미지 */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', borderTop: '1px solid var(--color-border)' }}>
+        <ImageResult
+          imageUrl={battle.imageAUrl}
+          description={battle.imageADescription}
+          votes={battle.votesA}
+          total={battle.total}
+          pct={pctA}
+          side="A"
+          isWinner={aWins}
+          id={battle.id}
+          isTextOnly={battle.isTextOnly}
+          sideText={battle.imageAText}
         />
+        <ImageResult
+          imageUrl={battle.imageBUrl}
+          description={battle.imageBDescription}
+          votes={battle.votesB}
+          total={battle.total}
+          pct={pctB}
+          side="B"
+          isWinner={bWins}
+          id={battle.id}
+          isTextOnly={battle.isTextOnly}
+          sideText={battle.imageBText}
+        />
+      </div>
+
+      {/* 이유 보기 */}
+      {battle.reasons.length > 0 && (
+        <div style={{ borderTop: '1px solid var(--color-border)' }}>
+          <button
+            onClick={() => setShowReasons((v) => !v)}
+            style={{
+              display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'space-between',
+              padding: '12px 16px', fontSize: '0.875rem', fontWeight: 500,
+              background: 'transparent', border: 'none', cursor: 'pointer',
+            }}
+          >
+            <span style={{ color: 'var(--color-muted-foreground)' }}>이유 보기</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{
+                borderRadius: 999, background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                padding: '2px 8px', fontSize: '0.75rem', fontWeight: 700,
+                color: 'var(--color-primary)',
+              }}>
+                {battle.reasons.length}
+              </span>
+              <ChevronDown
+                size={15}
+                style={{
+                  color: 'var(--color-muted-foreground)',
+                  transform: showReasons ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.2s',
+                }}
+              />
+            </div>
+          </button>
+
+          {showReasons && (
+            <ul style={{ borderTop: '1px solid var(--color-border)', margin: 0, padding: 0, listStyle: 'none' }}>
+              {battle.reasons.map((r, i) => (
+                <li key={i} style={{
+                  display: 'flex', alignItems: 'flex-start', gap: 12,
+                  padding: '12px 16px',
+                  borderTop: i > 0 ? '1px solid var(--color-border)' : undefined,
+                }}>
+                  <span style={{
+                    flexShrink: 0, borderRadius: 999, padding: '2px 10px',
+                    fontSize: '0.75rem', fontWeight: 700, marginTop: 2,
+                    background: r.choice === 'A' ? '#E0E7FF' : '#EDE9FE',
+                    color: r.choice === 'A' ? '#4338CA' : '#7C3AED',
+                  }}>
+                    {r.choice}
+                  </span>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--color-foreground)', opacity: 0.8, margin: 0 }}>{r.reason}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       )}
-    </>
+    </div>
   )
 }
