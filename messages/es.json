@@ -256,5 +256,46 @@
     "deleteMessage": "Eliminar este Touched también eliminará todos los datos de votación. ¿Estás seguro?",
     "deleteConfirmBtn": "Eliminar",
     "deleting": "Eliminando..."
+  },
+  "privacy": {
+    "title": "Política de Privacidad",
+    "lastUpdated": "Última actualización: marzo de 2025",
+    "intro": "Touched (\"Servicio\") valora tu información personal y la protege conforme a las leyes aplicables.",
+    "s1Title": "Información que recopilamos",
+    "s1Items": [
+      "Dirección de correo electrónico (a través de Google)",
+      "Foto de perfil y nombre de usuario",
+      "Imágenes subidas",
+      "Historial de votos"
+    ],
+    "s2Title": "Propósito de la recopilación",
+    "s2Items": [
+      "Prestación del servicio y gestión de cuentas",
+      "Identificación y autenticación de usuarios",
+      "Mejora y análisis del servicio"
+    ],
+    "s3Title": "Período de retención",
+    "s3Text": "Los datos se conservan hasta la eliminación de la cuenta. Toda la información personal se elimina en un plazo de 30 días tras el cierre de la cuenta.",
+    "s4Title": "Servicios de terceros",
+    "s4Intro": "Utilizamos los siguientes servicios para operar la app:",
+    "s4Items": [
+      "Google OAuth — Autenticación de inicio de sesión",
+      "Supabase — Almacenamiento de datos y autenticación",
+      "Vercel — Alojamiento del servidor",
+      "DeepL — Traducción automática de texto"
+    ],
+    "s5Title": "Tus derechos",
+    "s5Items": [
+      "Solicitar acceso, corrección o eliminación de tus datos",
+      "Eliminar tu cuenta directamente desde la app",
+      "Contactarnos en cualquier momento para solicitudes relacionadas con datos"
+    ],
+    "s6Title": "Contacto",
+    "s6Text": "Para consultas sobre privacidad, contáctenos:",
+    "contactEmail": "hsjeong80@gmail.com",
+    "linkLabel": "Política de Privacidad",
+    "agreeCheck": "Acepto la Política de Privacidad",
+    "agreeRequired": "Debes aceptar la Política de Privacidad para registrarte.",
+    "view": "Ver"
   }
 }

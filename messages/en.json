@@ -256,5 +256,46 @@
     "deleteMessage": "Deleting this Touched will remove all vote data as well. Are you sure?",
     "deleteConfirmBtn": "Delete",
     "deleting": "Deleting..."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "lastUpdated": "Last updated: March 2025",
+    "intro": "Touched (\"Service\") values your personal information and protects it in accordance with applicable laws.",
+    "s1Title": "Information We Collect",
+    "s1Items": [
+      "Email address (via Google login)",
+      "Profile photo and nickname",
+      "Uploaded images",
+      "Voting history"
+    ],
+    "s2Title": "Purpose of Collection",
+    "s2Items": [
+      "Service provision and account management",
+      "User identification and authentication",
+      "Service improvement and analysis"
+    ],
+    "s3Title": "Retention Period",
+    "s3Text": "We retain your data until account deletion. All personal data is deleted within 30 days of account closure.",
+    "s4Title": "Third-Party Services",
+    "s4Intro": "We use the following services to operate the app:",
+    "s4Items": [
+      "Google OAuth — Login authentication",
+      "Supabase — Data storage and authentication",
+      "Vercel — Server hosting",
+      "DeepL — Automatic text translation"
+    ],
+    "s5Title": "Your Rights",
+    "s5Items": [
+      "Request access, correction, or deletion of your data",
+      "Delete your account directly within the app",
+      "Contact us anytime for data-related requests"
+    ],
+    "s6Title": "Contact",
+    "s6Text": "For privacy-related inquiries, please reach out:",
+    "contactEmail": "hsjeong80@gmail.com",
+    "linkLabel": "Privacy Policy",
+    "agreeCheck": "I agree to the Privacy Policy",
+    "agreeRequired": "Please agree to the Privacy Policy to sign up.",
+    "view": "View"
   }
 }

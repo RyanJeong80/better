@@ -256,5 +256,46 @@
     "deleteMessage": "Supprimer ce Touched supprimera également toutes les données de vote. Êtes-vous sûr ?",
     "deleteConfirmBtn": "Supprimer",
     "deleting": "Suppression..."
+  },
+  "privacy": {
+    "title": "Politique de confidentialité",
+    "lastUpdated": "Dernière mise à jour: mars 2025",
+    "intro": "Touched (ci-après « Service ») accorde de l'importance à vos informations personnelles et les protège conformément aux lois applicables.",
+    "s1Title": "Informations collectées",
+    "s1Items": [
+      "Adresse e-mail (via Google)",
+      "Photo de profil et pseudonyme",
+      "Images téléchargées",
+      "Historique des votes"
+    ],
+    "s2Title": "Finalité de la collecte",
+    "s2Items": [
+      "Fourniture du service et gestion des comptes",
+      "Identification et authentification des utilisateurs",
+      "Amélioration et analyse du service"
+    ],
+    "s3Title": "Durée de conservation",
+    "s3Text": "Les données sont conservées jusqu'à la suppression du compte. Toutes les données personnelles sont supprimées dans les 30 jours suivant la fermeture du compte.",
+    "s4Title": "Services tiers",
+    "s4Intro": "Nous utilisons les services suivants pour exploiter l'application:",
+    "s4Items": [
+      "Google OAuth — Authentification de connexion",
+      "Supabase — Stockage de données et authentification",
+      "Vercel — Hébergement serveur",
+      "DeepL — Traduction automatique de texte"
+    ],
+    "s5Title": "Vos droits",
+    "s5Items": [
+      "Demander l'accès, la correction ou la suppression de vos données",
+      "Supprimer votre compte directement dans l'application",
+      "Nous contacter à tout moment pour des demandes liées aux données"
+    ],
+    "s6Title": "Contact",
+    "s6Text": "Pour toute question relative à la confidentialité, veuillez nous contacter:",
+    "contactEmail": "hsjeong80@gmail.com",
+    "linkLabel": "Politique de confidentialité",
+    "agreeCheck": "J'accepte la Politique de confidentialité",
+    "agreeRequired": "Vous devez accepter la Politique de confidentialité pour vous inscrire.",
+    "view": "Voir"
   }
 }

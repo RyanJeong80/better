@@ -42,3 +42,7 @@ next-env.d.ts
 
 # Generated vendor files
 public/vendor/
+
+# Capacitor
+/android
+/ios

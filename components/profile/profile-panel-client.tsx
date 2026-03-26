@@ -223,6 +223,16 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
 
       {/* Better 목록 */}
       <ProfileBetterList battles={battles} />
+
+      {/* 푸터 링크 */}
+      <div style={{ marginTop: 32, paddingTop: 16, borderTop: '1px solid var(--color-border)', textAlign: 'center' }}>
+        <Link
+          href="/privacy"
+          style={{ fontSize: '0.72rem', color: 'var(--color-muted-foreground)', textDecoration: 'underline', textUnderlineOffset: 3 }}
+        >
+          {t('privacy.linkLabel')}
+        </Link>
+      </div>
     </div>
   )
 }

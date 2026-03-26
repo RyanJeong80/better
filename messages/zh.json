@@ -256,5 +256,46 @@
     "deleteMessage": "删除此 Touched 将同时删除所有投票数据。确定要删除吗？",
     "deleteConfirmBtn": "删除",
     "deleting": "删除中..."
+  },
+  "privacy": {
+    "title": "隐私政策",
+    "lastUpdated": "最后更新: 2025年3月",
+    "intro": "Touched（以下简称\"服务\"）重视您的个人信息，并依据相关法律法规加以保护。",
+    "s1Title": "收集的个人信息",
+    "s1Items": [
+      "电子邮件地址（通过 Google 登录时）",
+      "个人头像和昵称",
+      "上传的图片",
+      "投票记录"
+    ],
+    "s2Title": "收集目的",
+    "s2Items": [
+      "提供服务及会员管理",
+      "用户识别与认证",
+      "改善和分析服务"
+    ],
+    "s3Title": "保留期限",
+    "s3Text": "保留至注销账户为止，注销后30天内删除所有个人信息。",
+    "s4Title": "第三方服务",
+    "s4Intro": "我们使用以下服务来运营应用:",
+    "s4Items": [
+      "Google OAuth — 登录认证",
+      "Supabase — 数据存储和认证",
+      "Vercel — 服务器托管",
+      "DeepL — 自动文本翻译"
+    ],
+    "s5Title": "用户权利",
+    "s5Items": [
+      "可请求查看、修改或删除个人信息",
+      "可直接通过应用内账户删除功能删除",
+      "随时可联系我们处理相关请求"
+    ],
+    "s6Title": "联系方式",
+    "s6Text": "如有隐私相关问题，请通过以下方式联系我们。",
+    "contactEmail": "hsjeong80@gmail.com",
+    "linkLabel": "隐私政策",
+    "agreeCheck": "我同意隐私政策",
+    "agreeRequired": "注册需要同意隐私政策。",
+    "view": "查看"
   }
 }

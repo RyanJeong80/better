@@ -1,16 +1,17 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { signUp, signInWithGoogle, type AuthState } from '@/actions/auth'
 
-function SubmitButton() {
+function SubmitButton({ disabled: extraDisabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus()
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={pending || extraDisabled}
       className="w-full rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
     >
       {pending ? (
@@ -30,6 +31,8 @@ function SubmitButton() {
 
 export function SignupForm() {
   const [state, formAction] = useActionState<AuthState, FormData>(signUp, null)
+  const [agreed, setAgreed] = useState(false)
+  const t = useTranslations('privacy')
 
   return (
     <div className="space-y-4">
@@ -112,7 +115,27 @@ export function SignupForm() {
         <p className="text-xs text-muted-foreground">비밀번호는 6자 이상이어야 합니다</p>
       </div>
 
-      <SubmitButton />
+      {/* 개인정보처리방침 동의 */}
+      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer' }}>
+        <input
+          type="checkbox"
+          checked={agreed}
+          onChange={(e) => setAgreed(e.target.checked)}
+          style={{ marginTop: 2, width: 16, height: 16, flexShrink: 0, accentColor: '#6366F1', cursor: 'pointer' }}
+        />
+        <span style={{ fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--color-muted-foreground)' }}>
+          {t('agreeCheck')}{' '}
+          <Link
+            href="/privacy"
+            target="_blank"
+            style={{ color: '#6366F1', fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 3 }}
+          >
+            {t('view')}
+          </Link>
+        </span>
+      </label>
+
+      <SubmitButton disabled={!agreed} />
 
       <p className="text-center text-sm text-muted-foreground">
         이미 계정이 있으신가요?{' '}
