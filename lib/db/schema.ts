@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, pgEnum, integer, numeric, smallint, primaryKey } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, timestamp, pgEnum, integer, numeric, smallint, primaryKey, boolean } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
 export const voteChoiceEnum = pgEnum('vote_choice', ['A', 'B'])
@@ -25,6 +25,9 @@ export const betters = pgTable('betters', {
   imageADescription: text('image_a_description'),
   imageBUrl: text('image_b_url').notNull(),
   imageBDescription: text('image_b_description'),
+  imageAText: text('image_a_text'),
+  imageBText: text('image_b_text'),
+  isTextOnly: boolean('is_text_only').default(false).notNull(),
   category: betterCategoryEnum('category').notNull().default('decision'),
   winner: voteChoiceEnum('winner'),
   createdAt: timestamp('created_at').defaultNow().notNull(),

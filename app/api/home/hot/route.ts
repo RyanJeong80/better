@@ -11,6 +11,9 @@ type HotThumb = {
   imageBUrl: string
   category: BetterCategory
   likeCount: number
+  isTextOnly: boolean
+  imageAText: string | null
+  imageBText: string | null
 }
 
 const getCachedHotBattles = unstable_cache(
@@ -21,6 +24,9 @@ const getCachedHotBattles = unstable_cache(
         title: betters.title,
         imageAUrl: betters.imageAUrl,
         imageBUrl: betters.imageBUrl,
+        imageAText: betters.imageAText,
+        imageBText: betters.imageBText,
+        isTextOnly: betters.isTextOnly,
         category: betters.category,
       }).from(betters),
       db.select({ betterId: likes.betterId }).from(likes),

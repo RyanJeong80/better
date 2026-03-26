@@ -648,34 +648,43 @@ export function CreateBattleForm() {
   async function handleSubmit() {
     setUpload({ running: true, step: t('uploadStep1'), progress: 10, error: null, done: false })
 
+    // 두 슬롯 모두 이미지 없이 텍스트만 입력한 경우 → text-only 경로
+    const isTextOnly = !slotA.url && !slotB.url && !!slotA.desc.trim() && !!slotB.desc.trim()
+
     let urlA = slotA.url
     let urlB = slotB.url
 
-    try {
-      if (!urlA && slotA.desc.trim()) {
-        urlA = await uploadTextImage(slotA.desc.trim(), slotA.selectedColor, 'A')
+    if (!isTextOnly) {
+      // 기존 경로: 이미지 없는 슬롯은 캔버스로 텍스트 이미지 생성 후 업로드
+      try {
+        if (!urlA && slotA.desc.trim()) {
+          urlA = await uploadTextImage(slotA.desc.trim(), slotA.selectedColor, 'A')
+        }
+        if (!urlB && slotB.desc.trim()) {
+          urlB = await uploadTextImage(slotB.desc.trim(), slotB.selectedColor, 'B')
+        }
+      } catch (e) {
+        setUpload({ running: false, step: '', progress: 0, error: t('imageUploadError', { message: e instanceof Error ? e.message : String(e) }), done: false })
+        return
       }
-      if (!urlB && slotB.desc.trim()) {
-        urlB = await uploadTextImage(slotB.desc.trim(), slotB.selectedColor, 'B')
-      }
-    } catch (e) {
-      setUpload({ running: false, step: '', progress: 0, error: t('imageUploadError', { message: e instanceof Error ? e.message : String(e) }), done: false })
-      return
-    }
 
-    if (!urlA || !urlB) {
-      setUpload({ running: false, step: '', progress: 0, error: t('bothContentRequired'), done: false })
-      return
+      if (!urlA || !urlB) {
+        setUpload({ running: false, step: '', progress: 0, error: t('bothContentRequired'), done: false })
+        return
+      }
     }
 
     setUpload(u => ({ ...u, step: t('saveStep2'), progress: 60 }))
 
     const formData = new FormData()
     formData.set('title', title.trim())
-    formData.set('imageAUrl', urlA)
-    formData.set('imageBUrl', urlB)
+    formData.set('imageAUrl', urlA ?? '')
+    formData.set('imageBUrl', urlB ?? '')
     formData.set('descriptionA', slotA.url ? slotA.desc : '')
     formData.set('descriptionB', slotB.url ? slotB.desc : '')
+    formData.set('isTextOnly', String(isTextOnly))
+    formData.set('imageAText', isTextOnly ? slotA.desc.trim() : '')
+    formData.set('imageBText', isTextOnly ? slotB.desc.trim() : '')
     formData.set('category', category ?? 'decision')
     formData.set('tags', JSON.stringify(selectedTags))
 

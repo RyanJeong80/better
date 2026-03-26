@@ -14,6 +14,9 @@ export type ProfileBattleStats = {
   imageADescription: string | null
   imageBUrl: string
   imageBDescription: string | null
+  isTextOnly: boolean
+  imageAText: string | null
+  imageBText: string | null
   votesA: number
   votesB: number
   total: number
@@ -89,6 +92,9 @@ export async function GET() {
       imageADescription: betters.imageADescription,
       imageBUrl: betters.imageBUrl,
       imageBDescription: betters.imageBDescription,
+      imageAText: betters.imageAText,
+      imageBText: betters.imageBText,
+      isTextOnly: betters.isTextOnly,
       category: betters.category,
       createdAt: betters.createdAt,
     })

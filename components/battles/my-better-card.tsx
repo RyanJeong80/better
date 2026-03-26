@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ChevronDown, Heart } from 'lucide-react'
 import type { BetterCategory } from '@/lib/constants/categories'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
+import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
 
 interface Reason {
   choice: 'A' | 'B'
@@ -17,6 +18,9 @@ interface BattleStats {
   imageADescription: string | null
   imageBUrl: string
   imageBDescription: string | null
+  isTextOnly?: boolean
+  imageAText?: string | null
+  imageBText?: string | null
   votesA: number
   votesB: number
   total: number
@@ -44,6 +48,9 @@ function ImageResult({
   pct,
   side,
   isWinner,
+  id,
+  isTextOnly,
+  sideText,
 }: {
   imageUrl: string
   description: string | null
@@ -52,16 +59,39 @@ function ImageResult({
   pct: number
   side: 'A' | 'B'
   isWinner: boolean
+  id: string
+  isTextOnly?: boolean
+  sideText?: string | null
 }) {
+  const colorOffset = side === 'A' ? 0 : 1
   return (
     <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', borderLeft: side === 'B' ? '1px solid var(--color-border)' : undefined }}>
       <div style={{ position: 'relative', width: '100%', paddingTop: '100%', overflow: 'hidden' }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={imageUrl}
-          alt={`사진 ${side}`}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
-        />
+        {isTextOnly ? (
+          <div style={{
+            position: 'absolute', inset: 0,
+            width: '100%', height: '100%',
+            background: TEXT_BG_COLORS[getTextColorIdx(id, colorOffset)].bg,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: 12,
+          }}>
+            <p style={{
+              color: TEXT_BG_COLORS[getTextColorIdx(id, colorOffset)].text,
+              fontWeight: 700, fontSize: '0.82rem', textAlign: 'center', lineHeight: 1.4,
+              overflow: 'hidden', display: '-webkit-box',
+              WebkitLineClamp: 5, WebkitBoxOrient: 'vertical',
+            }}>
+              {sideText}
+            </p>
+          </div>
+        ) : (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={imageUrl}
+            alt={`사진 ${side}`}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+          />
+        )}
 
         {total > 0 ? (
           <>
@@ -168,6 +198,9 @@ export function MyBetterCard({ battle }: { battle: BattleStats }) {
           pct={pctA}
           side="A"
           isWinner={aWins}
+          id={battle.id}
+          isTextOnly={battle.isTextOnly}
+          sideText={battle.imageAText}
         />
         <ImageResult
           imageUrl={battle.imageBUrl}
@@ -177,6 +210,9 @@ export function MyBetterCard({ battle }: { battle: BattleStats }) {
           pct={pctB}
           side="B"
           isWinner={bWins}
+          id={battle.id}
+          isTextOnly={battle.isTextOnly}
+          sideText={battle.imageBText}
         />
       </div>
 

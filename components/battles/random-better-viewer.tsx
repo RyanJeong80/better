@@ -10,6 +10,7 @@ import { submitVote } from '@/actions/votes'
 import { toggleLike } from '@/actions/likes'
 import { CATEGORY_FILTERS, CATEGORY_MAP } from '@/lib/constants/categories'
 import { calcLevel } from '@/lib/level'
+import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
 type Phase = 'voting' | 'picked' | 'submitting' | 'voted' | 'loading' | 'empty'
@@ -20,6 +21,36 @@ interface VoteResult {
   votesA: number
   votesB: number
   total: number
+}
+
+// ── 텍스트 전용 카드 ──────────────────────────────────────────────
+function TextCard({ text, colorIdx }: { text: string; colorIdx: number }) {
+  const { bg, text: textColor } = TEXT_BG_COLORS[colorIdx]
+  return (
+    <div style={{
+      position: 'absolute', inset: 0,
+      background: bg,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '24px 20px',
+    }}>
+      <p style={{
+        color: textColor,
+        fontWeight: 800,
+        fontSize: 'clamp(1.1rem, 5vw, 2rem)',
+        textAlign: 'center',
+        lineHeight: 1.35,
+        wordBreak: 'keep-all',
+        overflowWrap: 'break-word',
+        display: '-webkit-box',
+        WebkitLineClamp: 6,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+        textShadow: bg === '#f8fafc' ? 'none' : '0 1px 8px rgba(0,0,0,0.25)',
+      }}>
+        {text}
+      </p>
+    </div>
+  )
 }
 
 const CAT_BADGE: Record<BetterCategory, { bg: string; text: string }> = {
@@ -121,8 +152,8 @@ export function RandomBetterViewer({
 
     const texts = [
       battle.title,
-      battle.imageADescription ?? '',
-      battle.imageBDescription ?? '',
+      battle.isTextOnly ? (battle.imageAText ?? '') : (battle.imageADescription ?? ''),
+      battle.isTextOnly ? (battle.imageBText ?? '') : (battle.imageBDescription ?? ''),
     ]
 
     fetch('/api/translate', {
@@ -861,12 +892,21 @@ export function RandomBetterViewer({
                 transition: 'opacity 0.5s, filter 0.5s',
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={battle.imageAUrl}
-                alt="A"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-              />
+              {battle.isTextOnly ? (
+                <TextCard
+                  text={translated?.descA ?? battle.imageAText ?? ''}
+                  colorIdx={getTextColorIdx(battle.id, 0)}
+                />
+              ) : (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={battle.imageAUrl}
+                    alt="A"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </>
+              )}
               {/* 상단 그라데이션 (제목 가독성) */}
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.4) 40%, transparent 60%)', pointerEvents: 'none' }} />
               {/* 하단 그라데이션 (설명 가독성) */}
@@ -882,7 +922,7 @@ export function RandomBetterViewer({
               }}>A</div>
 
               {/* 설명 텍스트 */}
-              {battle.imageADescription && (
+              {!battle.isTextOnly && battle.imageADescription && (
                 <p style={{
                   position: 'absolute', bottom: 14, left: 36, right: 16, zIndex: 3,
                   margin: 0, color: 'white', fontSize: '0.78rem', lineHeight: 1.4,
@@ -1033,12 +1073,21 @@ export function RandomBetterViewer({
                 transition: 'opacity 0.5s, filter 0.5s',
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={battle.imageBUrl}
-                alt="B"
-                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-              />
+              {battle.isTextOnly ? (
+                <TextCard
+                  text={translated?.descB ?? battle.imageBText ?? ''}
+                  colorIdx={getTextColorIdx(battle.id, 1)}
+                />
+              ) : (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={battle.imageBUrl}
+                    alt="B"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                  />
+                </>
+              )}
               {/* 상단 그라데이션 */}
               <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 40%)', pointerEvents: 'none' }} />
               {/* 하단 그라데이션 */}
@@ -1054,7 +1103,7 @@ export function RandomBetterViewer({
               }}>B</div>
 
               {/* 설명 텍스트 */}
-              {battle.imageBDescription && (
+              {!battle.isTextOnly && battle.imageBDescription && (
                 <p style={{
                   position: 'absolute', bottom: 14, left: 36, right: 16, zIndex: 3,
                   margin: 0, color: 'white', fontSize: '0.78rem', lineHeight: 1.4,

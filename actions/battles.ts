@@ -15,6 +15,9 @@ export type BattleForVoting = {
   imageADescription: string | null
   imageBUrl: string
   imageBDescription: string | null
+  imageAText: string | null
+  imageBText: string | null
+  isTextOnly: boolean
   likeCount: number
   isLiked: boolean
   category: BetterCategory
@@ -75,6 +78,9 @@ export async function getRandomBattle(
       imageADescription: betters.imageADescription,
       imageBUrl: betters.imageBUrl,
       imageBDescription: betters.imageBDescription,
+      imageAText: betters.imageAText,
+      imageBText: betters.imageBText,
+      isTextOnly: betters.isTextOnly,
       category: betters.category,
     })
       .from(betters)
@@ -94,6 +100,9 @@ export async function getRandomBattle(
       imageADescription: picked.imageADescription,
       imageBUrl: picked.imageBUrl,
       imageBDescription: picked.imageBDescription,
+      imageAText: picked.imageAText,
+      imageBText: picked.imageBText,
+      isTextOnly: picked.isTextOnly ?? false,
       likeCount: pickedLikes.length,
       isLiked: userId ? pickedLikes.some((l) => l.userId === userId) : false,
       category: picked.category,
@@ -120,20 +129,28 @@ export async function saveBattle(
     if (!user) redirect('/login')
 
     const title = (formData.get('title') as string)?.trim()
-    const imageAUrl = formData.get('imageAUrl') as string
-    const imageBUrl = formData.get('imageBUrl') as string
+    const imageAUrl = (formData.get('imageAUrl') as string) || ''
+    const imageBUrl = (formData.get('imageBUrl') as string) || ''
     const descriptionA = (formData.get('descriptionA') as string) || ''
     const descriptionB = (formData.get('descriptionB') as string) || ''
     const category = (formData.get('category') as BetterCategory) || 'decision'
     const rawTags = (formData.get('tags') as string) || ''
+    const imageAText = (formData.get('imageAText') as string) || null
+    const imageBText = (formData.get('imageBText') as string) || null
+    const isTextOnly = formData.get('isTextOnly') === 'true'
     const tagNames: string[] = rawTags
       ? JSON.parse(rawTags).map((t: string) => t.toLowerCase().replace(/\s+/g, '').replace(/^#+/, ''))
           .filter((t: string) => t.length > 0 && t.length <= 30).slice(0, 5)
       : []
 
     if (!title) return { error: '제목을 입력해주세요' }
-    if (!imageAUrl) return { error: '사진 A 업로드가 완료되지 않았습니다' }
-    if (!imageBUrl) return { error: '사진 B 업로드가 완료되지 않았습니다' }
+    if (!isTextOnly) {
+      if (!imageAUrl) return { error: '사진 A 업로드가 완료되지 않았습니다' }
+      if (!imageBUrl) return { error: '사진 B 업로드가 완료되지 않았습니다' }
+    } else {
+      if (!imageAText) return { error: 'A 텍스트를 입력해주세요' }
+      if (!imageBText) return { error: 'B 텍스트를 입력해주세요' }
+    }
 
     console.log('[saveBattle] step 3: upsert user, id:', user.id)
 
@@ -158,6 +175,9 @@ export async function saveBattle(
       imageADescription: descriptionA || null,
       imageBUrl,
       imageBDescription: descriptionB || null,
+      imageAText,
+      imageBText,
+      isTextOnly,
       category,
     }).returning({ id: betters.id })
 
@@ -206,6 +226,9 @@ export type BattleThumb = {
   imageAUrl: string
   imageBUrl: string
   category: BetterCategory
+  isTextOnly: boolean
+  imageAText: string | null
+  imageBText: string | null
 }
 
 export async function getBattleThumbnails(
@@ -218,6 +241,9 @@ export async function getBattleThumbnails(
       title: betters.title,
       imageAUrl: betters.imageAUrl,
       imageBUrl: betters.imageBUrl,
+      imageAText: betters.imageAText,
+      imageBText: betters.imageBText,
+      isTextOnly: betters.isTextOnly,
       category: betters.category,
       createdAt: betters.createdAt,
     }).from(betters)
@@ -232,7 +258,9 @@ export async function getBattleThumbnails(
     const wrappedOffset = offset % filtered.length
     return filtered
       .slice(wrappedOffset, wrappedOffset + 10)
-      .map(({ id, title, imageAUrl, imageBUrl, category: cat }) => ({ id, title, imageAUrl, imageBUrl, category: cat }))
+      .map(({ id, title, imageAUrl, imageBUrl, imageAText, imageBText, isTextOnly, category: cat }) => ({
+        id, title, imageAUrl, imageBUrl, imageAText, imageBText, isTextOnly, category: cat,
+      }))
   } catch {
     return []
   }
@@ -250,6 +278,9 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
       imageADescription: betters.imageADescription,
       imageBUrl: betters.imageBUrl,
       imageBDescription: betters.imageBDescription,
+      imageAText: betters.imageAText,
+      imageBText: betters.imageBText,
+      isTextOnly: betters.isTextOnly,
       category: betters.category,
     })
       .from(betters)
@@ -269,6 +300,9 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
       imageADescription: battle.imageADescription,
       imageBUrl: battle.imageBUrl,
       imageBDescription: battle.imageBDescription,
+      imageAText: battle.imageAText,
+      imageBText: battle.imageBText,
+      isTextOnly: battle.isTextOnly ?? false,
       likeCount: battleLikes.length,
       isLiked: user ? battleLikes.some((l) => l.userId === user.id) : false,
       category: battle.category,

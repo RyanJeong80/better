@@ -14,6 +14,9 @@ export interface BattleWithStats {
   imageADescription: string | null
   imageBUrl: string
   imageBDescription: string | null
+  isTextOnly?: boolean
+  imageAText?: string | null
+  imageBText?: string | null
   votesA: number
   votesB: number
   total: number
