@@ -27,6 +27,11 @@ const TEXT_BG_COLORS = [
   { bg: '#db2777', text: '#ffffff' },
   { bg: '#0891b2', text: '#ffffff' },
   { bg: '#f8fafc', text: '#18181b' },
+  { bg: '#E0F0EC', text: '#18181b' },
+  { bg: '#EDE0F0', text: '#18181b' },
+  { bg: '#F0E4E0', text: '#18181b' },
+  { bg: '#E0EAF0', text: '#18181b' },
+  { bg: '#F0EEE0', text: '#18181b' },
 ]
 
 // ─── 이미지 리사이징 ──────────────────────────────────────────────
@@ -285,7 +290,7 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
                 style={{
                   backgroundColor: color.bg,
                   boxShadow: state.selectedColor === i ? `0 0 0 2px white, 0 0 0 3.5px ${color.bg}` : undefined,
-                  border: color.bg === '#f8fafc' ? '1px solid #e2e8f0' : undefined,
+                  border: color.text === '#18181b' ? '1px solid #e2e8f0' : undefined,
                 }}
                 className={['h-5 w-5 rounded-full transition-transform', state.selectedColor === i ? 'scale-125' : 'hover:scale-110'].join(' ')}
               />
@@ -311,7 +316,8 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
           onChange={(e) => onChange({ desc: e.target.value.slice(0, MAX_DESC) })}
           maxLength={MAX_DESC} rows={2}
           placeholder={hasImage ? t('descPlaceholder', { side }) : t('textPlaceholder')}
-          className="w-full resize-none rounded-xl border border-input bg-background px-3.5 py-2.5 text-base outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
+          className="w-full resize-none rounded-xl border border-input px-3.5 py-2.5 text-base outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
+          style={{ backgroundColor: '#ffffff' }}
         />
       </div>
     </div>
@@ -389,7 +395,7 @@ function TagInput({ value, onChange }: { value: string[]; onChange: (tags: strin
           display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6,
           padding: '8px 12px', borderRadius: 12,
           border: '1.5px solid var(--color-input)',
-          background: 'var(--color-background)',
+          background: '#ffffff',
           cursor: 'text', minHeight: 44,
           transition: 'border-color 0.15s',
         }}
@@ -428,7 +434,7 @@ function TagInput({ value, onChange }: { value: string[]; onChange: (tags: strin
             style={{
               flex: 1, minWidth: 80, border: 'none', outline: 'none',
               background: 'transparent', fontSize: '0.85rem',
-              color: 'var(--color-foreground)',
+              color: '#000000',
             }}
           />
         )}
@@ -799,19 +805,24 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
           {t('categoryLabel')} <span className="text-destructive">*</span>
         </label>
         <div className="grid grid-cols-3 gap-2">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat.id} type="button"
-              onClick={() => setCategory(cat.id)}
-              className={[
-                'flex flex-col items-center gap-1.5 rounded-2xl border-2 p-3 text-center transition-all',
-                category === cat.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/40 hover:bg-accent',
-              ].join(' ')}
-            >
-              <span className="text-2xl">{cat.emoji}</span>
-              <span className="text-xs font-semibold">{tCategories(cat.id as Parameters<typeof tCategories>[0])}</span>
-            </button>
-          ))}
+          {CATEGORIES.map((cat) => {
+            const isSelected = category === cat.id
+            return (
+              <button
+                key={cat.id} type="button"
+                onClick={() => setCategory(cat.id)}
+                className="flex flex-col items-center gap-1.5 rounded-2xl p-3 text-center transition-all"
+                style={{
+                  backgroundColor: isSelected ? '#3D2B1F' : '#ffffff',
+                  color: isSelected ? '#ffffff' : '#3D2B1F',
+                  border: '1px solid #3D2B1F',
+                }}
+              >
+                <span className="text-2xl">{cat.emoji}</span>
+                <span className="text-xs font-semibold">{tCategories(cat.id as Parameters<typeof tCategories>[0])}</span>
+              </button>
+            )
+          })}
         </div>
         {category ? (
           <p className="text-xs text-muted-foreground">{tCategories(`${category}Desc` as Parameters<typeof tCategories>[0])}</p>
@@ -828,7 +839,8 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder={t('titlePlaceholder')}
-          className="w-full rounded-xl border border-input bg-background px-3.5 py-2.5 text-base outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
+          className="w-full rounded-xl border border-input px-3.5 py-2.5 text-base outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
+          style={{ backgroundColor: '#ffffff' }}
         />
       </div>
 
