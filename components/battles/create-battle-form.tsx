@@ -279,9 +279,9 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
       )}
 
       {!hasImage && (
-        <div className="flex items-center gap-2.5">
-          <span className="text-xs text-muted-foreground shrink-0">{t('bgColor')}</span>
-          <div className="flex gap-1.5">
+        <div className="flex items-start gap-2.5">
+          <span className="text-xs text-muted-foreground shrink-0 mt-1">{t('bgColor')}</span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
             {TEXT_BG_COLORS.map((color, i) => (
               <button
                 key={i} type="button"
