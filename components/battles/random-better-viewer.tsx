@@ -1428,7 +1428,14 @@ export function RandomBetterViewer({
               position: 'absolute', bottom: 12, left: 0, right: 0, zIndex: 25,
               textAlign: 'center', pointerEvents: 'none',
             }}>
-              <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.72rem' }}>
+              <span style={{
+                color: 'rgba(255,255,255,0.82)',
+                fontSize: '0.72rem',
+                fontWeight: 600,
+                background: 'rgba(0,0,0,0.28)',
+                padding: '3px 10px',
+                borderRadius: 999,
+              }}>
                 {t('swipe.hint')}
               </span>
             </div>
