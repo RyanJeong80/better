@@ -73,10 +73,8 @@ export function SwipeSections({
           height: 48, flexShrink: 0,
           display: 'flex', alignItems: 'center',
           paddingLeft: 16, paddingRight: 12,
-          background: 'rgba(255,255,255,0.92)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid var(--color-border)',
+          background: '#EDE4DA',
+          borderBottom: '1px solid rgba(61,43,31,0.12)',
           position: 'relative', zIndex: 1,
           gap: 8,
         }}

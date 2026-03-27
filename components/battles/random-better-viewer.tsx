@@ -529,39 +529,38 @@ export function RandomBetterViewer({
       {/* ── 정보 바 ── */}
       <div style={{
         height: 36, flexShrink: 0, zIndex: 20,
-        background: 'rgba(0,0,0,0.5)',
-        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+        background: 'rgba(237,228,218,0.97)',
         display: 'flex', alignItems: 'center',
         paddingLeft: 12, paddingRight: 10, gap: 0,
       }}>
         {/* 좌측: 태그 필터 활성 시 태그명 표시 / 아니면 레벨·적중률·참여 수 */}
         <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
           {tagFilter ? (
-            <span style={{ color: '#A5B4FC', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ color: '#6366F1', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
               <Hash size={10} strokeWidth={2.5} />
               {tagFilter} {t('vote.tagSearching')}
             </span>
           ) : accuracyStatus === 'no-auth' ? (
-            <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'rgba(61,43,31,0.5)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
               {t('vote.loginPrompt')}
             </span>
           ) : accuracyStatus === 'loading' ? (
-            <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'rgba(61,43,31,0.4)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
               {t('vote.loading')}
             </span>
           ) : (() => {
             const li = calcLevel(accuracyTotal, accuracy)
-            const sep = <span style={{ color: 'rgba(255,255,255,0.3)', margin: '0 5px', fontSize: '0.6rem' }}>·</span>
+            const sep = <span style={{ color: 'rgba(61,43,31,0.25)', margin: '0 5px', fontSize: '0.6rem' }}>·</span>
             return (
               <>
-                <span style={{ color: 'white', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3 }}>
+                <span style={{ color: '#3D2B1F', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3 }}>
                   <span style={{ fontSize: '0.75rem' }}>{li.emoji}</span>
                   {t(`levels.${li.levelKey}` as Parameters<typeof t>[0])}
                 </span>
                 {sep}
-                <span style={{ color: 'rgba(255,255,255,0.9)', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                <span style={{ color: '#3D2B1F', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
                   {accuracy !== null ? `${accuracy}%` : '-'}
-                  <span style={{ color: 'rgba(255,255,255,0.4)', margin: '0 4px' }}>/</span>
+                  <span style={{ color: 'rgba(61,43,31,0.4)', margin: '0 4px' }}>/</span>
                   {accuracyTotal}{t('participation.unit')}
                 </span>
               </>
@@ -587,15 +586,15 @@ export function RandomBetterViewer({
                 onTouchEnd={e => e.stopPropagation()}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 4,
-                  background: catDropdownOpen ? 'rgba(99,102,241,0.35)' : 'rgba(255,255,255,0.12)',
-                  border: `1px solid ${catDropdownOpen ? 'rgba(99,102,241,0.6)' : 'rgba(255,255,255,0.2)'}`,
+                  background: catDropdownOpen ? 'rgba(61,43,31,0.15)' : 'rgba(61,43,31,0.08)',
+                  border: `1px solid ${catDropdownOpen ? 'rgba(61,43,31,0.4)' : 'rgba(61,43,31,0.15)'}`,
                   borderRadius: 999, padding: '3px 10px',
-                  cursor: 'pointer', color: 'white',
+                  cursor: 'pointer', color: '#3D2B1F',
                   fontSize: '0.7rem', fontWeight: 700,
                   position: 'relative', zIndex: 9991,
                 }}
               >
-                <span style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 500 }}>{t('vote.category')}</span>
+                <span style={{ color: 'rgba(61,43,31,0.6)', fontWeight: 500 }}>{t('vote.category')}</span>
                 <span style={{ maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {categoryFilter === 'all' ? t('categories.all') : t(`categories.${categoryFilter}` as Parameters<typeof t>[0])}
                 </span>
@@ -655,9 +654,9 @@ export function RandomBetterViewer({
               style={{
                 width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: (searchOpen || tagFilter) ? 'rgba(99,102,241,0.45)' : 'rgba(255,255,255,0.12)',
-                border: `1px solid ${(searchOpen || tagFilter) ? 'rgba(99,102,241,0.7)' : 'rgba(255,255,255,0.2)'}`,
-                cursor: 'pointer', color: 'white',
+                background: (searchOpen || tagFilter) ? 'rgba(61,43,31,0.15)' : 'rgba(61,43,31,0.08)',
+                border: `1px solid ${(searchOpen || tagFilter) ? 'rgba(61,43,31,0.4)' : 'rgba(61,43,31,0.15)'}`,
+                cursor: 'pointer', color: '#3D2B1F',
               }}
             >
               {tagFilter ? <X size={13} /> : <Search size={13} />}
