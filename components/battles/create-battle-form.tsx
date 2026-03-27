@@ -813,9 +813,9 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
                 onClick={() => setCategory(cat.id)}
                 className="flex flex-col items-center gap-1.5 rounded-2xl p-3 text-center transition-all"
                 style={{
-                  backgroundColor: isSelected ? '#3D2B1F' : '#ffffff',
+                  backgroundColor: isSelected ? '#3D2B1F' : '#D4C4B0',
                   color: isSelected ? '#ffffff' : '#3D2B1F',
-                  border: '1px solid #3D2B1F',
+                  border: 'none',
                 }}
               >
                 <span className="text-2xl">{cat.emoji}</span>

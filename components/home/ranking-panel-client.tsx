@@ -122,9 +122,9 @@ export function RankingPanelClient() {
               onClick={() => setActiveTab(key)}
               style={{
                 flexShrink: 0, padding: '5px 12px', borderRadius: 999,
-                border: active ? 'none' : '1.5px solid var(--color-border)',
-                background: active ? 'linear-gradient(135deg, #8B5CF6, #6366F1)' : 'transparent',
-                color: active ? 'white' : 'var(--color-muted-foreground)',
+                border: 'none',
+                background: active ? '#3D2B1F' : '#D4C4B0',
+                color: active ? '#ffffff' : '#3D2B1F',
                 fontSize: '0.75rem', fontWeight: active ? 800 : 500,
                 cursor: 'pointer', transition: 'all 0.15s',
                 whiteSpace: 'nowrap',
@@ -260,8 +260,9 @@ export function RankingPanelClient() {
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           marginTop: 16, padding: '12px 0',
-          borderRadius: 16, border: '1.5px solid var(--color-border)',
-          fontSize: '0.85rem', fontWeight: 700, color: '#6366F1',
+          borderRadius: 16, border: 'none',
+          background: '#3D2B1F',
+          fontSize: '0.85rem', fontWeight: 700, color: '#ffffff',
           textDecoration: 'none',
         }}
       >

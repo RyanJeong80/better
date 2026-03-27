@@ -143,11 +143,11 @@ export function HotPanelClient({
           onClick={() => setSortOrder(prev => prev === 'popular' ? 'recent' : 'popular')}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 4,
-            background: 'var(--color-muted)',
+            background: '#D4C4B0',
             border: 'none', cursor: 'pointer',
             borderRadius: 999, padding: '5px 10px',
             fontSize: '0.72rem', fontWeight: 700,
-            color: 'var(--color-foreground)',
+            color: '#3D2B1F',
             flexShrink: 0,
           }}
         >
@@ -172,9 +172,9 @@ export function HotPanelClient({
                 flexShrink: 0,
                 padding: '5px 12px',
                 borderRadius: 999,
-                border: active ? 'none' : '1.5px solid var(--color-border)',
-                background: active ? '#F59E0B' : 'transparent',
-                color: active ? 'white' : 'var(--color-muted-foreground)',
+                border: 'none',
+                background: active ? '#3D2B1F' : '#D4C4B0',
+                color: active ? '#ffffff' : '#3D2B1F',
                 fontSize: '0.75rem', fontWeight: active ? 800 : 500,
                 cursor: 'pointer',
                 transition: 'all 0.15s',

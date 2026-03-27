@@ -130,8 +130,8 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
             type="submit"
             style={{
               padding: '6px 14px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700,
-              border: '1.5px solid var(--color-border)', background: 'transparent',
-              cursor: 'pointer', color: 'var(--color-foreground)',
+              border: '1.5px solid #3D2B1F', background: 'transparent',
+              cursor: 'pointer', color: '#3D2B1F',
             }}
           >
             {t('auth.logout')}

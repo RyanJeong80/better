@@ -52,12 +52,13 @@ export function RankingView({
           <Link
             key={f.id}
             href={f.id === 'all' ? '/ranking' : `/ranking?category=${f.id}`}
-            className={[
-              'shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
-              currentCategory === f.id
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'border border-border bg-card text-muted-foreground hover:bg-accent',
-            ].join(' ')}
+            className="shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-all"
+            style={{
+              backgroundColor: currentCategory === f.id ? '#3D2B1F' : '#D4C4B0',
+              color: currentCategory === f.id ? '#ffffff' : '#3D2B1F',
+              border: 'none',
+              textDecoration: 'none',
+            }}
           >
             {f.emoji} {f.label}
           </Link>

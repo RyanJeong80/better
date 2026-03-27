@@ -64,7 +64,8 @@ export function UsernameEditor({ currentUsername }: { currentUsername: string })
         <span className="text-xl font-bold">@{currentUsername}</span>
         <button
           onClick={() => setEditing(true)}
-          className="rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent"
+          className="rounded-lg text-xs font-medium"
+          style={{ backgroundColor: '#D4C4B0', color: '#3D2B1F', border: 'none', padding: '4px 10px' }}
         >
           {t('edit')}
         </button>
