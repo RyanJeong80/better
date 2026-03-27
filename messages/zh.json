@@ -256,7 +256,10 @@
     "deleteTitle": "删除 Touched",
     "deleteMessage": "删除此 Touched 将同时删除所有投票数据。确定要删除吗？",
     "deleteConfirmBtn": "删除",
-    "deleting": "删除中..."
+    "deleting": "删除中...",
+    "viewReasons": "查看选择理由",
+    "showMore": "查看更多 (+{count}个)",
+    "allReasons": "全部选择理由 (共{count}个)"
   },
   "share": {
     "winnerA": "{percent}%的人选择了A！",

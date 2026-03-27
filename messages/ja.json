@@ -256,7 +256,10 @@
     "deleteTitle": "Touchedを削除",
     "deleteMessage": "このTouchedを削除すると、投票データもすべて削除されます。削除しますか？",
     "deleteConfirmBtn": "削除する",
-    "deleting": "削除中..."
+    "deleting": "削除中...",
+    "viewReasons": "選択理由を見る",
+    "showMore": "もっと見る (+{count}件)",
+    "allReasons": "選択理由をすべて見る (全{count}件)"
   },
   "share": {
     "winnerA": "{percent}%がAをタッチしました！",

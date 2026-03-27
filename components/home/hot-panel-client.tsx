@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 import type { PanelHotEntry } from '@/app/api/panels/hot/route'
+import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
 
 const CAT_COLOR: Record<BetterCategory, { bg: string; text: string }> = {
   fashion:    { bg: '#DBEAFE', text: '#1D4ED8' },
@@ -210,113 +211,132 @@ export function HotPanelClient({
               <div
                 key={entry.id}
                 onClick={() => onSelectBattle?.(entry)}
-                style={{ display: 'block', marginBottom: 20, cursor: 'pointer' }}
+                style={{ marginBottom: 24, cursor: 'pointer' }}
               >
-                {/* 썸네일 */}
-                <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: 12, overflow: 'hidden', background: '#000' }}>
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex' }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={entry.imageAUrl}
-                      alt="A"
-                      style={{ width: '50%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    />
-                    <div style={{
-                      position: 'relative', flexShrink: 0,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    }}>
-                      <div style={{ width: 1, height: '100%', position: 'absolute', background: 'rgba(255,255,255,0.25)' }} />
-                      <span style={{
-                        position: 'relative', zIndex: 1,
-                        background: 'rgba(0,0,0,0.7)',
-                        backdropFilter: 'blur(6px)',
-                        color: 'white', fontSize: '0.55rem', fontWeight: 900,
-                        padding: '3px 5px', borderRadius: 6,
-                        letterSpacing: '0.04em',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                      }}>VS</span>
+                {/* 폴라로이드 카드 */}
+                <div style={{
+                  background: '#ffffff',
+                  borderRadius: 4,
+                  boxShadow: '0 2px 14px rgba(0,0,0,0.13)',
+                  overflow: 'hidden',
+                }}>
+                  {/* 이미지 영역 */}
+                  <div style={{ padding: '6px 6px 0' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, position: 'relative' }}>
+                      {/* 이미지 A */}
+                      <div style={{ position: 'relative', paddingTop: '100%', overflow: 'hidden', background: '#111' }}>
+                        {entry.isTextOnly ? (
+                          <div style={{
+                            position: 'absolute', inset: 0,
+                            background: TEXT_BG_COLORS[getTextColorIdx(entry.id, 0)].bg,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10,
+                          }}>
+                            <p style={{
+                              color: TEXT_BG_COLORS[getTextColorIdx(entry.id, 0)].text,
+                              fontWeight: 700, fontSize: '0.78rem', textAlign: 'center', lineHeight: 1.4,
+                              overflow: 'hidden', display: '-webkit-box',
+                              WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', margin: 0,
+                            }}>
+                              {entry.imageAText}
+                            </p>
+                          </div>
+                        ) : (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={entry.imageAUrl}
+                            alt="A"
+                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        )}
+                        {/* A 라벨 */}
+                        <div style={{
+                          position: 'absolute', top: 7, left: 7,
+                          background: '#3D2B1F', color: 'white',
+                          fontSize: '0.6rem', fontWeight: 900, padding: '2px 7px', borderRadius: 4,
+                        }}>A</div>
+                      </div>
+
+                      {/* 이미지 B */}
+                      <div style={{ position: 'relative', paddingTop: '100%', overflow: 'hidden', background: '#111' }}>
+                        {entry.isTextOnly ? (
+                          <div style={{
+                            position: 'absolute', inset: 0,
+                            background: TEXT_BG_COLORS[getTextColorIdx(entry.id, 1)].bg,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 10,
+                          }}>
+                            <p style={{
+                              color: TEXT_BG_COLORS[getTextColorIdx(entry.id, 1)].text,
+                              fontWeight: 700, fontSize: '0.78rem', textAlign: 'center', lineHeight: 1.4,
+                              overflow: 'hidden', display: '-webkit-box',
+                              WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', margin: 0,
+                            }}>
+                              {entry.imageBText}
+                            </p>
+                          </div>
+                        ) : (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img
+                            src={entry.imageBUrl}
+                            alt="B"
+                            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        )}
+                        {/* B 라벨 */}
+                        <div style={{
+                          position: 'absolute', top: 7, left: 7,
+                          background: '#D4C4B0', color: '#3D2B1F',
+                          fontSize: '0.6rem', fontWeight: 900, padding: '2px 7px', borderRadius: 4,
+                        }}>B</div>
+                      </div>
+
+                      {/* 순위 배지 — 두 이미지 사이 중앙 상단 */}
+                      <div style={{
+                        position: 'absolute', top: 7, left: '50%', transform: 'translateX(-50%)',
+                        background: rankStyle ? rankStyle.bg : 'rgba(0,0,0,0.72)',
+                        color: rankStyle ? rankStyle.color : 'white',
+                        fontSize: rank > 9 ? '0.6rem' : '0.68rem',
+                        fontWeight: 900,
+                        minWidth: 22, height: 22,
+                        borderRadius: 5,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        padding: '0 5px',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                        zIndex: 10,
+                      }}>
+                        {rank}
+                      </div>
                     </div>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={entry.imageBUrl}
-                      alt="B"
-                      style={{ width: '50%', height: '100%', objectFit: 'cover', display: 'block' }}
-                    />
                   </div>
 
-                  {/* 순위 배지 */}
-                  <div style={{
-                    position: 'absolute', top: 8, left: 8,
-                    background: rankStyle ? rankStyle.bg : 'rgba(0,0,0,0.7)',
-                    color: rankStyle ? rankStyle.color : 'white',
-                    fontSize: rank > 9 ? '0.62rem' : '0.7rem',
-                    fontWeight: 900,
-                    minWidth: 24, height: 24,
-                    borderRadius: 6,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    padding: '0 6px',
-                    boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
-                  }}>
-                    {rank}
-                  </div>
-
-                  {/* 좋아요 수 */}
-                  <div style={{
-                    position: 'absolute', bottom: 8, right: 8,
-                    display: 'flex', alignItems: 'center', gap: 4,
-                    background: 'rgba(0,0,0,0.65)',
-                    backdropFilter: 'blur(6px)',
-                    borderRadius: 6,
-                    padding: '3px 7px',
-                  }}>
-                    <Heart size={11} style={{ fill: '#F43F5E', stroke: '#F43F5E', flexShrink: 0 }} />
-                    <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'white' }}>
-                      {entry.likeCount}
+                  {/* 폴라로이드 하단 정보 */}
+                  <div style={{ padding: '10px 10px 14px' }}>
+                    {/* 카테고리 배지 */}
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 3,
+                      background: catColor.bg, color: catColor.text,
+                      borderRadius: 4, padding: '2px 7px',
+                      fontSize: '0.65rem', fontWeight: 700,
+                    }}>
+                      {cat.emoji} {t(`categories.${entry.category}` as Parameters<typeof t>[0])}
                     </span>
-                  </div>
-                </div>
 
-                {/* 정보 영역 */}
-                <div style={{ display: 'flex', gap: 10, marginTop: 10, alignItems: 'flex-start' }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                    background: catColor.bg,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '1rem',
-                  }}>
-                    {cat.emoji}
-                  </div>
-
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* 제목 */}
                     <p style={{
-                      margin: 0,
-                      fontSize: '0.88rem', fontWeight: 700, lineHeight: 1.4,
-                      color: 'var(--color-foreground)',
-                      overflow: 'hidden',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
+                      margin: '6px 0 8px', fontSize: '0.9rem', fontWeight: 700, lineHeight: 1.4,
+                      color: '#3D2B1F',
+                      overflow: 'hidden', display: '-webkit-box',
+                      WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                     }}>
                       {entry.title}
                     </p>
-                    <p style={{
-                      margin: '4px 0 0',
-                      fontSize: '0.75rem', color: 'var(--color-muted-foreground)',
-                      display: 'flex', alignItems: 'center', gap: 6,
-                    }}>
-                      <span style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 3,
-                        background: catColor.bg, color: catColor.text,
-                        padding: '1px 7px', borderRadius: 999,
-                        fontSize: '0.68rem', fontWeight: 700,
-                      }}>
-                        {t(`categories.${entry.category}` as Parameters<typeof t>[0])}
-                      </span>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                        <Heart size={10} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
+
+                    {/* 좋아요 */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <Heart size={12} style={{ fill: '#F43F5E', stroke: '#F43F5E', flexShrink: 0 }} />
+                      <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#F43F5E' }}>
                         {entry.likeCount}
                       </span>
-                    </p>
+                    </div>
                   </div>
                 </div>
               </div>

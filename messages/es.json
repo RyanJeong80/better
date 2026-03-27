@@ -256,7 +256,10 @@
     "deleteTitle": "Eliminar Touched",
     "deleteMessage": "Eliminar este Touched también eliminará todos los datos de votación. ¿Estás seguro?",
     "deleteConfirmBtn": "Eliminar",
-    "deleting": "Eliminando..."
+    "deleting": "Eliminando...",
+    "viewReasons": "Ver razones",
+    "showMore": "Ver más (+{count})",
+    "allReasons": "Todas las razones ({count} en total)"
   },
   "share": {
     "winnerA": "¡El {percent}% tocó A!",
