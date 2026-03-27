@@ -13,9 +13,8 @@ export async function Header() {
     <header
       className="sticky top-0 z-50"
       style={{
-        background: 'rgba(237,228,218,0.92)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--color-border)',
+        background: '#EDE4DA',
+        borderBottom: '1px solid rgba(61,43,31,0.12)',
       }}
     >
       <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4 md:px-8">
