@@ -218,6 +218,21 @@ export function MyBetterCard({
               <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#F43F5E', fontVariantNumeric: 'tabular-nums' }}>{battle.likesCount}</span>
             </div>
           )}
+          {/* 공유 버튼 (저장 + 공유) — 삭제 버튼과 동일한 32×32 크기 */}
+          <ShareButton
+            variant="icon"
+            battleId={battle.id}
+            title={battle.title}
+            imageAUrl={battle.imageAUrl}
+            imageBUrl={battle.imageBUrl}
+            pctA={pctA}
+            pctB={pctB}
+            total={battle.total}
+            winner={aWins ? 'A' : bWins ? 'B' : null}
+            isTextOnly={battle.isTextOnly}
+            imageAText={battle.imageAText}
+            imageBText={battle.imageBText}
+          />
           <button
             onClick={(e) => { e.stopPropagation(); onDeleteClick(battle.id) }}
             style={{
@@ -259,29 +274,6 @@ export function MyBetterCard({
           id={battle.id}
           isTextOnly={battle.isTextOnly}
           sideText={battle.imageBText}
-        />
-      </div>
-
-      {/* 공유 버튼 */}
-      <div style={{
-        borderTop: '1px solid var(--color-border)',
-        padding: '12px 16px',
-        display: 'flex',
-        justifyContent: 'flex-end',
-      }}>
-        <ShareButton
-          battleId={battle.id}
-          title={battle.title}
-          imageAUrl={battle.imageAUrl}
-          imageBUrl={battle.imageBUrl}
-          pctA={pctA}
-          pctB={pctB}
-          total={battle.total}
-          winner={aWins ? 'A' : bWins ? 'B' : null}
-          isTextOnly={battle.isTextOnly}
-          imageAText={battle.imageAText}
-          imageBText={battle.imageBText}
-          compact
         />
       </div>
 

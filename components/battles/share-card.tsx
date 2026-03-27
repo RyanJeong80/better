@@ -42,9 +42,6 @@ export function ShareCard({
     <div
       ref={cardRef}
       style={{
-        position: 'fixed',
-        left: -10800,
-        top: 0,
         width: 1080,
         height: 1080,
         background: '#EDE4DA',
@@ -53,7 +50,6 @@ export function ShareCard({
         padding: 60,
         boxSizing: 'border-box',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif',
-        zIndex: -9999,
       }}
     >
       {/* 헤더: 로고 + 앱 이름 */}
@@ -114,11 +110,9 @@ export function ShareCard({
             <img
               src={imageAUrl}
               alt="A"
-              crossOrigin="anonymous"
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
           )}
-          {/* 그라디언트 오버레이 */}
           <div style={{
             position: 'absolute', inset: 0,
             background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 55%)',
@@ -169,11 +163,9 @@ export function ShareCard({
             <img
               src={imageBUrl}
               alt="B"
-              crossOrigin="anonymous"
               style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
             />
           )}
-          {/* 그라디언트 오버레이 */}
           <div style={{
             position: 'absolute', inset: 0,
             background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 55%)',
