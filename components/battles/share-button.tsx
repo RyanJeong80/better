@@ -84,11 +84,11 @@ async function loadImage(url: string): Promise<HTMLImageElement> {
 
 async function buildShareCanvas(opts: {
   battleId: string
-  title: string
   imageAUrl: string
   imageBUrl: string
   pctA: number
   pctB: number
+  winner: 'A' | 'B' | null
   isTextOnly?: boolean
   imageAText?: string | null
   imageBText?: string | null
@@ -109,135 +109,126 @@ async function buildShareCanvas(opts: {
   ctx.fillStyle = '#EDE4DA'
   ctx.fillRect(0, 0, W, H)
 
-  // ── Logo (centered, image or text fallback) ─────────
-  const logo = new Image()
-  logo.crossOrigin = 'anonymous'
-  await new Promise<void>(resolve => {
-    logo.onload = () => resolve()
-    logo.onerror = () => {
-      ctx.font = `800 48px ${FONT}`
-      ctx.fillStyle = '#1a1a1a'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'top'
-      ctx.fillText('TOUCHED', W / 2, 30)
-      resolve()
-    }
-    logo.src = window.location.origin + '/touched-logo.png'
-  })
-  if (logo.complete && logo.naturalWidth > 0) {
-    const logoH = 70
-    const logoW = logo.naturalWidth * (logoH / logo.naturalHeight)
-    ctx.drawImage(logo, (W - logoW) / 2, 30, logoW, logoH)
-  }
-
-  let y = 30 + 70 + 36 // logo top + logo height + gap
-
-  // ── Title ───────────────────────────────────────────
-  ctx.font = `700 34px ${FONT}`
-  ctx.textBaseline = 'top'
-  ctx.textAlign = 'left'
-  ctx.fillStyle = '#1a1a1a'
-  const titleLines = wrapLines(ctx, opts.title, W - PAD * 2, 2)
-  for (const line of titleLines) {
-    ctx.fillText(line, PAD, y)
-    y += Math.round(34 * 1.3)
-  }
-  y += 24
-
-  // ── A/B images (height 460) ─────────────────────────
-  const imgH = 460
-  const imgW = (W - PAD * 2) / 2
-  const imgXA = PAD
-  const imgXB = PAD + imgW
+  // ── A/B images (large, from top) ────────────────────
+  const imgY = 40
+  const imgH = 560
+  const imgW = (W - PAD * 2) / 2   // 480
+  const imgXA = PAD                 // 60
+  const imgXB = PAD + imgW          // 540
 
   ctx.save()
   ctx.beginPath()
-  ctx.rect(imgXA, y, imgW * 2, imgH)
+  ctx.rect(imgXA, imgY, imgW * 2, imgH)
   ctx.clip()
 
   if (opts.isTextOnly) {
     ctx.fillStyle = opts.colorA.bg
-    ctx.fillRect(imgXA, y, imgW, imgH)
+    ctx.fillRect(imgXA, imgY, imgW, imgH)
     ctx.fillStyle = opts.colorA.text
-    ctx.font = `700 30px ${FONT}`
+    ctx.font = `700 32px ${FONT}`
     ctx.textBaseline = 'top'
     ctx.textAlign = 'center'
-    const linesA = wrapLines(ctx, opts.imageAText ?? '', imgW - 48, 5)
-    const blockHA = linesA.length * Math.round(30 * 1.4)
-    let tyA = y + (imgH - blockHA) / 2
-    for (const l of linesA) { ctx.fillText(l, imgXA + imgW / 2, tyA); tyA += Math.round(30 * 1.4) }
+    const linesA = wrapLines(ctx, opts.imageAText ?? '', imgW - 56, 5)
+    const blockHA = linesA.length * Math.round(32 * 1.4)
+    let tyA = imgY + (imgH - blockHA) / 2
+    for (const l of linesA) { ctx.fillText(l, imgXA + imgW / 2, tyA); tyA += Math.round(32 * 1.4) }
 
     ctx.fillStyle = opts.colorB.bg
-    ctx.fillRect(imgXB, y, imgW, imgH)
+    ctx.fillRect(imgXB, imgY, imgW, imgH)
     ctx.fillStyle = opts.colorB.text
-    const linesB = wrapLines(ctx, opts.imageBText ?? '', imgW - 48, 5)
-    const blockHB = linesB.length * Math.round(30 * 1.4)
-    let tyB = y + (imgH - blockHB) / 2
-    for (const l of linesB) { ctx.fillText(l, imgXB + imgW / 2, tyB); tyB += Math.round(30 * 1.4) }
+    const linesB = wrapLines(ctx, opts.imageBText ?? '', imgW - 56, 5)
+    const blockHB = linesB.length * Math.round(32 * 1.4)
+    let tyB = imgY + (imgH - blockHB) / 2
+    for (const l of linesB) { ctx.fillText(l, imgXB + imgW / 2, tyB); tyB += Math.round(32 * 1.4) }
     ctx.textAlign = 'left'
   } else {
     const [imgA, imgB] = await Promise.all([loadImage(opts.imageAUrl), loadImage(opts.imageBUrl)])
-    drawImageCover(ctx, imgA, imgXA, y, imgW, imgH)
-    drawImageCover(ctx, imgB, imgXB, y, imgW, imgH)
+    drawImageCover(ctx, imgA, imgXA, imgY, imgW, imgH)
+    drawImageCover(ctx, imgB, imgXB, imgY, imgW, imgH)
   }
 
   // Gradient overlays
   for (const [gx, gw] of [[imgXA, imgW], [imgXB, imgW]] as [number, number][]) {
-    const grad = ctx.createLinearGradient(gx, y + imgH, gx, y)
+    const grad = ctx.createLinearGradient(gx, imgY + imgH, gx, imgY)
     grad.addColorStop(0, 'rgba(0,0,0,0.72)')
     grad.addColorStop(0.55, 'rgba(0,0,0,0)')
     ctx.fillStyle = grad
-    ctx.fillRect(gx, y, gw, imgH)
+    ctx.fillRect(gx, imgY, gw, imgH)
   }
+
   ctx.restore()
 
-  // Labels + percentages
+  // A/B labels + percentages
   ctx.textBaseline = 'alphabetic'
   ctx.fillStyle = 'white'
-  ctx.font = `900 60px ${FONT}`
+  ctx.font = `900 64px ${FONT}`
   ctx.textAlign = 'left'
-  ctx.fillText('A', imgXA + 20, y + imgH - 16)
-  ctx.font = `900 38px ${FONT}`
+  ctx.fillText('A', imgXA + 20, imgY + imgH - 18)
+  ctx.font = `900 42px ${FONT}`
   ctx.textAlign = 'right'
-  ctx.fillText(`${opts.pctA}%`, imgXA + imgW - 16, y + imgH - 20)
+  ctx.fillText(`${opts.pctA}%`, imgXA + imgW - 18, imgY + imgH - 22)
 
-  ctx.font = `900 38px ${FONT}`
+  ctx.font = `900 42px ${FONT}`
   ctx.textAlign = 'left'
-  ctx.fillText(`${opts.pctB}%`, imgXB + 16, y + imgH - 20)
-  ctx.font = `900 60px ${FONT}`
+  ctx.fillText(`${opts.pctB}%`, imgXB + 18, imgY + imgH - 22)
+  ctx.font = `900 64px ${FONT}`
   ctx.textAlign = 'right'
-  ctx.fillText('B', imgXB + imgW - 20, y + imgH - 16)
+  ctx.fillText('B', imgXB + imgW - 20, imgY + imgH - 18)
 
   // VS badge
-  const vsX = PAD + imgW
-  const vsY = y + imgH / 2
+  const vsX = PAD + imgW   // 540
+  const vsY = imgY + imgH / 2
   ctx.beginPath()
-  ctx.arc(vsX, vsY, 32, 0, Math.PI * 2)
+  ctx.arc(vsX, vsY, 34, 0, Math.PI * 2)
   ctx.fillStyle = '#1a1a1a'
   ctx.fill()
   ctx.strokeStyle = '#EDE4DA'
-  ctx.lineWidth = 3
+  ctx.lineWidth = 4
   ctx.stroke()
   ctx.fillStyle = 'white'
-  ctx.font = `900 18px ${FONT}`
+  ctx.font = `900 20px ${FONT}`
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   ctx.fillText('VS', vsX, vsY)
 
-  y += imgH + 32
+  // ── Logo stamp on winner card ────────────────────────
+  const logo = new Image()
+  logo.crossOrigin = 'anonymous'
+  await new Promise<void>(resolve => {
+    logo.onload = () => resolve()
+    logo.onerror = () => resolve()
+    logo.src = window.location.origin + '/touched-logo.png'
+  })
+
+  if (opts.winner && logo.complete && logo.naturalWidth > 0) {
+    const cx = opts.winner === 'A' ? imgXA + imgW / 2 : imgXB + imgW / 2
+    const cy = imgY + imgH / 2
+    const stampW = 300
+    const stampH = logo.naturalHeight * (stampW / logo.naturalWidth)
+
+    ctx.save()
+    ctx.globalAlpha = 0.85
+    ctx.translate(cx, cy)
+    ctx.rotate(-15 * Math.PI / 180)
+    ctx.drawImage(logo, -stampW / 2, -stampH / 2, stampW, stampH)
+    ctx.restore()
+    ctx.globalAlpha = 1.0
+  }
+
+  let y = imgY + imgH + 32
 
   // ── Results bar ─────────────────────────────────────
-  ctx.font = `800 26px ${FONT}`
+  ctx.font = `800 28px ${FONT}`
   ctx.textBaseline = 'top'
   ctx.fillStyle = '#1a1a1a'
   ctx.textAlign = 'left'
   ctx.fillText(`A · ${opts.pctA}%`, PAD, y)
   ctx.textAlign = 'right'
   ctx.fillText(`${opts.pctB}% · B`, W - PAD, y)
-  y += 36
+  y += 38
 
   const barW = W - PAD * 2
-  rr(ctx, PAD, y, barW, 18, 9)
+  rr(ctx, PAD, y, barW, 20, 10)
   ctx.fillStyle = '#c8bfb5'
   ctx.fill()
 
@@ -246,47 +237,53 @@ async function buildShareCanvas(opts: {
     const barGrad = ctx.createLinearGradient(PAD, y, PAD + barW, y)
     barGrad.addColorStop(0, '#6366F1')
     barGrad.addColorStop(1, '#8B5CF6')
-    rr(ctx, PAD, y, fillW, 18, 9)
+    rr(ctx, PAD, y, fillW, 20, 10)
     ctx.fillStyle = barGrad
     ctx.fill()
   }
-  y += 18 + 32
+  y += 20 + 32
 
   // ── Winner text ─────────────────────────────────────
   ctx.fillStyle = '#1a1a1a'
-  ctx.font = `900 42px ${FONT}`
+  ctx.font = `900 44px ${FONT}`
   ctx.textBaseline = 'top'
   ctx.textAlign = 'left'
   ctx.fillText(opts.winnerText, PAD, y)
 
-  // ── QR code (bottom) ────────────────────────────────
+  // ── Bottom: QR code + TOUCHED text ──────────────────
   const qrSize = 88
   const boxPad = 8
-  const boxSize = qrSize + boxPad * 2
+  const boxSize = qrSize + boxPad * 2   // 104
+  const scanTextLineH = Math.round(22 * 1.4)
   const qrBoxX = PAD
-  const qrBoxY = H - PAD - boxSize
+  const qrBoxY = H - PAD - boxSize - 10 - scanTextLineH   // 1080-60-104-10-31 = 875
 
+  // QR white box
   rr(ctx, qrBoxX, qrBoxY, boxSize, boxSize, 12)
   ctx.fillStyle = 'white'
   ctx.fill()
 
   const QRCode = (await import('qrcode')).default
   const qrCanvas = document.createElement('canvas')
-  await QRCode.toCanvas(qrCanvas, SHARE_URL, { width: qrSize, margin: 0, color: { dark: '#000000', light: '#ffffff' } })
+  await QRCode.toCanvas(qrCanvas, SHARE_URL, {
+    width: qrSize, margin: 0,
+    color: { dark: '#000000', light: '#ffffff' },
+  })
   ctx.drawImage(qrCanvas, qrBoxX + boxPad, qrBoxY + boxPad, qrSize, qrSize)
 
-  // Scan/download text
-  ctx.fillStyle = '#1a1a1a'
-  ctx.font = `700 26px ${FONT}`
-  ctx.textAlign = 'right'
-  const scanLines = wrapLines(ctx, opts.scanDownloadText, 280, 3)
-  const scanBlockH = scanLines.length * Math.round(26 * 1.4)
-  let scanY = qrBoxY + (boxSize - scanBlockH) / 2
+  // Download text below QR
+  ctx.fillStyle = '#6b6058'
+  ctx.font = `600 22px ${FONT}`
+  ctx.textAlign = 'left'
   ctx.textBaseline = 'top'
-  for (const line of scanLines) {
-    ctx.fillText(line, W - PAD, scanY)
-    scanY += Math.round(26 * 1.4)
-  }
+  ctx.fillText(opts.scanDownloadText, qrBoxX, qrBoxY + boxSize + 10)
+
+  // TOUCHED text — vertically centered with QR box
+  ctx.fillStyle = '#3D2B1F'
+  ctx.font = `bold 64px ${FONT}`
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'middle'
+  ctx.fillText('TOUCHED', W - PAD, qrBoxY + boxSize / 2)
 
   return canvas
 }
@@ -319,8 +316,8 @@ export function ShareButton({
     setCapturing(true)
     try {
       const canvas = await buildShareCanvas({
-        battleId, title, imageAUrl, imageBUrl,
-        pctA, pctB, isTextOnly, imageAText, imageBText,
+        battleId, imageAUrl, imageBUrl,
+        pctA, pctB, winner, isTextOnly, imageAText, imageBText,
         winnerText,
         scanDownloadText: t('scanDownload'),
         colorA, colorB,
@@ -353,7 +350,7 @@ export function ShareButton({
         const file = new File([blob], 'touched-result.png', { type: 'image/png' })
         if (navigator.canShare?.({ files: [file] })) {
           closePreview()
-          await navigator.share({ title: t('shareTitle'), files: [file] })
+          await navigator.share({ title, files: [file] })
           return
         }
       } catch (e) {
@@ -373,6 +370,16 @@ export function ShareButton({
   }
 
   // ── 스타일 ──────────────────────────────────────────
+  const spinner = (light: boolean) => (
+    <span style={{
+      width: 14, height: 14,
+      border: `2px solid ${light ? 'rgba(255,255,255,0.4)' : 'var(--color-border)'}`,
+      borderTopColor: light ? 'white' : 'var(--color-foreground)',
+      borderRadius: '50%', display: 'inline-block',
+      animation: 'spin 0.6s linear infinite',
+    }} />
+  )
+
   const iconStyle = (gradient: boolean): React.CSSProperties => ({
     width: 32, height: 32, borderRadius: 10, flexShrink: 0,
     border: gradient ? 'none' : '1.5px solid var(--color-border)',
@@ -407,10 +414,7 @@ export function ShareButton({
             title={t('save')}
             style={iconStyle(false)}
           >
-            {capturing
-              ? <span style={{ width: 14, height: 14, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.6s linear infinite' }} />
-              : <ArrowDownToLine size={14} strokeWidth={2} />
-            }
+            {capturing ? spinner(false) : <ArrowDownToLine size={14} strokeWidth={2} />}
           </button>
           <button
             onClick={e => { e.stopPropagation(); openPreview('share') }}
@@ -418,20 +422,17 @@ export function ShareButton({
             title={t('share')}
             style={iconStyle(true)}
           >
-            {capturing
-              ? <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.5)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.6s linear infinite' }} />
-              : <Share2 size={14} strokeWidth={2} />
-            }
+            {capturing ? spinner(true) : <Share2 size={14} strokeWidth={2} />}
           </button>
         </>
       ) : (
         <div style={{ display: 'flex', gap: 8 }}>
           <button onClick={() => openPreview('save')} disabled={capturing} style={rowStyle(false)}>
-            {capturing ? <span style={{ width: 14, height: 14, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.6s linear infinite' }} /> : <ArrowDownToLine size={15} strokeWidth={2} />}
+            {capturing ? spinner(false) : <ArrowDownToLine size={15} strokeWidth={2} />}
             {t('save')}
           </button>
           <button onClick={() => openPreview('share')} disabled={capturing} style={rowStyle(true)}>
-            {capturing ? <span style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.5)', borderTopColor: 'white', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.6s linear infinite' }} /> : <Share2 size={15} strokeWidth={2} />}
+            {capturing ? spinner(true) : <Share2 size={15} strokeWidth={2} />}
             {t('share')}
           </button>
         </div>
@@ -459,15 +460,8 @@ export function ShareButton({
               boxShadow: '0 24px 60px rgba(0,0,0,0.4)',
             }}
           >
-            {/* 미리보기 이미지 */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={previewUrl}
-              alt="share preview"
-              style={{ width: '100%', display: 'block' }}
-            />
-
-            {/* 버튼 영역 */}
+            <img src={previewUrl} alt="share preview" style={{ width: '100%', display: 'block' }} />
             <div style={{ display: 'flex', gap: 10, padding: '14px 16px' }}>
               <button
                 onClick={closePreview}
