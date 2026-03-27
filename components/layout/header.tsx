@@ -13,7 +13,7 @@ export async function Header() {
     <header
       className="sticky top-0 z-50"
       style={{
-        background: 'rgba(255,255,255,0.88)',
+        background: 'rgba(237,228,218,0.92)',
         backdropFilter: 'blur(20px)',
         borderBottom: '1px solid var(--color-border)',
       }}

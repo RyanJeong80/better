@@ -23,6 +23,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-brand-bg: #EDE4DA;
   --font-sans: var(--font-plus-jakarta), 'Pretendard Variable', var(--font-m-plus), var(--font-noto-sc), sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -31,7 +32,7 @@
 }
 
 :root {
-  --background: oklch(0.988 0.006 280);
+  --background: #EDE4DA;
   --foreground: oklch(0.14 0.025 278);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.14 0.025 278);
