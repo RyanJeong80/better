@@ -222,15 +222,17 @@ export function SwipeSections({
                 top: '50%',
                 transform: 'translateY(-50%)',
                 zIndex: 150,
-                background: 'none',
+                background: 'rgba(0,0,0,0.22)',
                 border: 'none',
-                color: 'rgba(255,255,255,0.7)',
-                fontSize: 32,
+                borderRadius: 999,
+                color: 'rgba(255,255,255,0.88)',
+                fontSize: 28,
                 cursor: 'pointer',
                 userSelect: 'none',
-                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                textShadow: '0 1px 6px rgba(0,0,0,0.4)',
                 lineHeight: 1,
-                padding: '8px 4px',
+                width: 36, height: 36,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
                 animation: '_bounceXLeft 1.6s ease-in-out infinite',
               }}
             >
@@ -249,15 +251,17 @@ export function SwipeSections({
                 top: '50%',
                 transform: 'translateY(-50%)',
                 zIndex: 150,
-                background: 'none',
+                background: 'rgba(0,0,0,0.22)',
                 border: 'none',
-                color: 'rgba(255,255,255,0.7)',
-                fontSize: 32,
+                borderRadius: 999,
+                color: 'rgba(255,255,255,0.88)',
+                fontSize: 28,
                 cursor: 'pointer',
                 userSelect: 'none',
-                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                textShadow: '0 1px 6px rgba(0,0,0,0.4)',
                 lineHeight: 1,
-                padding: '8px 4px',
+                width: 36, height: 36,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
                 animation: '_bounceXRight 1.6s ease-in-out infinite',
               }}
             >
@@ -265,36 +269,6 @@ export function SwipeSections({
             </button>
           )}
 
-          {/* 첫 페이지 전용 하단 스와이프 힌트 */}
-          {active === 0 && (
-            <div
-              style={{
-                position: 'fixed',
-                bottom: 80,
-                left: '50%',
-                transform: 'translateX(-50%)',
-                textAlign: 'center',
-                color: 'rgba(255,255,255,0.7)',
-                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
-                zIndex: 150,
-                pointerEvents: 'none',
-              }}
-            >
-              <p style={{ fontSize: '0.72rem', fontWeight: 600, whiteSpace: 'nowrap', marginBottom: 4 }}>
-                {t('hint.swipeNext')}
-              </p>
-              <span
-                style={{
-                  display: 'inline-block',
-                  fontSize: 20,
-                  lineHeight: 1,
-                  animation: '_bounceY 1.4s ease-in-out infinite',
-                }}
-              >
-                ∨
-              </span>
-            </div>
-          )}
         </>
       )}
     </div>
