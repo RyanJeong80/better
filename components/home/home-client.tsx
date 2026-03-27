@@ -6,6 +6,7 @@ import { RandomBetterViewer } from '@/components/battles/random-better-viewer'
 import { RankingPanelClient } from '@/components/home/ranking-panel-client'
 import { HotPanelClient } from '@/components/home/hot-panel-client'
 import { ProfilePanelClient } from '@/components/profile/profile-panel-client'
+import { CreateModal } from '@/components/battles/create-modal'
 import type { BattleForVoting } from '@/actions/battles'
 import type { PanelHotEntry } from '@/app/api/panels/hot/route'
 import type { UserInfo } from '@/app/(main)/page'
@@ -20,6 +21,7 @@ export function HomeClient({
   const [activePanel, setActivePanel] = useState(0) // 0=랜덤Better, 1=Hot Better, 2=랭킹, 3=프로필
   const [currentBattle, setCurrentBattle] = useState<BattleForVoting | null>(initialBattle)
   const [commentOpen, setCommentOpen] = useState(false)
+  const [createOpen, setCreateOpen] = useState(false)
 
   // Hot Better 카드 클릭 시 호출 — 랜덤Better 패널(0)로 전환 + 해당 Better 표시
   const handleSelectFromHot = useCallback((entry: PanelHotEntry) => {
@@ -41,23 +43,27 @@ export function HomeClient({
   }, [])
 
   return (
-    <SwipeSections
-      active={activePanel}
-      onActiveChange={setActivePanel}
-      user={user}
-      betterContent={
-        <div style={{ height: '100%' }}>
-          <RandomBetterViewer
-            key={currentBattle?.id ?? 'empty'}
-            initialBattle={currentBattle}
-            onCommentOpen={setCommentOpen}
-          />
-        </div>
-      }
-      hotContent={<HotPanelClient onSelectBattle={handleSelectFromHot} />}
-      rankingContent={<RankingPanelClient />}
-      profileContent={<ProfilePanelClient user={user} />}
-      hideIndicator={commentOpen}
-    />
+    <>
+      <SwipeSections
+        active={activePanel}
+        onActiveChange={setActivePanel}
+        onOpenCreate={() => setCreateOpen(true)}
+        user={user}
+        betterContent={
+          <div style={{ height: '100%' }}>
+            <RandomBetterViewer
+              key={currentBattle?.id ?? 'empty'}
+              initialBattle={currentBattle}
+              onCommentOpen={setCommentOpen}
+            />
+          </div>
+        }
+        hotContent={<HotPanelClient onSelectBattle={handleSelectFromHot} />}
+        rankingContent={<RankingPanelClient />}
+        profileContent={<ProfilePanelClient user={user} />}
+        hideIndicator={commentOpen}
+      />
+      <CreateModal open={createOpen} onClose={() => setCreateOpen(false)} />
+    </>
   )
 }

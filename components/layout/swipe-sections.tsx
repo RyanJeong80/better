@@ -15,6 +15,7 @@ export function SwipeSections({
   user,
   active,
   onActiveChange,
+  onOpenCreate,
   hideIndicator = false,
 }: {
   betterContent: React.ReactNode
@@ -24,6 +25,7 @@ export function SwipeSections({
   user: UserInfo | null
   active: number
   onActiveChange: (v: number) => void
+  onOpenCreate?: () => void
   hideIndicator?: boolean
 }) {
   const t = useTranslations()
@@ -95,20 +97,37 @@ export function SwipeSections({
         <div style={{ flex: 1 }} />
 
         {/* 만들기 버튼 */}
-        <Link
-          href={user ? '/battles/new' : '/login'}
-          style={{
-            display: 'inline-flex', alignItems: 'center', gap: 3,
-            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-            color: 'white', fontWeight: 700, fontSize: '0.78rem',
-            padding: '7px 13px', borderRadius: 999,
-            textDecoration: 'none', flexShrink: 0, lineHeight: 1,
-            letterSpacing: '-0.01em',
-          }}
-        >
-          <span style={{ fontSize: '1rem', marginTop: -1 }}>+</span>
-          {t('nav.create')}
-        </Link>
+        {user ? (
+          <button
+            onClick={onOpenCreate}
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 3,
+              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+              color: 'white', fontWeight: 700, fontSize: '0.78rem',
+              padding: '7px 13px', borderRadius: 999,
+              border: 'none', cursor: 'pointer', flexShrink: 0, lineHeight: 1,
+              letterSpacing: '-0.01em',
+            }}
+          >
+            <span style={{ fontSize: '1rem', marginTop: -1 }}>+</span>
+            {t('nav.create')}
+          </button>
+        ) : (
+          <Link
+            href="/login"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 3,
+              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+              color: 'white', fontWeight: 700, fontSize: '0.78rem',
+              padding: '7px 13px', borderRadius: 999,
+              textDecoration: 'none', flexShrink: 0, lineHeight: 1,
+              letterSpacing: '-0.01em',
+            }}
+          >
+            <span style={{ fontSize: '1rem', marginTop: -1 }}>+</span>
+            {t('nav.create')}
+          </Link>
+        )}
 
         {/* 언어 변경 */}
         <LanguageSwitcher />

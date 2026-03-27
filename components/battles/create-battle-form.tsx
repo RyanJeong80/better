@@ -602,7 +602,7 @@ interface UploadState {
 const initUpload = (): UploadState => ({ running: false, step: '', progress: 0, error: null, done: false })
 
 // ─── 메인 폼 ──────────────────────────────────────────────────────
-export function CreateBattleForm() {
+export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
   const router = useRouter()
   const t = useTranslations('create')
   const tCategories = useTranslations('categories')
@@ -695,7 +695,10 @@ export function CreateBattleForm() {
         return
       }
       setUpload({ running: false, step: t('done'), progress: 100, error: null, done: true })
-      setTimeout(() => router.push('/profile'), 1200)
+      setTimeout(() => {
+        if (onClose) onClose()
+        else router.push('/profile')
+      }, 1200)
     } catch (e) {
       setUpload({ running: false, step: '', progress: 0, error: t('saveError', { message: e instanceof Error ? e.message : String(e) }), done: false })
     }
