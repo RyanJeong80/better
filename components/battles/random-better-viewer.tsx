@@ -518,7 +518,7 @@ export function RandomBetterViewer({
     : 1
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#000', userSelect: 'none' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#EDE4DA', userSelect: 'none' }}>
       <style>{`
         @keyframes _slideUp      { from { transform: translateY(28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
         @keyframes _slideDown    { from { transform: translateY(-28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
@@ -765,7 +765,7 @@ export function RandomBetterViewer({
         document.body,
       )}
 
-      {/* ── 사진 영역 ── */}
+      {/* ── 사진 영역 (터치 핸들러) ── */}
       <div
         style={{ flex: 1, position: 'relative', overflow: 'hidden', touchAction: 'pan-x' }}
         onTouchStart={onTouchStart}
@@ -823,625 +823,492 @@ export function RandomBetterViewer({
         />
       )}
 
-      {/* ── 로딩 ── */}
-      {phase === 'loading' && (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ flex: 1, background: '#1a1a1a' }} />
-          <div style={{ height: 1, background: 'rgba(255,255,255,0.15)' }} />
-          <div style={{ flex: 1, background: '#141414' }} />
-        </div>
-      )}
+      {/* ── 폴라로이드 카드 ── */}
+      <div style={{
+        position: 'absolute',
+        top: 8, left: 8, right: 8, bottom: 0,
+        display: 'flex', flexDirection: 'column',
+        borderRadius: '4px 4px 0 0',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+        overflow: 'hidden',
+        ...slideStyle,
+      }}>
 
-      {/* ── Empty ── */}
-      {phase === 'empty' && (
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          color: 'white', textAlign: 'center', padding: 32,
-        }}>
-          {tagFilter ? (
-            <>
-              <div style={{ fontSize: '3rem', marginBottom: 16 }}>🏷️</div>
-              <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800 }}>
-                {t('vote.tagEmpty', { tag: tagFilter! })}
-              </p>
-              <p style={{ margin: '10px 0 0', color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', lineHeight: 1.6 }}>
-                {t('vote.tagEmptyDesc')}
-              </p>
-              <button
-                onClick={() => handleTagChange(null)}
+        {/* ── 로딩 ── */}
+        {phase === 'loading' && (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flex: 1, background: '#1c1c1e' }} />
+            <div style={{ height: 2, background: '#EDE4DA' }} />
+            <div style={{ flex: 1, background: '#161618' }} />
+            <div style={{ height: 80, background: '#f0ebe4' }} />
+          </div>
+        )}
+
+        {/* ── Empty ── */}
+        {phase === 'empty' && (
+          <div style={{
+            flex: 1, display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center',
+            background: '#ffffff', color: '#3D2B1F',
+            textAlign: 'center', padding: 32,
+          }}>
+            {tagFilter ? (
+              <>
+                <div style={{ fontSize: '3rem', marginBottom: 16 }}>🏷️</div>
+                <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#3D2B1F' }}>
+                  {t('vote.tagEmpty', { tag: tagFilter! })}
+                </p>
+                <p style={{ margin: '10px 0 0', color: '#9CA3AF', fontSize: '0.85rem', lineHeight: 1.6 }}>
+                  {t('vote.tagEmptyDesc')}
+                </p>
+                <button
+                  onClick={() => handleTagChange(null)}
+                  style={{
+                    marginTop: 20, padding: '8px 20px', borderRadius: 999,
+                    background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.4)',
+                    color: '#6366F1', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer',
+                  }}
+                >
+                  {t('vote.clearTagFilter')}
+                </button>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: '3.5rem', marginBottom: 20 }}>🎉</div>
+                <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#3D2B1F' }}>{t('vote.allSeen')}</p>
+                <p style={{ margin: '10px 0 0', color: '#9CA3AF', fontSize: '0.9rem', lineHeight: 1.6 }}>
+                  {t('vote.allSeenDesc')}
+                </p>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* ── 메인 콘텐츠 ── */}
+        {phase !== 'loading' && phase !== 'empty' && battle && (
+          <>
+            {/* ── 사진 섹션 ── */}
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#EDE4DA' }}>
+
+              {/* 사진 A (상단) */}
+              <div
+                onClick={phase === 'voting' ? () => handlePickPhoto('A') : undefined}
                 style={{
-                  marginTop: 20, padding: '8px 20px', borderRadius: 999,
-                  background: 'rgba(99,102,241,0.3)', border: '1px solid rgba(99,102,241,0.6)',
-                  color: 'white', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer',
+                  position: 'absolute', top: 0, left: 0, right: 0, height: 'calc(50% - 1px)',
+                  overflow: 'hidden',
+                  cursor: phase === 'voting' ? 'pointer' : 'default',
+                  opacity: opacityA,
+                  filter: !dimA && (phase === 'picked' || phase === 'submitting') && selectedChoice === 'A'
+                    ? 'brightness(1.18)'
+                    : phase === 'voted' && isAWinning ? 'brightness(1.08)' : undefined,
+                  transition: 'opacity 0.5s, filter 0.5s',
                 }}
               >
-                {t('vote.clearTagFilter')}
-              </button>
-            </>
-          ) : (
-            <>
-              <div style={{ fontSize: '3.5rem', marginBottom: 20 }}>🎉</div>
-              <p style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800 }}>{t('vote.allSeen')}</p>
-              <p style={{ margin: '10px 0 0', color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-                {t('vote.allSeenDesc')}
-              </p>
-            </>
-          )}
-        </div>
-      )}
-
-      {/* ── 메인 터치 콘텐츠 ── */}
-      {phase !== 'loading' && phase !== 'empty' && battle && (
-        <>
-          {/* ── 애니메이션 래퍼: 사진 A + VS + 사진 B + 제목 ── */}
-          <div style={{ position: 'absolute', inset: 0, zIndex: 10, ...slideStyle }}>
-
-            {/* 사진 A (상단 50%) */}
-            <div
-              onClick={phase === 'voting' ? () => handlePickPhoto('A') : undefined}
-              style={{
-                position: 'absolute', top: 0, left: 0, right: 0, height: '50%',
-                overflow: 'hidden',
-                cursor: phase === 'voting' ? 'pointer' : 'default',
-                opacity: opacityA,
-                filter: !dimA && (phase === 'picked' || phase === 'submitting') && selectedChoice === 'A'
-                  ? 'brightness(1.18)'
-                  : phase === 'voted' && isAWinning ? 'brightness(1.08)' : undefined,
-                transition: 'opacity 0.5s, filter 0.5s',
-              }}
-            >
-              {battle.isTextOnly ? (
-                <TextCard
-                  text={translated?.descA ?? battle.imageAText ?? ''}
-                  colorIdx={getTextColorIdx(battle.id, 0)}
-                />
-              ) : (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                {battle.isTextOnly ? (
+                  <TextCard
+                    text={translated?.descA ?? battle.imageAText ?? ''}
+                    colorIdx={getTextColorIdx(battle.id, 0)}
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={battle.imageAUrl}
                     alt="A"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
-                </>
-              )}
-              {/* 상단 그라데이션 (제목 가독성) */}
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.4) 40%, transparent 60%)', pointerEvents: 'none' }} />
-              {/* 하단 그라데이션 (설명 가독성) */}
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)', pointerEvents: 'none' }} />
+                )}
+                {/* 하단 그라데이션 */}
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.42) 0%, transparent 55%)', pointerEvents: 'none' }} />
 
-              {/* A 배지 */}
-              <div style={{
-                position: 'absolute', bottom: 14, left: 12, zIndex: 3,
-                background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-                color: 'white', fontSize: '0.7rem', fontWeight: 900,
-                padding: '3px 10px', borderRadius: 999,
-                border: '1px solid rgba(255,255,255,0.3)',
-              }}>A</div>
+                {/* A 배지 */}
+                <div style={{
+                  position: 'absolute', bottom: 10, left: 10, zIndex: 3,
+                  background: '#3D2B1F', color: 'white',
+                  fontSize: '0.62rem', fontWeight: 900, padding: '2px 8px', borderRadius: 4,
+                }}>A</div>
 
-              {/* 설명 텍스트 */}
-              {!battle.isTextOnly && battle.imageADescription && (
-                <p style={{
-                  position: 'absolute', bottom: 14, left: 36, right: 16, zIndex: 3,
-                  margin: 0, color: 'white', fontSize: '0.78rem', lineHeight: 1.4,
-                  textShadow: '0 1px 4px rgba(0,0,0,0.9)',
-                  overflow: 'hidden',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                }}>
-                  {translated?.descA ?? battle.imageADescription}
-                </p>
-              )}
-
-
-              {/* 선택됨 오버레이 */}
-              {(phase === 'picked' || phase === 'submitting') && selectedChoice === 'A' && (
-                <>
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.22)', pointerEvents: 'none' }} />
-                  <div style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    background: '#6366F1', borderRadius: '50%',
-                    width: 56, height: 56,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 4px 28px rgba(99,102,241,0.75)',
-                    animation: '_checkPop 0.38s cubic-bezier(0.25,1,0.5,1) forwards',
+                {/* 설명 텍스트 */}
+                {!battle.isTextOnly && (translated?.descA ?? battle.imageADescription) && (
+                  <p style={{
+                    position: 'absolute', bottom: 10, left: 32, right: 60, zIndex: 3,
+                    margin: 0, color: 'white', fontSize: '0.72rem', lineHeight: 1.35,
+                    textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+                    overflow: 'hidden', display: '-webkit-box',
+                    WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                   }}>
-                    <Check size={28} color="white" strokeWidth={3} />
-                  </div>
-                </>
-              )}
+                    {translated?.descA ?? battle.imageADescription}
+                  </p>
+                )}
 
-              {/* 투표 결과 오버레이 */}
-              {phase === 'voted' && voteResult && (
-                <>
-                  {/* 배경 오버레이: 이기는 쪽은 얇게, 지는 쪽은 두껍게 */}
-                  <div style={{
-                    position: 'absolute', inset: 0, pointerEvents: 'none',
-                    background: isAWinning ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.5)',
-                    transition: 'background 0.5s',
-                  }} />
-                  {/* 배지 */}
-                  <div style={{ position: 'absolute', top: 50, left: 12, right: 12, zIndex: 4, display: 'flex', gap: 6 }}>
-                    {selectedChoice === 'A' && (
-                      <span style={{ background: '#6366F1', color: 'white', fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999 }}>{t('vote.myChoice')}</span>
-                    )}
-                    {isAWinning && (
-                      <span style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999 }}>{t('vote.leading')}</span>
-                    )}
-                  </div>
-                  {/* 퍼센트 — 중앙 */}
-                  <div style={{
-                    position: 'absolute', inset: 0, zIndex: 4,
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    opacity: barFilled ? 1 : 0,
-                    transition: 'opacity 0.4s ease',
-                  }}>
-                    <p style={{
-                      margin: 0, color: 'white', lineHeight: 1,
-                      fontSize: isAWinning ? '3.8rem' : '2.8rem',
-                      fontWeight: 900,
-                      textShadow: isAWinning ? '0 2px 20px rgba(99,102,241,0.6)' : '0 2px 8px rgba(0,0,0,0.6)',
-                      transition: 'font-size 0.4s',
-                    }}>{pctA}%</p>
-                    <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.78rem', fontWeight: 600 }}>
-                      {t('vote.votesCount', { count: voteResult.votesA })}
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
+                {/* 터치! 버튼 (voting) */}
+                {phase === 'voting' && (
+                  <button
+                    onClick={e => { e.stopPropagation(); handlePickPhoto('A') }}
+                    style={{
+                      position: 'absolute', bottom: 8, right: 10, zIndex: 8,
+                      background: 'rgba(255,255,255,0.9)', color: '#3D2B1F',
+                      fontWeight: 800, fontSize: '0.78rem',
+                      padding: '6px 14px', borderRadius: 20, border: 'none',
+                      cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                      letterSpacing: '-0.01em',
+                    }}
+                  >터치!</button>
+                )}
 
-            {/* ── VS 구분선 / 결과 퍼센트 바 ── */}
-            <div style={{
-              position: 'absolute', top: '50%', left: 0, right: 0,
-              transform: 'translateY(-50%)', zIndex: 5,
-              pointerEvents: 'none',
-            }}>
-              {phase === 'voted' && voteResult ? (
-                /* 투표 결과 퍼센트 바 */
-                <div style={{ position: 'relative', height: 38, overflow: 'hidden' }}>
-                  {/* A 채우기 (왼쪽 → 중앙) */}
-                  <div style={{
-                    position: 'absolute', left: 0, top: 0, bottom: 0,
-                    width: barFilled ? `${pctA}%` : '0%',
-                    background: 'linear-gradient(to right, #4338CA, #6366F1)',
-                    transition: 'width 0.75s cubic-bezier(0.25,1,0.5,1)',
-                  }} />
-                  {/* B 채우기 (오른쪽 → 중앙) */}
-                  <div style={{
-                    position: 'absolute', right: 0, top: 0, bottom: 0,
-                    width: barFilled ? `${pctB}%` : '0%',
-                    background: 'linear-gradient(to left, #BE185D, #EC4899)',
-                    transition: 'width 0.75s cubic-bezier(0.25,1,0.5,1)',
-                  }} />
-                  {/* 미채워진 중앙 (애니메이션 중 빈 공간) */}
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} />
-                  {/* 라벨 */}
-                  <div style={{
-                    position: 'absolute', inset: 0, zIndex: 2,
-                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '0 14px',
-                  }}>
-                    <span style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', textShadow: '0 1px 6px rgba(0,0,0,0.8)', letterSpacing: '-0.02em' }}>
-                      A&nbsp;&nbsp;{pctA}%
-                    </span>
-                    <span style={{ color: 'white', fontWeight: 900, fontSize: '0.95rem', textShadow: '0 1px 6px rgba(0,0,0,0.8)', letterSpacing: '-0.02em' }}>
-                      {pctB}%&nbsp;&nbsp;B
-                    </span>
-                  </div>
-                  {/* 자동 이동 카운트다운 바 */}
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, background: 'rgba(255,255,255,0.15)', zIndex: 3 }}>
+                {/* 선택됨 오버레이 */}
+                {(phase === 'picked' || phase === 'submitting') && selectedChoice === 'A' && (
+                  <>
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.22)', pointerEvents: 'none' }} />
                     <div style={{
-                      height: '100%',
-                      width: barFilled ? '0%' : '100%',
-                      background: 'rgba(255,255,255,0.55)',
-                      transition: barFilled ? 'width 2.9s linear' : 'none',
-                    }} />
-                  </div>
-                </div>
-              ) : (
-                /* 기본 VS 구분선 */
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.3)' }} />
-                  <div style={{
-                    width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-                    background: 'rgba(0,0,0,0.75)',
-                    backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
-                    border: '1.5px solid rgba(255,255,255,0.32)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: 'white', fontWeight: 900, fontSize: '0.72rem', letterSpacing: '0.05em',
-                  }}>VS</div>
-                  <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.3)' }} />
-                </div>
-              )}
-            </div>
+                      position: 'absolute', top: '50%', left: '50%',
+                      background: '#6366F1', borderRadius: '50%',
+                      width: 52, height: 52,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 4px 28px rgba(99,102,241,0.75)',
+                      animation: '_checkPop 0.38s cubic-bezier(0.25,1,0.5,1) forwards',
+                    }}>
+                      <Check size={26} color="white" strokeWidth={3} />
+                    </div>
+                  </>
+                )}
 
-            {/* 사진 B (하단 50%) */}
-            <div
-              onClick={phase === 'voting' ? () => handlePickPhoto('B') : undefined}
-              style={{
-                position: 'absolute', top: '50%', left: 0, right: 0, bottom: 0,
-                overflow: 'hidden',
-                cursor: phase === 'voting' ? 'pointer' : 'default',
-                opacity: opacityB,
-                filter: !dimB && (phase === 'picked' || phase === 'submitting') && selectedChoice === 'B'
-                  ? 'brightness(1.18)'
-                  : phase === 'voted' && isBWinning ? 'brightness(1.08)' : undefined,
-                transition: 'opacity 0.5s, filter 0.5s',
-              }}
-            >
-              {battle.isTextOnly ? (
-                <TextCard
-                  text={translated?.descB ?? battle.imageBText ?? ''}
-                  colorIdx={getTextColorIdx(battle.id, 1)}
-                />
-              ) : (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                {/* 투표 결과 오버레이 */}
+                {phase === 'voted' && voteResult && (
+                  <>
+                    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: isAWinning ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.5)', transition: 'background 0.5s' }} />
+                    <div style={{ position: 'absolute', top: 8, left: 10, right: 10, zIndex: 4, display: 'flex', gap: 6 }}>
+                      {selectedChoice === 'A' && (
+                        <span style={{ background: '#6366F1', color: 'white', fontSize: '0.6rem', fontWeight: 800, padding: '2px 8px', borderRadius: 999 }}>{t('vote.myChoice')}</span>
+                      )}
+                      {isAWinning && (
+                        <span style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '0.6rem', fontWeight: 700, padding: '2px 8px', borderRadius: 999 }}>{t('vote.leading')}</span>
+                      )}
+                    </div>
+                    <div style={{ position: 'absolute', inset: 0, zIndex: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: barFilled ? 1 : 0, transition: 'opacity 0.4s ease' }}>
+                      <p style={{ margin: 0, color: 'white', lineHeight: 1, fontSize: isAWinning ? '3.5rem' : '2.6rem', fontWeight: 900, textShadow: isAWinning ? '0 2px 20px rgba(99,102,241,0.6)' : '0 2px 8px rgba(0,0,0,0.6)', transition: 'font-size 0.4s' }}>{pctA}%</p>
+                      <p style={{ margin: '5px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.72rem', fontWeight: 600 }}>{t('vote.votesCount', { count: voteResult.votesA })}</p>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* ── VS 구분선 / 결과 퍼센트 바 ── */}
+              <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, transform: 'translateY(-50%)', zIndex: 5, pointerEvents: 'none' }}>
+                {phase === 'voted' && voteResult ? (
+                  <div style={{ position: 'relative', height: 36, overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: barFilled ? `${pctA}%` : '0%', background: 'linear-gradient(to right, #4338CA, #6366F1)', transition: 'width 0.75s cubic-bezier(0.25,1,0.5,1)' }} />
+                    <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: barFilled ? `${pctB}%` : '0%', background: 'linear-gradient(to left, #BE185D, #EC4899)', transition: 'width 0.75s cubic-bezier(0.25,1,0.5,1)' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} />
+                    <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 14px' }}>
+                      <span style={{ color: 'white', fontWeight: 900, fontSize: '0.92rem', textShadow: '0 1px 6px rgba(0,0,0,0.8)', letterSpacing: '-0.02em' }}>A&nbsp;&nbsp;{pctA}%</span>
+                      <span style={{ color: 'white', fontWeight: 900, fontSize: '0.92rem', textShadow: '0 1px 6px rgba(0,0,0,0.8)', letterSpacing: '-0.02em' }}>{pctB}%&nbsp;&nbsp;B</span>
+                    </div>
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, background: 'rgba(255,255,255,0.15)', zIndex: 3 }}>
+                      <div style={{ height: '100%', width: barFilled ? '0%' : '100%', background: 'rgba(255,255,255,0.55)', transition: barFilled ? 'width 2.9s linear' : 'none' }} />
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{ flex: 1, height: 2, background: '#EDE4DA' }} />
+                    <div style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1.5px solid rgba(255,255,255,0.32)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '0.68rem', letterSpacing: '0.05em' }}>VS</div>
+                    <div style={{ flex: 1, height: 2, background: '#EDE4DA' }} />
+                  </div>
+                )}
+              </div>
+
+              {/* 사진 B (하단) */}
+              <div
+                onClick={phase === 'voting' ? () => handlePickPhoto('B') : undefined}
+                style={{
+                  position: 'absolute', top: 'calc(50% + 1px)', left: 0, right: 0, bottom: 0,
+                  overflow: 'hidden',
+                  cursor: phase === 'voting' ? 'pointer' : 'default',
+                  opacity: opacityB,
+                  filter: !dimB && (phase === 'picked' || phase === 'submitting') && selectedChoice === 'B'
+                    ? 'brightness(1.18)'
+                    : phase === 'voted' && isBWinning ? 'brightness(1.08)' : undefined,
+                  transition: 'opacity 0.5s, filter 0.5s',
+                }}
+              >
+                {battle.isTextOnly ? (
+                  <TextCard
+                    text={translated?.descB ?? battle.imageBText ?? ''}
+                    colorIdx={getTextColorIdx(battle.id, 1)}
+                  />
+                ) : (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={battle.imageBUrl}
                     alt="B"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
-                </>
-              )}
-              {/* 상단 그라데이션 */}
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, transparent 40%)', pointerEvents: 'none' }} />
-              {/* 하단 그라데이션 */}
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 50%)', pointerEvents: 'none' }} />
+                )}
+                {/* 하단 그라데이션 */}
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.42) 0%, transparent 55%)', pointerEvents: 'none' }} />
 
-              {/* B 배지 */}
-              <div style={{
-                position: 'absolute', bottom: 14, left: 12, zIndex: 3,
-                background: 'rgba(255,255,255,0.18)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
-                color: 'white', fontSize: '0.7rem', fontWeight: 900,
-                padding: '3px 10px', borderRadius: 999,
-                border: '1px solid rgba(255,255,255,0.3)',
-              }}>B</div>
+                {/* B 배지 */}
+                <div style={{
+                  position: 'absolute', bottom: 10, left: 10, zIndex: 3,
+                  background: '#D4C4B0', color: '#3D2B1F',
+                  fontSize: '0.62rem', fontWeight: 900, padding: '2px 8px', borderRadius: 4,
+                }}>B</div>
 
-              {/* 설명 텍스트 */}
-              {!battle.isTextOnly && battle.imageBDescription && (
-                <p style={{
-                  position: 'absolute', bottom: 14, left: 36, right: 16, zIndex: 3,
-                  margin: 0, color: 'white', fontSize: '0.78rem', lineHeight: 1.4,
-                  textShadow: '0 1px 4px rgba(0,0,0,0.9)',
-                  overflow: 'hidden',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                }}>
-                  {translated?.descB ?? battle.imageBDescription}
-                </p>
-              )}
-
-
-              {/* 선택됨 오버레이 */}
-              {(phase === 'picked' || phase === 'submitting') && selectedChoice === 'B' && (
-                <>
-                  <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.22)', pointerEvents: 'none' }} />
-                  <div style={{
-                    position: 'absolute', top: '50%', left: '50%',
-                    background: '#6366F1', borderRadius: '50%',
-                    width: 56, height: 56,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    boxShadow: '0 4px 28px rgba(99,102,241,0.75)',
-                    animation: '_checkPop 0.38s cubic-bezier(0.25,1,0.5,1) forwards',
+                {/* 설명 텍스트 */}
+                {!battle.isTextOnly && (translated?.descB ?? battle.imageBDescription) && (
+                  <p style={{
+                    position: 'absolute', bottom: 10, left: 32, right: 60, zIndex: 3,
+                    margin: 0, color: 'white', fontSize: '0.72rem', lineHeight: 1.35,
+                    textShadow: '0 1px 4px rgba(0,0,0,0.9)',
+                    overflow: 'hidden', display: '-webkit-box',
+                    WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                   }}>
-                    <Check size={28} color="white" strokeWidth={3} />
-                  </div>
-                </>
-              )}
+                    {translated?.descB ?? battle.imageBDescription}
+                  </p>
+                )}
 
-              {/* 투표 결과 오버레이 */}
-              {phase === 'voted' && voteResult && (
-                <>
-                  <div style={{
-                    position: 'absolute', inset: 0, pointerEvents: 'none',
-                    background: isBWinning ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.5)',
-                    transition: 'background 0.5s',
-                  }} />
-                  <div style={{ position: 'absolute', top: 8, left: 12, right: 12, zIndex: 4, display: 'flex', gap: 6 }}>
-                    {selectedChoice === 'B' && (
-                      <span style={{ background: '#6366F1', color: 'white', fontSize: '0.65rem', fontWeight: 800, padding: '3px 10px', borderRadius: 999 }}>{t('vote.myChoice')}</span>
-                    )}
-                    {isBWinning && (
-                      <span style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '0.65rem', fontWeight: 700, padding: '3px 10px', borderRadius: 999 }}>{t('vote.leading')}</span>
-                    )}
-                  </div>
-                  <div style={{
-                    position: 'absolute', inset: 0, zIndex: 4,
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    opacity: barFilled ? 1 : 0,
-                    transition: 'opacity 0.4s ease',
-                  }}>
-                    <p style={{
-                      margin: 0, color: 'white', lineHeight: 1,
-                      fontSize: isBWinning ? '3.8rem' : '2.8rem',
-                      fontWeight: 900,
-                      textShadow: isBWinning ? '0 2px 20px rgba(99,102,241,0.6)' : '0 2px 8px rgba(0,0,0,0.6)',
-                      transition: 'font-size 0.4s',
-                    }}>{pctB}%</p>
-                    <p style={{ margin: '6px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.78rem', fontWeight: 600 }}>
-                      {t('vote.votesCount', { count: voteResult.votesB })}
-                    </p>
-                  </div>
-                </>
-              )}
-            </div>
+                {/* 터치! 버튼 (voting) */}
+                {phase === 'voting' && (
+                  <button
+                    onClick={e => { e.stopPropagation(); handlePickPhoto('B') }}
+                    style={{
+                      position: 'absolute', bottom: 8, right: 10, zIndex: 8,
+                      background: 'rgba(255,255,255,0.9)', color: '#3D2B1F',
+                      fontWeight: 800, fontSize: '0.78rem',
+                      padding: '6px 14px', borderRadius: 20, border: 'none',
+                      cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
+                      letterSpacing: '-0.01em',
+                    }}
+                  >터치!</button>
+                )}
 
-            {/* 터치 제목 + 카테고리 배지 (A 사진 상단 오버레이) */}
-            <div style={{
-              position: 'absolute', top: 34, left: 12, right: 76, zIndex: 8,
-              pointerEvents: 'none',
-            }}>
-              {(() => {
-                const cat = CATEGORY_MAP[battle.category]
-                const badge = CAT_BADGE[battle.category]
-                return (
+                {/* 선택됨 오버레이 */}
+                {(phase === 'picked' || phase === 'submitting') && selectedChoice === 'B' && (
                   <>
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 3,
-                      background: badge.bg, color: badge.text,
-                      fontSize: '0.62rem', fontWeight: 700,
-                      padding: '2px 8px', borderRadius: 999,
-                      marginBottom: 5,
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(99,102,241,0.22)', pointerEvents: 'none' }} />
+                    <div style={{
+                      position: 'absolute', top: '50%', left: '50%',
+                      background: '#6366F1', borderRadius: '50%',
+                      width: 52, height: 52,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: '0 4px 28px rgba(99,102,241,0.75)',
+                      animation: '_checkPop 0.38s cubic-bezier(0.25,1,0.5,1) forwards',
                     }}>
-                      {cat.emoji} {t(`categories.${battle.category}` as Parameters<typeof t>[0])}
-                    </span>
-                    <h2 style={{
-                      margin: 0, color: 'white', fontWeight: 800,
-                      fontSize: '1.25rem', lineHeight: 1.35,
-                      textShadow: '0 2px 10px rgba(0,0,0,0.95)',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}>
-                      {translated?.title ?? battle.title}
-                    </h2>
-                    {translated && (
-                      <span style={{
-                        display: 'inline-flex', alignItems: 'center', gap: 3,
-                        marginTop: 4,
-                        background: 'rgba(255,255,255,0.15)',
-                        backdropFilter: 'blur(6px)',
-                        color: 'rgba(255,255,255,0.7)',
-                        fontSize: '0.58rem', fontWeight: 700,
-                        padding: '2px 6px', borderRadius: 999,
-                        letterSpacing: '0.02em',
-                      }}>
-                        ✦ AI
-                      </span>
-                    )}
-                    <p style={{
-                      margin: '4px 0 0', color: 'rgba(255,255,255,0.7)',
-                      fontSize: '0.72rem',
-                      textShadow: '0 1px 4px rgba(0,0,0,0.8)',
-                    }}>
-                      {phase === 'voting' && t('vote.tapToSelect')}
-                      {(phase === 'picked' || phase === 'submitting') && t('vote.addReasonOptional')}
-                      {phase === 'voted' && t('vote.voteDone')}
-                    </p>
+                      <Check size={26} color="white" strokeWidth={3} />
+                    </div>
                   </>
-                )
-              })()}
-            </div>
-          </div>
+                )}
 
-          {/* ── 뒤로가기 버튼 (handleClose 모드) ── */}
-          {handleClose && (
-            <button
-              onClick={handleClose}
-              style={{
-                position: 'absolute', top: 8, left: 8, zIndex: 35,
-                width: 40, height: 40, borderRadius: '50%',
-                background: 'rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.25)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer',
-              }}
-            >
-              <ArrowLeft size={20} color="white" />
-            </button>
-          )}
-
-          {/* ── 우측 액션 버튼 (좋아요 + 공유, VS 선 기준 중앙 배치) ── */}
-          <div style={{
-            position: 'absolute', right: 12, top: '60%', transform: 'translateY(-50%)',
-            zIndex: 25,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14,
-          }}>
-            {/* 좋아요 */}
-            <button
-              onClick={e => { e.stopPropagation(); handleLike() }}
-              disabled={likePending}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-                opacity: likePending ? 0.6 : 1,
-              }}
-            >
-              <span style={{
-                width: 44, height: 44, borderRadius: '50%',
-                background: 'rgba(0,0,0,0.55)',
-                backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.25)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                transition: 'transform 0.15s',
-              }}>
-                <Heart size={20} style={{ fill: isLiked ? '#F43F5E' : 'transparent', stroke: isLiked ? '#F43F5E' : 'white', transition: 'all 0.15s' }} />
-              </span>
-              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>
-                {likeCount}
-              </span>
-            </button>
-
-            {/* 공유 */}
-            <button
-              onClick={e => { e.stopPropagation(); handleShare() }}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-              }}
-            >
-              <span style={{
-                width: 44, height: 44, borderRadius: '50%',
-                background: 'rgba(0,0,0,0.55)',
-                backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255,255,255,0.25)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <Share2 size={20} color="white" />
-              </span>
-              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>
-                {t('vote.share')}
-              </span>
-            </button>
-          </div>
-
-          {/* ── 투표 이유 입력 하단 시트 (picked / submitting) ── */}
-          {(phase === 'picked' || phase === 'submitting') && (
-            <div style={{
-              position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 40,
-              background: 'rgba(255,255,255,0.97)',
-              backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-              borderRadius: '20px 20px 0 0',
-              padding: '12px 16px 28px',
-              boxShadow: '0 -8px 40px rgba(0,0,0,0.3)',
-              animation: '_slideUpModal 0.25s cubic-bezier(0.25,1,0.5,1)',
-            }}>
-              <div style={{ width: 36, height: 4, borderRadius: 999, background: '#E5E7EB', margin: '0 auto 12px' }} />
-              {error && (
-                <p style={{ color: '#EF4444', fontSize: '0.85rem', margin: '0 0 8px' }}>{error}</p>
-              )}
-              <p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#6B7280', fontWeight: 600 }}>
-                {t('vote.reasonLabel', { choice: selectedChoice ?? '' })}
-              </p>
-              <textarea
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                placeholder={t('vote.reasonPlaceholder')}
-                maxLength={200}
-                rows={2}
-                disabled={phase === 'submitting'}
-                style={{
-                  width: '100%', resize: 'none', borderRadius: 12,
-                  border: '1px solid #E5E7EB', background: '#F9FAFB',
-                  padding: '10px 12px', fontSize: '0.9rem', outline: 'none',
-                  boxSizing: 'border-box', fontFamily: 'inherit',
-                }}
-              />
-              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 10 }}>
-                <button
-                  onClick={handleCancel}
-                  disabled={phase === 'submitting'}
-                  style={{
-                    padding: '9px 18px', borderRadius: 12,
-                    border: '1px solid #E5E7EB', background: 'white',
-                    fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer',
-                  }}
-                >{t('vote.cancel')}</button>
-                <button
-                  onClick={handleSubmit}
-                  disabled={phase === 'submitting'}
-                  style={{
-                    padding: '9px 22px', borderRadius: 12, border: 'none',
-                    background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
-                    color: 'white', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer',
-                  }}
-                >
-                  {phase === 'submitting' ? t('vote.submitting') : t('vote.submit')}
-                </button>
+                {/* 투표 결과 오버레이 */}
+                {phase === 'voted' && voteResult && (
+                  <>
+                    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: isBWinning ? 'rgba(0,0,0,0.18)' : 'rgba(0,0,0,0.5)', transition: 'background 0.5s' }} />
+                    <div style={{ position: 'absolute', top: 8, left: 10, right: 10, zIndex: 4, display: 'flex', gap: 6 }}>
+                      {selectedChoice === 'B' && (
+                        <span style={{ background: '#6366F1', color: 'white', fontSize: '0.6rem', fontWeight: 800, padding: '2px 8px', borderRadius: 999 }}>{t('vote.myChoice')}</span>
+                      )}
+                      {isBWinning && (
+                        <span style={{ background: 'rgba(255,255,255,0.22)', backdropFilter: 'blur(8px)', color: 'white', fontSize: '0.6rem', fontWeight: 700, padding: '2px 8px', borderRadius: 999 }}>{t('vote.leading')}</span>
+                      )}
+                    </div>
+                    <div style={{ position: 'absolute', inset: 0, zIndex: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', opacity: barFilled ? 1 : 0, transition: 'opacity 0.4s ease' }}>
+                      <p style={{ margin: 0, color: 'white', lineHeight: 1, fontSize: isBWinning ? '3.5rem' : '2.6rem', fontWeight: 900, textShadow: isBWinning ? '0 2px 20px rgba(99,102,241,0.6)' : '0 2px 8px rgba(0,0,0,0.6)', transition: 'font-size 0.4s' }}>{pctB}%</p>
+                      <p style={{ margin: '5px 0 0', color: 'rgba(255,255,255,0.75)', fontSize: '0.72rem', fontWeight: 600 }}>{t('vote.votesCount', { count: voteResult.votesB })}</p>
+                    </div>
+                  </>
+                )}
               </div>
-            </div>
-          )}
 
-          {/* ── 투표 완료: 이전 / 다음 네비게이션 ── */}
-          {phase === 'voted' && (
-            handleClose ? (
-              /* 뒤로가기 모드: 목록으로 버튼만 */
-              <div style={{
-                position: 'absolute', bottom: 16, left: 0, right: 0, zIndex: 35,
-                display: 'flex', justifyContent: 'center',
-              }}>
+              {/* ── 뒤로가기 버튼 (handleClose 모드) ── */}
+              {handleClose && (
                 <button
                   onClick={handleClose}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    padding: '10px 28px', borderRadius: 12,
-                    background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    color: 'white', fontSize: '0.88rem', fontWeight: 700, cursor: 'pointer',
-                  }}
-                >
-                  {t('vote.backToList')}
-                </button>
-              </div>
-            ) : (
-              /* 일반 모드: 이전 / 다음 */
-              <div style={{
-                position: 'absolute', bottom: 16, left: 0, right: 0, zIndex: 35,
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '0 16px',
-              }}>
-                <button
-                  onClick={handlePrev}
-                  disabled={historyStack.length === 0}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    padding: '9px 16px', borderRadius: 12,
-                    background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
+                    position: 'absolute', top: 10, left: 10, zIndex: 35,
+                    width: 36, height: 36, borderRadius: '50%',
+                    background: 'rgba(0,0,0,0.6)',
+                    backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
                     border: '1px solid rgba(255,255,255,0.25)',
-                    color: 'white', fontSize: '0.85rem', fontWeight: 700,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
                     cursor: 'pointer',
-                    opacity: historyStack.length === 0 ? 0.3 : 1,
                   }}
                 >
-                  <ChevronUp size={16} /> {t('vote.prevButton')}
+                  <ArrowLeft size={18} color="white" />
                 </button>
+              )}
 
-                <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.72rem' }}>{t('swipe.up')}</span>
+              {/* ── 우측 액션 버튼 ── */}
+              <div style={{
+                position: 'absolute', right: 10, top: '58%', transform: 'translateY(-50%)',
+                zIndex: 25,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+              }}>
+                <button
+                  onClick={e => { e.stopPropagation(); handleLike() }}
+                  disabled={likePending}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: 0, opacity: likePending ? 0.6 : 1 }}
+                >
+                  <span style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Heart size={18} style={{ fill: isLiked ? '#F43F5E' : 'transparent', stroke: isLiked ? '#F43F5E' : 'white', transition: 'all 0.15s' }} />
+                  </span>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>{likeCount}</span>
+                </button>
 
                 <button
-                  onClick={handleNext}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 6,
-                    padding: '9px 20px', borderRadius: 12, border: 'none',
-                    background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
-                    color: 'white', fontSize: '0.85rem', fontWeight: 700,
-                    cursor: 'pointer',
-                    boxShadow: '0 4px 16px rgba(99,102,241,0.45)',
-                  }}
+                  onClick={e => { e.stopPropagation(); handleShare() }}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
                 >
-                  {t('vote.nextButton')} <ChevronRight size={16} />
+                  <span style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Share2 size={18} color="white" />
+                  </span>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>{t('vote.share')}</span>
                 </button>
               </div>
-            )
-          )}
 
-          {/* ── voting: 스와이프 힌트 (일반 모드에서만) ── */}
-          {phase === 'voting' && !handleClose && (
+              {/* ── 스와이프 힌트 ── */}
+              {phase === 'voting' && !handleClose && (
+                <div style={{ position: 'absolute', bottom: 10, left: 0, right: 0, zIndex: 25, textAlign: 'center', pointerEvents: 'none' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.82)', fontSize: '0.7rem', fontWeight: 600, background: 'rgba(0,0,0,0.28)', padding: '3px 10px', borderRadius: 999 }}>
+                    {t('swipe.hint')}
+                  </span>
+                </div>
+              )}
+
+              {/* ── 투표 완료: 이전 / 다음 ── */}
+              {phase === 'voted' && (
+                handleClose ? (
+                  <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, zIndex: 35, display: 'flex', justifyContent: 'center' }}>
+                    <button
+                      onClick={handleClose}
+                      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 24px', borderRadius: 10, background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      {t('vote.backToList')}
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, zIndex: 35, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px' }}>
+                    <button
+                      onClick={handlePrev}
+                      disabled={historyStack.length === 0}
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '8px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.25)', color: 'white', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', opacity: historyStack.length === 0 ? 0.3 : 1 }}
+                    >
+                      <ChevronUp size={15} /> {t('vote.prevButton')}
+                    </button>
+                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.68rem' }}>{t('swipe.up')}</span>
+                    <button
+                      onClick={handleNext}
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '8px 18px', borderRadius: 10, border: 'none', background: 'linear-gradient(135deg,#6366F1,#8B5CF6)', color: 'white', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 16px rgba(99,102,241,0.45)' }}
+                    >
+                      {t('vote.nextButton')} <ChevronRight size={15} />
+                    </button>
+                  </div>
+                )
+              )}
+
+            </div>{/* 사진 섹션 끝 */}
+
+            {/* ── 폴라로이드 하단 흰색 정보 바 ── */}
             <div style={{
-              position: 'absolute', bottom: 12, left: 0, right: 0, zIndex: 25,
-              textAlign: 'center', pointerEvents: 'none',
+              height: 80, flexShrink: 0, background: '#ffffff',
+              padding: '10px 14px',
+              display: 'flex', alignItems: 'center', gap: 10,
             }}>
-              <span style={{
-                color: 'rgba(255,255,255,0.82)',
-                fontSize: '0.72rem',
-                fontWeight: 600,
-                background: 'rgba(0,0,0,0.28)',
-                padding: '3px 10px',
-                borderRadius: 999,
-              }}>
-                {t('swipe.hint')}
-              </span>
+              {/* 좌측: 카테고리 + 제목 + 상태 */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {(() => {
+                  const cat = CATEGORY_MAP[battle.category]
+                  const badge = CAT_BADGE[battle.category]
+                  return (
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: badge.bg, color: badge.text, fontSize: '0.6rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
+                          {cat.emoji} {t(`categories.${battle.category}` as Parameters<typeof t>[0])}
+                        </span>
+                        {translated && (
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.1)', color: '#6366F1', fontSize: '0.54rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>✦ AI</span>
+                        )}
+                      </div>
+                      <h2 style={{ margin: 0, fontWeight: 800, fontSize: '0.88rem', lineHeight: 1.3, color: '#3D2B1F', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
+                        {translated?.title ?? battle.title}
+                      </h2>
+                      <p style={{ margin: '2px 0 0', fontSize: '0.6rem', color: '#9CA3AF', fontWeight: 500 }}>
+                        {phase === 'voting' && t('vote.tapToSelect')}
+                        {(phase === 'picked' || phase === 'submitting') && t('vote.addReasonOptional')}
+                        {phase === 'voted' && t('vote.voteDone')}
+                      </p>
+                    </>
+                  )
+                })()}
+              </div>
+
+              {/* 우측: A/B 설명 (작게) */}
+              {!battle.isTextOnly && ((translated?.descA ?? battle.imageADescription) || (translated?.descB ?? battle.imageBDescription)) && (
+                <div style={{ flexShrink: 0, maxWidth: 86, textAlign: 'right' }}>
+                  {(translated?.descA ?? battle.imageADescription) && (
+                    <p style={{ margin: 0, fontSize: '0.58rem', color: '#B0A090', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
+                      A: {translated?.descA ?? battle.imageADescription}
+                    </p>
+                  )}
+                  {(translated?.descB ?? battle.imageBDescription) && (
+                    <p style={{ margin: '3px 0 0', fontSize: '0.58rem', color: '#B0A090', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
+                      B: {translated?.descB ?? battle.imageBDescription}
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
-          )}
-        </>
-      )}
+
+            {/* ── 투표 이유 입력 바텀시트 (picked / submitting) ── */}
+            {(phase === 'picked' || phase === 'submitting') && (
+              <div style={{
+                position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 40,
+                background: 'rgba(255,255,255,0.97)',
+                backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+                borderRadius: '20px 20px 0 0',
+                padding: '12px 16px 28px',
+                boxShadow: '0 -8px 40px rgba(0,0,0,0.3)',
+                animation: '_slideUpModal 0.25s cubic-bezier(0.25,1,0.5,1)',
+              }}>
+                <div style={{ width: 36, height: 4, borderRadius: 999, background: '#E5E7EB', margin: '0 auto 12px' }} />
+                {error && (
+                  <p style={{ color: '#EF4444', fontSize: '0.85rem', margin: '0 0 8px' }}>{error}</p>
+                )}
+                <p style={{ margin: '0 0 8px', fontSize: '0.8rem', color: '#6B7280', fontWeight: 600 }}>
+                  {t('vote.reasonLabel', { choice: selectedChoice ?? '' })}
+                </p>
+                <textarea
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  placeholder={t('vote.reasonPlaceholder')}
+                  maxLength={200}
+                  rows={2}
+                  disabled={phase === 'submitting'}
+                  style={{
+                    width: '100%', resize: 'none', borderRadius: 12,
+                    border: '1px solid #E5E7EB', background: '#F9FAFB',
+                    padding: '10px 12px', fontSize: '0.9rem', outline: 'none',
+                    boxSizing: 'border-box', fontFamily: 'inherit',
+                  }}
+                />
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 10 }}>
+                  <button
+                    onClick={handleCancel}
+                    disabled={phase === 'submitting'}
+                    style={{ padding: '9px 18px', borderRadius: 12, border: '1px solid #E5E7EB', background: 'white', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer' }}
+                  >{t('vote.cancel')}</button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={phase === 'submitting'}
+                    style={{ padding: '9px 22px', borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#6366F1,#8B5CF6)', color: 'white', fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    {phase === 'submitting' ? t('vote.submitting') : t('vote.submit')}
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+      </div>{/* ── 폴라로이드 카드 끝 ── */}
       </div>{/* ── 사진 영역 끝 ── */}
 
     </div>
