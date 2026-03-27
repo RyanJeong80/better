@@ -259,7 +259,6 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
                 </div>
                 <div className="text-center">
                   <p className="text-sm font-medium text-muted-foreground">{t('clickOrDrag')}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground/60">{t('orTypeText')}</p>
                 </div>
               </>
             )}
@@ -315,7 +314,7 @@ const ImageSlot = memo(forwardRef<SlotHandle, {
           value={state.desc}
           onChange={(e) => onChange({ desc: e.target.value.slice(0, MAX_DESC) })}
           maxLength={MAX_DESC} rows={2}
-          placeholder={hasImage ? t('descPlaceholder', { side }) : t('textPlaceholder')}
+          placeholder={hasImage ? t('descPlaceholder', { side }) : t('orTypeText')}
           className="w-full resize-none rounded-xl border border-input px-3.5 py-2.5 text-base outline-none placeholder:text-muted-foreground/40 focus:ring-2 focus:ring-ring transition-shadow"
           style={{ backgroundColor: '#ffffff' }}
         />

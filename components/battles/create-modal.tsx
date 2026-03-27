@@ -14,9 +14,14 @@ export function CreateModal({ open, onClose }: { open: boolean; onClose: () => v
 
   useEffect(() => {
     if (!open) return
-    const prev = document.body.style.overflow
+    const prevOverflow = document.body.style.overflow
+    const prevTouchAction = document.body.style.touchAction
     document.body.style.overflow = 'hidden'
-    return () => { document.body.style.overflow = prev }
+    document.body.style.touchAction = 'none'
+    return () => {
+      document.body.style.overflow = prevOverflow
+      document.body.style.touchAction = prevTouchAction
+    }
   }, [open])
 
   if (!mounted || !open) return null
@@ -29,6 +34,7 @@ export function CreateModal({ open, onClose }: { open: boolean; onClose: () => v
         display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
       }}
       onClick={onClose}
+      onTouchMove={e => e.stopPropagation()}
     >
       <style>{`
         @keyframes _createModalUp {
@@ -75,7 +81,15 @@ export function CreateModal({ open, onClose }: { open: boolean; onClose: () => v
         </div>
 
         {/* 스크롤 콘텐츠 */}
-        <div style={{ overflowY: 'auto', flex: 1, padding: '20px 20px 48px' }}>
+        <div
+          style={{
+            overflowY: 'auto', flex: 1, padding: '20px 20px 48px',
+            overscrollBehavior: 'contain',
+            touchAction: 'pan-y',
+          }}
+          onTouchStart={e => e.stopPropagation()}
+          onTouchMove={e => e.stopPropagation()}
+        >
           <CreateBattleForm onClose={onClose} />
         </div>
       </div>
