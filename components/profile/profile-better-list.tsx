@@ -98,9 +98,9 @@ export function ProfileBetterList({ battles }: { battles: BattleWithStats[] }) {
             style={{
               flexShrink: 0, borderRadius: 999, padding: '6px 12px',
               fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer',
-              border: filter === f.id ? 'none' : '1px solid var(--color-border)',
-              background: filter === f.id ? 'var(--color-primary)' : 'var(--color-card)',
-              color: filter === f.id ? 'var(--color-primary-foreground)' : 'var(--color-muted-foreground)',
+              border: 'none',
+              background: filter === f.id ? '#3D2B1F' : '#D4C4B0',
+              color: filter === f.id ? '#ffffff' : '#3D2B1F',
             }}
           >
             {f.emoji} {f.id === 'all' ? t('categories.all') : t(`categories.${f.id}` as Parameters<typeof t>[0])}
