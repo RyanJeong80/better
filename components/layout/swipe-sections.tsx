@@ -3,7 +3,6 @@
 import { useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { LanguageSwitcher } from '@/components/layout/language-switcher'
 import type { UserInfo } from '@/app/(main)/page'
 
@@ -31,14 +30,6 @@ export function SwipeSections({
   const t = useTranslations()
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
-
-  // 패널 순서: 0=랜덤Better, 1=Hot Better, 2=랭킹, 3=프로필
-  const SECTION_LABELS = [
-    t('sections.better'),
-    t('sections.hot'),
-    t('sections.ranking'),
-    t('sections.profile'),
-  ]
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -202,125 +193,109 @@ export function SwipeSections({
 
       </div>
 
-      {/* ── 하단 섹션 인디케이터 (fixed) ── */}
+      {/* ── 새 인디케이터: 좌우 꺽쇠 + 첫 페이지 하단 힌트 ── */}
       {!hideIndicator && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: 14,
-            left: 0,
-            right: 0,
-            zIndex: 50,
-            display: 'flex',
-            justifyContent: 'center',
-            pointerEvents: 'none',
-          }}
-        >
-          <div
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: 0,
-              background: 'rgba(0,0,0,0.4)',
-              backdropFilter: 'blur(12px)',
-              WebkitBackdropFilter: 'blur(12px)',
-              borderRadius: 999,
-              padding: '3px 4px',
-              boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
-              pointerEvents: 'auto',
-              maxHeight: 24,
-            }}
-          >
-            {/* 이전 화살표 */}
+        <>
+          <style>{`
+            @keyframes _bounceXLeft {
+              0%, 100% { transform: translateX(0) translateY(-50%); }
+              50%       { transform: translateX(-4px) translateY(-50%); }
+            }
+            @keyframes _bounceXRight {
+              0%, 100% { transform: translateX(0) translateY(-50%); }
+              50%       { transform: translateX(4px) translateY(-50%); }
+            }
+            @keyframes _bounceY {
+              0%, 100% { transform: translateX(-50%) translateY(0); }
+              50%       { transform: translateX(-50%) translateY(6px); }
+            }
+          `}</style>
+
+          {/* 좌측 꺽쇠 */}
+          {active > 0 && (
             <button
-              onClick={() => active > 0 && onActiveChange(active - 1)}
-              disabled={active === 0}
-              style={{
-                width: 20, height: 18,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'none', border: 'none',
-                cursor: active > 0 ? 'pointer' : 'default',
-                color: active > 0 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.2)',
-                flexShrink: 0,
-                transition: 'color 0.15s',
-                padding: 0,
-              }}
+              onClick={() => onActiveChange(active - 1)}
               aria-label="previous section"
-            >
-              <ChevronLeft size={11} strokeWidth={2.5} />
-            </button>
-
-            {/* 섹션 번호들 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 1, padding: '0 2px' }}>
-              {SECTION_LABELS.map((label, i) => {
-                const isCurrent = i === active
-                return (
-                  <button
-                    key={i}
-                    onClick={() => onActiveChange(i)}
-                    style={{
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      padding: '1px 4px',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      borderRadius: 4,
-                      transition: 'all 0.2s',
-                      lineHeight: 1,
-                    }}
-                    aria-label={label}
-                  >
-                    <span style={{
-                      fontSize: isCurrent ? '0.8rem' : '0.6rem',
-                      fontWeight: isCurrent ? 900 : 500,
-                      color: isCurrent ? 'white' : 'rgba(255,255,255,0.3)',
-                      lineHeight: 1,
-                      transition: 'all 0.2s',
-                    }}>
-                      {i + 1}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* 구분점 + 섹션명 */}
-            <span style={{
-              fontSize: '0.58rem', fontWeight: 700,
-              color: 'rgba(255,255,255,0.5)',
-              padding: '0 1px 0 3px',
-              userSelect: 'none',
-              lineHeight: 1,
-            }}>·</span>
-            <span style={{
-              fontSize: '0.62rem', fontWeight: 800,
-              color: 'white',
-              whiteSpace: 'nowrap',
-              padding: '0 3px',
-              letterSpacing: '-0.01em',
-              lineHeight: 1,
-            }}>
-              {SECTION_LABELS[active]}
-            </span>
-
-            {/* 다음 화살표 */}
-            <button
-              onClick={() => active < 3 && onActiveChange(active + 1)}
-              disabled={active === 3}
               style={{
-                width: 20, height: 18,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: 'none', border: 'none',
-                cursor: active < 3 ? 'pointer' : 'default',
-                color: active < 3 ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.2)',
-                flexShrink: 0,
-                transition: 'color 0.15s',
-                padding: 0,
+                position: 'fixed',
+                left: 12,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 150,
+                background: 'none',
+                border: 'none',
+                color: 'rgba(255,255,255,0.7)',
+                fontSize: 32,
+                cursor: 'pointer',
+                userSelect: 'none',
+                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                lineHeight: 1,
+                padding: '8px 4px',
+                animation: '_bounceXLeft 1.6s ease-in-out infinite',
               }}
-              aria-label="next section"
             >
-              <ChevronRight size={11} strokeWidth={2.5} />
+              ‹
             </button>
-          </div>
-        </div>
+          )}
+
+          {/* 우측 꺽쇠 */}
+          {active < 3 && (
+            <button
+              onClick={() => onActiveChange(active + 1)}
+              aria-label="next section"
+              style={{
+                position: 'fixed',
+                right: 12,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 150,
+                background: 'none',
+                border: 'none',
+                color: 'rgba(255,255,255,0.7)',
+                fontSize: 32,
+                cursor: 'pointer',
+                userSelect: 'none',
+                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                lineHeight: 1,
+                padding: '8px 4px',
+                animation: '_bounceXRight 1.6s ease-in-out infinite',
+              }}
+            >
+              ›
+            </button>
+          )}
+
+          {/* 첫 페이지 전용 하단 스와이프 힌트 */}
+          {active === 0 && (
+            <div
+              style={{
+                position: 'fixed',
+                bottom: 80,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                textAlign: 'center',
+                color: 'rgba(255,255,255,0.7)',
+                textShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                zIndex: 150,
+                pointerEvents: 'none',
+              }}
+            >
+              <p style={{ fontSize: '0.72rem', fontWeight: 600, whiteSpace: 'nowrap', marginBottom: 4 }}>
+                {t('hint.swipeNext')}
+              </p>
+              <span
+                style={{
+                  display: 'inline-block',
+                  fontSize: 20,
+                  lineHeight: 1,
+                  animation: '_bounceY 1.4s ease-in-out infinite',
+                }}
+              >
+                ∨
+              </span>
+            </div>
+          )}
+        </>
       )}
     </div>
   )

@@ -131,7 +131,8 @@
     "swipeVertical": "Desliza arriba/abajo → Siguiente Touched",
     "swipeHorizontal": "Desliza izq/der → Top100 / Ranking",
     "tap": "Toca foto → Votar  |  Detalle → Ampliar",
-    "dismiss": "Toca para cerrar"
+    "dismiss": "Toca para cerrar",
+    "swipeNext": "Desliza para ver más"
   },
   "categories": {
     "all": "Todos",

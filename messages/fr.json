@@ -131,7 +131,8 @@
     "swipeVertical": "Glisser haut/bas → Touched suivant",
     "swipeHorizontal": "Glisser gauche/droite → Top100 / Classement",
     "tap": "Appuyer → Voter  |  Détail → Agrandir",
-    "dismiss": "Appuyer pour fermer"
+    "dismiss": "Appuyer pour fermer",
+    "swipeNext": "Glissez pour voir plus"
   },
   "categories": {
     "all": "Tout",

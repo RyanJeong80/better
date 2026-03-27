@@ -131,7 +131,8 @@
     "swipeVertical": "위아래 스와이프 → 다음 Touched",
     "swipeHorizontal": "좌우 스와이프 → Top100 / 랭킹",
     "tap": "사진 탭 → 투표  |  상세보기 → 크게 보기",
-    "dismiss": "탭하면 닫힙니다"
+    "dismiss": "탭하면 닫힙니다",
+    "swipeNext": "스와이프해서 다음 터치 보기"
   },
   "categories": {
     "all": "전체",

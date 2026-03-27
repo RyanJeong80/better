@@ -131,7 +131,8 @@
     "swipeVertical": "Swipe up/down → Next Touched",
     "swipeHorizontal": "Swipe left/right → Top100 / Ranking",
     "tap": "Tap photo → Vote  |  Long press → Zoom",
-    "dismiss": "Tap to dismiss"
+    "dismiss": "Tap to dismiss",
+    "swipeNext": "Swipe for next Touch"
   },
   "categories": {
     "all": "All",

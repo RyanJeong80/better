@@ -131,7 +131,8 @@
     "swipeVertical": "上下スワイプ → 次のTouched",
     "swipeHorizontal": "左右スワイプ → Top100 / ランキング",
     "tap": "写真タップ → 投票  |  詳細 → 拡大",
-    "dismiss": "タップして閉じる"
+    "dismiss": "タップして閉じる",
+    "swipeNext": "スワイプして次を見る"
   },
   "categories": {
     "all": "すべて",

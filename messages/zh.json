@@ -131,7 +131,8 @@
     "swipeVertical": "上下滑动 → 下一个Touched",
     "swipeHorizontal": "左右滑动 → Top100 / 排行榜",
     "tap": "点击照片 → 投票  |  详情 → 放大",
-    "dismiss": "点击关闭"
+    "dismiss": "点击关闭",
+    "swipeNext": "滑动查看下一个"
   },
   "categories": {
     "all": "全部",
