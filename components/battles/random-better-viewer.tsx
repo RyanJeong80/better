@@ -351,7 +351,7 @@ export function RandomBetterViewer({
       setIsLiked(next.isLiked)
       setPhase('voting')
       setSlideDir('enter-up')
-      setTimeout(() => setSlideDir('none'), 320)
+      setTimeout(() => setSlideDir('none'), 300)
       if (!isDemo) fillPrefetchQueue()
     })
   }
@@ -376,7 +376,7 @@ export function RandomBetterViewer({
       setIsLiked(prefetched.isLiked)
       setPhase('voting')
       setSlideDir('enter-up')
-      setTimeout(() => setSlideDir('none'), 320)
+      setTimeout(() => setSlideDir('none'), 300)
       // 소비된 만큼 큐를 다시 채움
       if (!isDemo) fillPrefetchQueue()
     } else {
@@ -399,7 +399,7 @@ export function RandomBetterViewer({
     setIsLiked(prev.isLiked)
     setPhase('voting')
     setSlideDir('enter-down')
-    setTimeout(() => setSlideDir('none'), 320)
+    setTimeout(() => setSlideDir('none'), 300)
   }
 
   function resetQueue() {
@@ -501,9 +501,9 @@ export function RandomBetterViewer({
 
   const slideStyle: React.CSSProperties =
     slideDir === 'enter-up'
-      ? { animation: '_slideUp 0.28s cubic-bezier(0.25,1,0.5,1)' }
+      ? { animation: '_slideUp 0.3s ease-out' }
       : slideDir === 'enter-down'
-        ? { animation: '_slideDown 0.28s cubic-bezier(0.25,1,0.5,1)' }
+        ? { animation: '_slideDown 0.3s ease-out' }
         : {}
 
   const dimA = (phase === 'picked' || phase === 'submitting') && selectedChoice === 'B'
@@ -520,8 +520,8 @@ export function RandomBetterViewer({
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: '#EDE4DA', userSelect: 'none' }}>
       <style>{`
-        @keyframes _slideUp      { from { transform: translateY(28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
-        @keyframes _slideDown    { from { transform: translateY(-28px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+        @keyframes _slideUp      { from { transform: translateY(60px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+        @keyframes _slideDown    { from { transform: translateY(-60px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
         @keyframes _slideUpModal { from { transform: translateY(100%) } to { transform: translateY(0) } }
         @keyframes _checkPop     { 0% { transform: translate(-50%,-50%) scale(0); opacity:0 } 65% { transform: translate(-50%,-50%) scale(1.3); opacity:1 } 100% { transform: translate(-50%,-50%) scale(1); opacity:1 } }
       `}</style>
@@ -823,24 +823,40 @@ export function RandomBetterViewer({
         />
       )}
 
+      {/* ── 다음 카드 미리보기 ── */}
+      {phase !== 'loading' && phase !== 'empty' && (
+        <div style={{
+          position: 'absolute',
+          bottom: 0, left: 24, right: 24,
+          height: 80,
+          background: '#ffffff',
+          borderRadius: '12px 12px 0 0',
+          boxShadow: '0 -4px 12px rgba(0,0,0,0.08)',
+          opacity: 0.7,
+          transform: 'scale(0.95)',
+        }} />
+      )}
+
       {/* ── 폴라로이드 카드 ── */}
       <div style={{
         position: 'absolute',
-        top: 8, left: 8, right: 8, bottom: 0,
+        top: 16, left: 16, right: 16, bottom: 80,
         display: 'flex', flexDirection: 'column',
-        borderRadius: '4px 4px 0 0',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+        borderRadius: 12,
+        boxShadow: '0 2px 4px rgba(0,0,0,0.08), 0 8px 16px rgba(0,0,0,0.12), 0 20px 40px rgba(0,0,0,0.15)',
         overflow: 'hidden',
+        background: 'white',
         ...slideStyle,
       }}>
 
         {/* ── 로딩 ── */}
         {phase === 'loading' && (
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ flex: 1, background: '#1c1c1e' }} />
-            <div style={{ height: 2, background: '#EDE4DA' }} />
-            <div style={{ flex: 1, background: '#161618' }} />
-            <div style={{ height: 80, background: '#f0ebe4' }} />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'white' }}>
+            <div style={{ height: 14, flexShrink: 0 }} />
+            <div style={{ flex: 1, margin: '0 12px', borderRadius: 4, background: '#1c1c1e' }} />
+            <div style={{ height: 12, flexShrink: 0 }} />
+            <div style={{ flex: 1, margin: '0 12px', borderRadius: 4, background: '#161618' }} />
+            <div style={{ height: 68, flexShrink: 0, background: '#f0ebe4', borderTop: '1px solid #EDE4DA' }} />
           </div>
         )}
 
@@ -888,14 +904,20 @@ export function RandomBetterViewer({
         {phase !== 'loading' && phase !== 'empty' && battle && (
           <>
             {/* ── 사진 섹션 ── */}
-            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: '#EDE4DA' }}>
+            <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: 'white', display: 'flex', flexDirection: 'column' }}>
+
+              {/* 상단 폴라로이드 여백 */}
+              <div style={{ height: 14, flexShrink: 0 }} />
 
               {/* 사진 A (상단) */}
               <div
                 onClick={phase === 'voting' ? () => handlePickPhoto('A') : undefined}
                 style={{
-                  position: 'absolute', top: 0, left: 0, right: 0, height: 'calc(50% - 1px)',
+                  flex: 1,
+                  marginLeft: 12, marginRight: 12,
+                  position: 'relative',
                   overflow: 'hidden',
+                  borderRadius: 4,
                   cursor: phase === 'voting' ? 'pointer' : 'default',
                   opacity: opacityA,
                   filter: !dimA && (phase === 'picked' || phase === 'submitting') && selectedChoice === 'A'
@@ -992,36 +1014,18 @@ export function RandomBetterViewer({
                 )}
               </div>
 
-              {/* ── VS 구분선 / 결과 퍼센트 바 ── */}
-              <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, transform: 'translateY(-50%)', zIndex: 5, pointerEvents: 'none' }}>
-                {phase === 'voted' && voteResult ? (
-                  <div style={{ position: 'relative', height: 36, overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: barFilled ? `${pctA}%` : '0%', background: 'linear-gradient(to right, #4338CA, #6366F1)', transition: 'width 0.75s cubic-bezier(0.25,1,0.5,1)' }} />
-                    <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: barFilled ? `${pctB}%` : '0%', background: 'linear-gradient(to left, #BE185D, #EC4899)', transition: 'width 0.75s cubic-bezier(0.25,1,0.5,1)' }} />
-                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} />
-                    <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 14px' }}>
-                      <span style={{ color: 'white', fontWeight: 900, fontSize: '0.92rem', textShadow: '0 1px 6px rgba(0,0,0,0.8)', letterSpacing: '-0.02em' }}>A&nbsp;&nbsp;{pctA}%</span>
-                      <span style={{ color: 'white', fontWeight: 900, fontSize: '0.92rem', textShadow: '0 1px 6px rgba(0,0,0,0.8)', letterSpacing: '-0.02em' }}>{pctB}%&nbsp;&nbsp;B</span>
-                    </div>
-                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, background: 'rgba(255,255,255,0.15)', zIndex: 3 }}>
-                      <div style={{ height: '100%', width: barFilled ? '0%' : '100%', background: 'rgba(255,255,255,0.55)', transition: barFilled ? 'width 2.9s linear' : 'none' }} />
-                    </div>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <div style={{ flex: 1, height: 2, background: '#EDE4DA' }} />
-                    <div style={{ width: 38, height: 38, borderRadius: '50%', flexShrink: 0, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1.5px solid rgba(255,255,255,0.32)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 900, fontSize: '0.68rem', letterSpacing: '0.05em' }}>VS</div>
-                    <div style={{ flex: 1, height: 2, background: '#EDE4DA' }} />
-                  </div>
-                )}
-              </div>
+              {/* A/B 사이 흰색 여백 (12px) */}
+              <div style={{ height: 12, flexShrink: 0 }} />
 
               {/* 사진 B (하단) */}
               <div
                 onClick={phase === 'voting' ? () => handlePickPhoto('B') : undefined}
                 style={{
-                  position: 'absolute', top: 'calc(50% + 1px)', left: 0, right: 0, bottom: 0,
+                  flex: 1,
+                  marginLeft: 12, marginRight: 12,
+                  position: 'relative',
                   overflow: 'hidden',
+                  borderRadius: 4,
                   cursor: phase === 'voting' ? 'pointer' : 'default',
                   opacity: opacityB,
                   filter: !dimB && (phase === 'picked' || phase === 'submitting') && selectedChoice === 'B'
@@ -1118,12 +1122,34 @@ export function RandomBetterViewer({
                 )}
               </div>
 
+              {/* ── VS 오버레이 (사진 A/B 사이 중앙) ── */}
+              <div style={{ position: 'absolute', top: 'calc(50% + 7px)', left: 12, right: 12, transform: 'translateY(-50%)', zIndex: 5, pointerEvents: 'none' }}>
+                {phase === 'voted' && voteResult ? (
+                  <div style={{ position: 'relative', height: 36, overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: barFilled ? `${pctA}%` : '0%', background: 'linear-gradient(to right, #4338CA, #6366F1)', transition: 'width 0.75s cubic-bezier(0.25,1,0.5,1)' }} />
+                    <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: barFilled ? `${pctB}%` : '0%', background: 'linear-gradient(to left, #BE185D, #EC4899)', transition: 'width 0.75s cubic-bezier(0.25,1,0.5,1)' }} />
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)' }} />
+                    <div style={{ position: 'absolute', inset: 0, zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 14px' }}>
+                      <span style={{ color: 'white', fontWeight: 900, fontSize: '0.92rem', textShadow: '0 1px 6px rgba(0,0,0,0.8)', letterSpacing: '-0.02em' }}>A&nbsp;&nbsp;{pctA}%</span>
+                      <span style={{ color: 'white', fontWeight: 900, fontSize: '0.92rem', textShadow: '0 1px 6px rgba(0,0,0,0.8)', letterSpacing: '-0.02em' }}>{pctB}%&nbsp;&nbsp;B</span>
+                    </div>
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 2, background: 'rgba(255,255,255,0.15)', zIndex: 3 }}>
+                      <div style={{ height: '100%', width: barFilled ? '0%' : '100%', background: 'rgba(255,255,255,0.55)', transition: barFilled ? 'width 2.9s linear' : 'none' }} />
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: '#ffffff', border: '1.5px solid #D4C4B0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9B8B7E', fontWeight: 900, fontSize: '0.62rem', letterSpacing: '0.05em', boxShadow: '0 2px 6px rgba(0,0,0,0.1)' }}>VS</div>
+                  </div>
+                )}
+              </div>
+
               {/* ── 뒤로가기 버튼 (handleClose 모드) ── */}
               {handleClose && (
                 <button
                   onClick={handleClose}
                   style={{
-                    position: 'absolute', top: 10, left: 10, zIndex: 35,
+                    position: 'absolute', top: 24, left: 22, zIndex: 35,
                     width: 36, height: 36, borderRadius: '50%',
                     background: 'rgba(0,0,0,0.6)',
                     backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
@@ -1138,7 +1164,7 @@ export function RandomBetterViewer({
 
               {/* ── 우측 액션 버튼 ── */}
               <div style={{
-                position: 'absolute', right: 10, top: '58%', transform: 'translateY(-50%)',
+                position: 'absolute', right: 22, top: '58%', transform: 'translateY(-50%)',
                 zIndex: 25,
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
               }}>
@@ -1208,9 +1234,9 @@ export function RandomBetterViewer({
 
             {/* ── 폴라로이드 하단 흰색 정보 바 ── */}
             <div style={{
-              height: 80, flexShrink: 0, background: '#ffffff',
-              padding: '10px 14px',
-              display: 'flex', alignItems: 'center', gap: 10,
+              flexShrink: 0, background: '#ffffff',
+              padding: '10px 14px 20px',
+              display: 'flex', alignItems: 'flex-start', gap: 10,
             }}>
               {/* 좌측: 카테고리 + 제목 + 상태 */}
               <div style={{ flex: 1, minWidth: 0 }}>
