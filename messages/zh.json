@@ -263,6 +263,9 @@
     "tie": "平局，各{percent}%！",
     "participants": "{count}人参与",
     "scanDownload": "扫码下载应用",
+    "cancel": "取消",
+    "saveAction": "保存 💾",
+    "shareAction": "分享 📤",
     "save": "保存",
     "share": "分享",
     "shareTitle": "Touched 投票结果"

@@ -263,6 +263,9 @@
     "tie": "{percent}%로 동률이에요!",
     "participants": "총 {count}명 참여",
     "scanDownload": "QR코드로 앱 다운로드",
+    "cancel": "취소",
+    "saveAction": "저장하기 💾",
+    "shareAction": "공유하기 📤",
     "save": "저장",
     "share": "공유",
     "shareTitle": "Touched 투표 결과"

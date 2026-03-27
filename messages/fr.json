@@ -263,6 +263,9 @@
     "tie": "Égalité à {percent}% !",
     "participants": "{count} personnes ont participé",
     "scanDownload": "Scannez pour télécharger",
+    "cancel": "Annuler",
+    "saveAction": "Enregistrer 💾",
+    "shareAction": "Partager 📤",
     "save": "Enregistrer",
     "share": "Partager",
     "shareTitle": "Résultat Touched"

@@ -263,6 +263,9 @@
     "tie": "¡Empate con {percent}%!",
     "participants": "{count} personas participaron",
     "scanDownload": "Escanea para descargar",
+    "cancel": "Cancelar",
+    "saveAction": "Guardar 💾",
+    "shareAction": "Compartir 📤",
     "save": "Guardar",
     "share": "Compartir",
     "shareTitle": "Resultado de Touched"

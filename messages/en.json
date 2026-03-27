@@ -263,6 +263,9 @@
     "tie": "It's a tie at {percent}%!",
     "participants": "{count} people participated",
     "scanDownload": "Scan to download the app",
+    "cancel": "Cancel",
+    "saveAction": "Save 💾",
+    "shareAction": "Share 📤",
     "save": "Save",
     "share": "Share",
     "shareTitle": "Touched vote result"

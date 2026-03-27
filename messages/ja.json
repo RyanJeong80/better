@@ -263,6 +263,9 @@
     "tie": "{percent}%で同率です！",
     "participants": "{count}人が参加",
     "scanDownload": "QRコードでアプリをダウンロード",
+    "cancel": "キャンセル",
+    "saveAction": "保存 💾",
+    "shareAction": "共有 📤",
     "save": "保存",
     "share": "共有",
     "shareTitle": "Touched 投票結果"
