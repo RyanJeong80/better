@@ -82,6 +82,26 @@ async function loadImage(url: string): Promise<HTMLImageElement> {
   })
 }
 
+// Canvas letterSpacing helper (supported in Chrome 99+, Safari 16.1+, Firefox 96+)
+function setSpacing(ctx: CanvasRenderingContext2D, val: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ;(ctx as any).letterSpacing = val
+}
+
+async function ensureFont(family: string, weights: string[]): Promise<void> {
+  try {
+    const id = `gf-${family.replace(/\s+/g, '-').toLowerCase()}`
+    if (!document.getElementById(id)) {
+      const link = document.createElement('link')
+      link.id = id
+      link.rel = 'stylesheet'
+      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(family)}:wght@${weights.join(';')}&display=swap`
+      document.head.appendChild(link)
+    }
+    await Promise.all(weights.map(w => document.fonts.load(`${w} 64px "${family}"`)))
+  } catch { /* fall back to system fonts */ }
+}
+
 async function buildShareCanvas(opts: {
   battleId: string
   imageAUrl: string
@@ -104,6 +124,10 @@ async function buildShareCanvas(opts: {
   const ctx = canvas.getContext('2d')!
 
   const PAD = 60
+  const DISPLAY = '"Josefin Sans", sans-serif'
+
+  // ── Load display font ────────────────────────────────
+  await ensureFont('Josefin Sans', ['400', '700'])
 
   // ── Background ──────────────────────────────────────
   ctx.fillStyle = '#EDE4DA'
@@ -191,7 +215,7 @@ async function buildShareCanvas(opts: {
   ctx.textBaseline = 'middle'
   ctx.fillText('VS', vsX, vsY)
 
-  // ── Logo stamp on winner card ────────────────────────
+  // ── Logo stamp on winner card (white circle bg + glow) ──
   const logo = new Image()
   logo.crossOrigin = 'anonymous'
   await new Promise<void>(resolve => {
@@ -207,17 +231,28 @@ async function buildShareCanvas(opts: {
     const stampH = logo.naturalHeight * (stampW / logo.naturalWidth)
 
     ctx.save()
-    ctx.globalAlpha = 0.85
     ctx.translate(cx, cy)
     ctx.rotate(-15 * Math.PI / 180)
-    ctx.drawImage(logo, -stampW / 2, -stampH / 2, stampW, stampH)
-    ctx.restore()
+
+    // White circular background
+    ctx.beginPath()
+    ctx.arc(0, 0, stampW * 0.55, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)'
+    ctx.fill()
+
+    // White glow + logo on top
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.9)'
+    ctx.shadowBlur = 20
     ctx.globalAlpha = 1.0
+    ctx.drawImage(logo, -stampW / 2, -stampH / 2, stampW, stampH)
+
+    ctx.restore()   // resets shadowBlur, globalAlpha, transform
   }
 
   let y = imgY + imgH + 32
 
   // ── Results bar ─────────────────────────────────────
+  setSpacing(ctx, '0px')
   ctx.font = `800 28px ${FONT}`
   ctx.textBaseline = 'top'
   ctx.fillStyle = '#1a1a1a'
@@ -250,13 +285,13 @@ async function buildShareCanvas(opts: {
   ctx.textAlign = 'left'
   ctx.fillText(opts.winnerText, PAD, y)
 
-  // ── Bottom: QR code + TOUCHED text ──────────────────
+  // ── Bottom: QR code + TOUCHED + HI text ─────────────
   const qrSize = 88
   const boxPad = 8
   const boxSize = qrSize + boxPad * 2   // 104
   const scanTextLineH = Math.round(22 * 1.4)
   const qrBoxX = PAD
-  const qrBoxY = H - PAD - boxSize - 10 - scanTextLineH   // 1080-60-104-10-31 = 875
+  const qrBoxY = H - PAD - boxSize - 10 - scanTextLineH   // ≈ 875
 
   // QR white box
   rr(ctx, qrBoxX, qrBoxY, boxSize, boxSize, 12)
@@ -272,18 +307,50 @@ async function buildShareCanvas(opts: {
   ctx.drawImage(qrCanvas, qrBoxX + boxPad, qrBoxY + boxPad, qrSize, qrSize)
 
   // Download text below QR
+  setSpacing(ctx, '0px')
   ctx.fillStyle = '#6b6058'
   ctx.font = `600 22px ${FONT}`
   ctx.textAlign = 'left'
   ctx.textBaseline = 'top'
   ctx.fillText(opts.scanDownloadText, qrBoxX, qrBoxY + boxSize + 10)
 
-  // TOUCHED text — vertically centered with QR box
+  // ── TOUCHED (Josefin Sans, wide spacing) ─────────────
+  const TOUCHED_SIZE = 64
+  const TOUCHED_SPACING = '8px'
+  ctx.font = `700 ${TOUCHED_SIZE}px ${DISPLAY}`
+  setSpacing(ctx, TOUCHED_SPACING)
+  const touchedWidth = ctx.measureText('TOUCHED').width
+
+  // ── HI text auto-sized to match TOUCHED width ────────
+  setSpacing(ctx, '0px')
+  let hiSize = 14
+  while (hiSize < 60) {
+    ctx.font = `400 ${hiSize}px ${DISPLAY}`
+    if (ctx.measureText('HI(Human Intelligence)').width >= touchedWidth) break
+    hiSize++
+  }
+
+  // Vertical centering: [TOUCHED + gap + HI] within QR box height
+  const TEXT_GAP = 10
+  const totalTextH = TOUCHED_SIZE + TEXT_GAP + hiSize
+  const textStartY = qrBoxY + Math.round((boxSize - totalTextH) / 2)
+
+  // Draw TOUCHED
   ctx.fillStyle = '#3D2B1F'
-  ctx.font = `bold 64px ${FONT}`
+  ctx.font = `700 ${TOUCHED_SIZE}px ${DISPLAY}`
+  setSpacing(ctx, TOUCHED_SPACING)
   ctx.textAlign = 'right'
-  ctx.textBaseline = 'middle'
-  ctx.fillText('TOUCHED', W - PAD, qrBoxY + boxSize / 2)
+  ctx.textBaseline = 'top'
+  ctx.fillText('TOUCHED', W - PAD, textStartY)
+
+  // Draw HI
+  setSpacing(ctx, '0px')
+  ctx.font = `400 ${hiSize}px ${DISPLAY}`
+  ctx.fillStyle = '#3D2B1F'
+  ctx.fillText('HI(Human Intelligence)', W - PAD, textStartY + TOUCHED_SIZE + TEXT_GAP)
+
+  // Reset spacing
+  setSpacing(ctx, '0px')
 
   return canvas
 }
