@@ -1,6 +1,7 @@
-# Better — 프로젝트 가이드
+# Touched — 프로젝트 가이드
 
 두 사진을 업로드하면 다른 사람들이 투표하는 소셜 비교 투표 앱.
+앱 이름: **Touched** (이전: Better)
 
 ---
 
@@ -11,13 +12,16 @@
 | Framework | Next.js 16.1.6 (App Router) |
 | Language | TypeScript + React 19 |
 | Database | Supabase (PostgreSQL) + Drizzle ORM |
-| Auth | Supabase Auth (이메일/비밀번호) |
+| Auth | Supabase Auth (이메일/비밀번호 + Google OAuth) |
 | Storage | Supabase Storage (`battle-images` 버킷) |
 | Realtime | Supabase Realtime |
 | Styling | Tailwind CSS v4 + shadcn/ui |
-| Validation | Zod |
+| i18n | next-intl (6개 언어: ko, en, ja, zh, es, fr) |
 | Icons | Lucide React |
 | Deployment | Vercel |
+| PWA | @ducanh2912/next-pwa |
+| Native | Capacitor (Android/iOS) |
+| Translation | DeepL API (`deepl-node`) |
 
 ---
 
@@ -35,6 +39,9 @@ DATABASE_URL=postgresql://postgres.[project-ref]:[password]@aws-0-ap-northeast-2
 
 # Direct connection — drizzle-kit 전용 (실제 마이그레이션은 SQL Editor에서 직접 실행)
 DIRECT_DATABASE_URL=postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
+
+# DeepL 번역 API
+DEEPL_API_KEY=your_deepl_api_key
 ```
 
 ---
@@ -43,8 +50,10 @@ DIRECT_DATABASE_URL=postgresql://postgres:[password]@db.[project-ref].supabase.c
 
 - [ ] `.env.local` 값 입력
 - [ ] 마이그레이션: `drizzle/run-in-supabase-sql-editor.sql` 을 Supabase SQL Editor에서 실행
+- [ ] 텍스트 전용 터치 컬럼 마이그레이션 (아래 참고)
 - [ ] Supabase Storage에서 `battle-images` 버킷 생성 (public)
 - [ ] Supabase Realtime에서 `votes` 테이블 활성화
+- [ ] `public/icons/` 에 아이콘 파일 배치 (icon-192x192.png, icon-512x512.png, icon-1024x1024.png)
 
 ---
 
@@ -52,14 +61,15 @@ DIRECT_DATABASE_URL=postgresql://postgres:[password]@db.[project-ref].supabase.c
 
 ```
 app/
-├── layout.tsx                  # 루트 레이아웃 (폰트, 메타데이터)
-├── globals.css                 # 전역 스타일 (Tailwind v4 테마, CSS 변수)
+├── layout.tsx                  # 루트 레이아웃 (폰트, 메타데이터, PWA)
+├── globals.css                 # 전역 스타일
+├── privacy/page.tsx            # 개인정보처리방침 (/privacy)
 ├── (auth)/
 │   ├── login/page.tsx
-│   └── signup/page.tsx
+│   └── signup/page.tsx         # 개인정보처리방침 동의 체크박스 포함
 ├── (main)/
 │   ├── layout.tsx              # Header + BottomNav
-│   ├── page.tsx                # 홈 (기능 카드)
+│   ├── page.tsx                # 홈 (4패널 스와이프: 랜덤/Hot/랭킹/프로필)
 │   ├── battles/
 │   │   ├── new/page.tsx        # 터치 생성 (로그인 필요)
 │   │   └── [id]/page.tsx       # 터치 상세
@@ -67,25 +77,33 @@ app/
 │   ├── hot/page.tsx            # 좋아요 Top 100
 │   ├── ranking/page.tsx        # 유저 랭킹
 │   └── profile/page.tsx        # 내 프로필 (로그인 필요)
-└── api/auth/callback/route.ts  # Supabase OAuth 콜백
+└── api/
+    ├── auth/callback/route.ts  # Supabase OAuth 콜백
+    ├── translate/route.ts      # DeepL 번역 API
+    ├── user/profile/route.ts   # 프로필 데이터
+    └── panels/hot/route.ts     # Hot 패널 데이터
 
 actions/
-├── auth.ts                     # signIn, signUp, signOut
-├── battles.ts                  # createBattle, getRandomBattle, getBattles
+├── auth.ts                     # signIn, signUp, signOut, signInWithGoogle
+├── battles.ts                  # createBattle, getRandomBattle, getBattles, deleteBattle
 ├── votes.ts                    # castVote, submitVote, getVoteCounts
 └── likes.ts                    # toggleLike
 
 components/
 ├── auth/                       # LoginForm, SignupForm
 ├── battles/                    # BattleVote, CreateBattleForm, MyBetterCard, RandomBetterViewer
-├── home/                       # AnimatedWord
-├── layout/                     # Header, BottomNav
+├── home/                       # HomeBetterViewer, HotPanelClient, SplashScreen 등
+├── layout/                     # Header, BottomNav, SwipeSections
+├── profile/                    # ProfilePanelClient, ProfileBetterList
 └── ranking/                    # RankingView
 
 lib/
 ├── db/
 │   ├── schema.ts               # Drizzle 스키마
 │   └── index.ts                # Drizzle 인스턴스 (lazy proxy)
+├── constants/
+│   ├── categories.ts           # BetterCategory, CATEGORY_MAP, CATEGORY_FILTERS
+│   └── text-colors.ts          # TEXT_BG_COLORS, getTextColorIdx
 └── supabase/
     ├── client.ts               # 브라우저용 클라이언트
     └── server.ts               # 서버용 클라이언트
@@ -93,7 +111,18 @@ lib/
 hooks/
 └── use-realtime-votes.ts       # Supabase Realtime 실시간 투표 수
 
-types/index.ts                  # VoteChoice, BattleWithStats 등
+public/
+├── manifest.json               # PWA 매니페스트
+├── favicon-16x16.png
+├── favicon-32x32.png
+└── icons/
+    ├── icon-192x192.png
+    ├── icon-512x512.png
+    └── icon-1024x1024.png
+
+capacitor.config.ts             # Capacitor 설정 (Android/iOS)
+android/                        # Android 네이티브 프로젝트
+ios/                            # iOS 네이티브 프로젝트
 proxy.ts                        # 인증 미들웨어 (Next.js 16)
 ```
 
@@ -103,9 +132,22 @@ proxy.ts                        # 인증 미들웨어 (Next.js 16)
 
 ```
 users       id, email, name, avatarUrl, createdAt
-battles     id, userId(FK), title, imageAUrl, imageADescription, imageBUrl, imageBDescription, createdAt, closedAt
-votes       id, battleId(FK), voterId(FK), choice(A|B), reason, createdAt
-likes       id, battleId(FK), userId(FK), createdAt
+betters     id, userId(FK), title, imageAUrl, imageADescription,
+            imageBUrl, imageBDescription,
+            imageAText, imageBText, isTextOnly,   ← 텍스트 전용 컬럼
+            category, closedAt, winner, createdAt
+votes       id, betterId(FK), voterId(FK), choice(A|B), reason, createdAt
+likes       id, betterId(FK), userId(FK), createdAt
+userStats   userId(FK), totalVotes, accuracyRate, 카테고리별 정확도...
+```
+
+### 텍스트 전용 터치 마이그레이션 (미실행 시 실행 필요)
+
+```sql
+ALTER TABLE betters
+ADD COLUMN IF NOT EXISTS image_a_text text,
+ADD COLUMN IF NOT EXISTS image_b_text text,
+ADD COLUMN IF NOT EXISTS is_text_only boolean NOT NULL DEFAULT false;
 ```
 
 ---
@@ -116,6 +158,7 @@ likes       id, battleId(FK), userId(FK), createdAt
 
 - **보호 경로**: `/battles/new`, `/profile` → 미인증 시 `/login` 리다이렉트
 - **Auth 경로**: `/login`, `/signup` → 인증 상태 시 `/` 리다이렉트
+- `/privacy` — 공개 접근 가능
 - Supabase 미연결 시 인증 체크 건너뜀 (개발 편의)
 
 ---
@@ -135,22 +178,102 @@ const [state, action] = useActionState(signIn, null)
 const { voteCounts } = useRealtimeVotes(battleId, initialCounts)
 ```
 
-### 이미지
-```tsx
-// Next.js <img> 직접 사용 (next.config.ts에 supabase.co remotePatterns 등록됨)
-<img src={imageUrl} alt="..." />
+### 텍스트 전용 터치 색상
+```ts
+// lib/constants/text-colors.ts
+// UUID에서 결정론적으로 색상 인덱스 도출 (DB 컬럼 없이)
+getTextColorIdx(id, 0 | 1)  // side: 0=A, 1=B
 ```
 
-### DB 연결
+### 번역 (DeepL)
 ```ts
-// lib/db/index.ts — Proxy로 lazy 초기화 (DATABASE_URL 없어도 앱 실행 가능)
+// app/api/translate/route.ts
+// POST { texts: string[], target: string }
+// 모듈 레벨 Map 캐시, 실패 시 원문 반환
 ```
+
+### CSS transform 안 fixed 포지셔닝
+```tsx
+// SwipeSections가 transform: translateX() 사용 → position:fixed 요소가 뷰포트 기준 아님
+// 해결: createPortal(dialog, document.body) 사용
+import { createPortal } from 'react-dom'
+const [mounted, setMounted] = useState(false)
+useEffect(() => setMounted(true), [])
+{mounted && createPortal(<Dialog />, document.body)}
+```
+
+### 삭제 기능 패턴
+```ts
+// actions/battles.ts — deleteBattle(id)
+// 1. 소유권 확인 (userId 매칭)
+// 2. DB 삭제 (CASCADE → votes, likes 자동 삭제)
+// 3. Storage 이미지 삭제 (URL에서 경로 추출)
+// 반환: { success: true } | { error: string }
+```
+
+---
+
+## 홈 화면 구조 (4패널 스와이프)
+
+`components/layout/swipe-sections.tsx`:
+- 패널 0: 랜덤 터치 (RandomBetterViewer)
+- 패널 1: Hot Touched (HotPanelClient)
+- 패널 2: 랭킹 (RankingView)
+- 패널 3: 프로필 (ProfilePanelClient)
+- 하단 고정 인디케이터: `position: fixed` (transform 영향 받지 않도록 SwipeSections 외부)
+- 코멘트 입력 시 인디케이터 숨김 (`hideIndicator` prop)
+
+---
+
+## PWA 설정
+
+- `next.config.ts`: `@ducanh2912/next-pwa` (개발 환경 비활성)
+- `public/manifest.json`: name "Touched", theme_color "#ffffff"
+- `app/layout.tsx`: manifest, appleWebApp, icons, viewport(themeColor) 설정
+- 빌드 시 `public/sw.js`, `public/workbox-*.js` 자동 생성 (.gitignore 권장)
+
+---
+
+## Capacitor 설정
+
+```ts
+// capacitor.config.ts
+appId: 'com.touched.app'
+appName: 'Touched'
+webDir: 'out'
+server.url: 'https://better-ivory.vercel.app'  // 웹뷰로 Vercel 앱 로드
+plugins.SplashScreen: {
+  launchShowDuration: 2000,
+  backgroundColor: '#EDE4DA',
+  androidSplashResourceName: 'splash',
+  showSpinner: false,
+}
+```
+
+```bash
+npm run cap:sync     # npx cap sync
+npm run cap:android  # Android Studio 열기
+npm run cap:ios      # Xcode 열기
+```
+
+스플래시 이미지 경로:
+- Android: `android/app/src/main/res/drawable/splash.png`
+- iOS: `ios/App/App/Assets.xcassets/Splash.imageset/`
+
+---
+
+## 개인정보처리방침
+
+- 경로: `/privacy` (`app/privacy/page.tsx`)
+- 6개 언어 지원 (`messages/*.json`의 `privacy` 네임스페이스)
+- 프로필 패널 하단에 링크
+- 회원가입 폼에 동의 체크박스 (미동의 시 버튼 비활성)
 
 ---
 
 ## 폰트 설정
 
-`next/font/google`으로 자체 호스팅 (런타임 Google 서버 요청 없음):
+`next/font/google`으로 자체 호스팅:
 
 | 언어 | 폰트 | 로드 방식 |
 |------|------|-----------|
@@ -159,9 +282,6 @@ const { voteCounts } = useRealtimeVotes(battleId, initialCounts)
 | 일본어 | M PLUS Rounded 1c | `next/font/google` |
 | 중국어 | Noto Sans SC | `next/font/google` |
 
-CSS 변수: `--font-plus-jakarta`, `--font-m-plus`, `--font-noto-sc`
-fallback chain: `var(--font-plus-jakarta), 'Pretendard Variable', var(--font-m-plus), var(--font-noto-sc), sans-serif`
-
 ---
 
 ## 개발 명령어
@@ -169,8 +289,11 @@ fallback chain: `var(--font-plus-jakarta), 'Pretendard Variable', var(--font-m-p
 ```bash
 npm run dev          # 개발 서버
 npm run build        # 프로덕션 빌드
-npm run db:generate  # Drizzle 마이그레이션 파일 생성 (파일만 생성, DB 미적용)
+npm run db:generate  # Drizzle 마이그레이션 파일 생성
 npm run db:studio    # Drizzle Studio 열기
+npm run cap:sync     # Capacitor 동기화
+npm run cap:android  # Android Studio 열기
+npm run cap:ios      # Xcode 열기
 ```
 
 > **마이그레이션 실행 방법**
@@ -187,41 +310,45 @@ npm run db:studio    # Drizzle Studio 열기
 - 인증 (이메일/비밀번호 로그인·회원가입·로그아웃)
 - Google OAuth 로그인 (Supabase Auth)
 - 터치 생성 (이미지 2장 클라이언트 직접 업로드 → URL만 Server Action에 전달)
+- 텍스트 전용 터치 (isTextOnly, imageAText, imageBText)
 - A/B 투표 (중복 방지, 이유 입력 옵션)
 - 실시간 투표 수 (Supabase Realtime)
 - 랜덤 탐색 (본인 터치·이미 투표한 터치 제외, sessionStorage로 중복 방지)
-- 좋아요 토글 + Hot 100 랭킹 ("Hot100에 추천하기" 문구 포함)
+- 좋아요 토글 + Hot 100 랭킹
 - 유저 랭킹 (참여 수 / 투표 적중률)
-- 프로필 (내 터치, 통계, 받은 투표 이유)
+- 프로필 (내 터치, 통계, 받은 투표 이유, 삭제 기능, 마감일 표시)
+- 4패널 스와이프 홈 (랜덤/Hot/랭킹/프로필)
+- 자동 번역 (DeepL, 한국어 외 언어에서 제목·설명 번역)
+- 6개 언어 i18n (ko, en, ja, zh, es, fr)
+- PWA (manifest, service worker, iOS 최적화)
+- Capacitor Android/iOS 네이티브 빌드 준비
+- 개인정보처리방침 페이지 (/privacy)
 - 모바일 반응형 (하단 네비게이션)
-- 홈 피처 카드 전체 클릭 가능 (제목·썸네일·내용 모두 링크)
-- 이미지 업로드 시 canvas 리사이징 (1280px, JPEG 0.82) + blob URL 메모리 관리
-- 업로드 성공 후 홈 자동 리다이렉트 (메모리 해제)
+- 이미지 업로드 시 canvas 리사이징 (1280px, JPEG 0.82)
 
 ### 미구현
-- 터치 삭제 / 마감 (`closedAt` 필드 있으나 미사용)
+- 터치 마감 (`closedAt` 필드 있으나 마감 처리 로직 미구현)
 - 유저 검색 / 팔로우
 - 신고·모더레이션
-- 터치 카테고리·태그
+- 계정 탈퇴 기능
 
 ---
 
-## 주요 버그 수정 이력 (Vercel 배포)
+## 주요 버그 수정 이력
 
 ### DB 연결
 - **증상**: Vercel에서 INSERT 쿼리 `Failed query` / 로컬에서 `EHOSTUNREACH`
 - **원인**: Supabase 직접 연결(5432)은 IPv6 전용 → 로컬·Vercel 일부 리전 미지원
 - **해결**: 로컬·Vercel 모두 Transaction Pooler URL(포트 6543) 사용
 - `lib/db/index.ts` 옵션: `prepare: false`(PgBouncer 호환), `ssl: false`(Pooler는 SSL 불필요)
-- 마이그레이션만 Direct Connection 필요 → SQL Editor에서 직접 실행
 
 ### public.users FK 제약
 - **증상**: 투표·좋아요·터치 생성 시 FK constraint 오류
 - **원인**: OAuth 로그인 시 `public.users`에 유저가 생성되지 않음
 - **해결**:
-  1. Supabase SQL Editor에서 `auth.users` INSERT 트리거 생성 (아래 참고)
-  2. `actions/battles.ts`, `actions/votes.ts`, `actions/likes.ts`에 user upsert 추가 (실패해도 non-fatal)
-  3. `app/api/auth/callback/route.ts`에서 `onConflictDoUpdate`로 name/avatarUrl 갱신
+  1. Supabase SQL Editor에서 `auth.users` INSERT 트리거 생성
+  2. 모든 Server Action에 user upsert 추가 (non-fatal)
+  3. OAuth 콜백에서 `onConflictDoUpdate`로 name/avatarUrl 갱신
 
 ### Supabase Storage RLS
 - **증상**: 이미지 업로드 시 "new row violates row-level security policy"
@@ -232,6 +359,14 @@ npm run db:studio    # Drizzle Studio 열기
   CREATE POLICY "public read" ON storage.objects
   FOR SELECT TO public USING (bucket_id = 'battle-images');
   ```
+
+### position:fixed + CSS transform
+- **증상**: SwipeSections의 transform 안에서 fixed 다이얼로그 클릭 불가
+- **해결**: `createPortal(dialog, document.body)` + `mounted` state로 SSR 대응
+
+### 텍스트 전용 터치 DB 오류
+- **증상**: `image_a_text`, `image_b_text`, `is_text_only` 컬럼 없을 때 `Failed query`
+- **해결**: `deleteBattle`에서 `isTextOnly` 컬럼 select 제거, URL 포함 여부로 이미지 삭제 판단
 
 ---
 

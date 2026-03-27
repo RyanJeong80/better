@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { ChevronDown, Heart, Trash2 } from 'lucide-react'
+import { ShareButton } from './share-button'
 import { useTranslations } from 'next-intl'
 import type { BetterCategory } from '@/lib/constants/categories'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
@@ -258,6 +259,29 @@ export function MyBetterCard({
           id={battle.id}
           isTextOnly={battle.isTextOnly}
           sideText={battle.imageBText}
+        />
+      </div>
+
+      {/* 공유 버튼 */}
+      <div style={{
+        borderTop: '1px solid var(--color-border)',
+        padding: '12px 16px',
+        display: 'flex',
+        justifyContent: 'flex-end',
+      }}>
+        <ShareButton
+          battleId={battle.id}
+          title={battle.title}
+          imageAUrl={battle.imageAUrl}
+          imageBUrl={battle.imageBUrl}
+          pctA={pctA}
+          pctB={pctB}
+          total={battle.total}
+          winner={aWins ? 'A' : bWins ? 'B' : null}
+          isTextOnly={battle.isTextOnly}
+          imageAText={battle.imageAText}
+          imageBText={battle.imageBText}
+          compact
         />
       </div>
 

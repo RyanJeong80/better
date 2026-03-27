@@ -257,6 +257,16 @@
     "deleteConfirmBtn": "Supprimer",
     "deleting": "Suppression..."
   },
+  "share": {
+    "winnerA": "{percent}% ont touché A !",
+    "winnerB": "{percent}% ont touché B !",
+    "tie": "Égalité à {percent}% !",
+    "participants": "{count} personnes ont participé",
+    "scanDownload": "Scannez pour télécharger",
+    "save": "Enregistrer",
+    "share": "Partager",
+    "shareTitle": "Résultat Touched"
+  },
   "privacy": {
     "title": "Politique de confidentialité",
     "lastUpdated": "Dernière mise à jour: mars 2025",

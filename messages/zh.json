@@ -257,6 +257,16 @@
     "deleteConfirmBtn": "删除",
     "deleting": "删除中..."
   },
+  "share": {
+    "winnerA": "{percent}%的人选择了A！",
+    "winnerB": "{percent}%的人选择了B！",
+    "tie": "平局，各{percent}%！",
+    "participants": "{count}人参与",
+    "scanDownload": "扫码下载应用",
+    "save": "保存",
+    "share": "分享",
+    "shareTitle": "Touched 投票结果"
+  },
   "privacy": {
     "title": "隐私政策",
     "lastUpdated": "最后更新: 2025年3月",

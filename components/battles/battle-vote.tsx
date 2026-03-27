@@ -4,18 +4,27 @@ import { useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { castVote } from '@/actions/votes'
 import { useRealtimeVotes } from '@/hooks/use-realtime-votes'
+import { ShareButton } from './share-button'
 import type { VoteChoice } from '@/types'
 
 interface Props {
   battleId: string
+  title: string
   imageAUrl: string
   imageBUrl: string
   counts: { A: number; B: number; total: number }
   userVote: VoteChoice | null
   readOnly?: boolean
+  isTextOnly?: boolean
+  imageAText?: string | null
+  imageBText?: string | null
 }
 
-export function BattleVote({ battleId, imageAUrl, imageBUrl, counts, userVote, readOnly = false }: Props) {
+export function BattleVote({
+  battleId, title, imageAUrl, imageBUrl,
+  counts, userVote, readOnly = false,
+  isTextOnly, imageAText, imageBText,
+}: Props) {
   const [isPending, startTransition] = useTransition()
   const t = useTranslations('vote')
   const live = useRealtimeVotes(battleId, counts)
@@ -108,9 +117,26 @@ export function BattleVote({ battleId, imageAUrl, imageBUrl, counts, userVote, r
       )}
 
       {hasVoted && (
-        <p className="text-center text-sm text-muted-foreground">
-          {t('totalVotes', { count: live.total })}
-        </p>
+        <div className="space-y-3">
+          <p className="text-center text-sm text-muted-foreground">
+            {t('totalVotes', { count: live.total })}
+          </p>
+          <div className="flex justify-center">
+            <ShareButton
+              battleId={battleId}
+              title={title}
+              imageAUrl={imageAUrl}
+              imageBUrl={imageBUrl}
+              pctA={pctA}
+              pctB={pctB}
+              total={live.total}
+              winner={winner}
+              isTextOnly={isTextOnly}
+              imageAText={imageAText}
+              imageBText={imageBText}
+            />
+          </div>
+        </div>
       )}
     </div>
   )

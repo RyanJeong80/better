@@ -257,6 +257,16 @@
     "deleteConfirmBtn": "삭제하기",
     "deleting": "삭제 중..."
   },
+  "share": {
+    "winnerA": "A를 {percent}%가 터치했어요!",
+    "winnerB": "B를 {percent}%가 터치했어요!",
+    "tie": "{percent}%로 동률이에요!",
+    "participants": "총 {count}명 참여",
+    "scanDownload": "QR코드로 앱 다운로드",
+    "save": "저장",
+    "share": "공유",
+    "shareTitle": "Touched 투표 결과"
+  },
   "privacy": {
     "title": "개인정보처리방침",
     "lastUpdated": "최종 수정일: 2025년 3월",

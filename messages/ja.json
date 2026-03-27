@@ -257,6 +257,16 @@
     "deleteConfirmBtn": "削除する",
     "deleting": "削除中..."
   },
+  "share": {
+    "winnerA": "{percent}%がAをタッチしました！",
+    "winnerB": "{percent}%がBをタッチしました！",
+    "tie": "{percent}%で同率です！",
+    "participants": "{count}人が参加",
+    "scanDownload": "QRコードでアプリをダウンロード",
+    "save": "保存",
+    "share": "共有",
+    "shareTitle": "Touched 投票結果"
+  },
   "privacy": {
     "title": "プライバシーポリシー",
     "lastUpdated": "最終更新日: 2025年3月",

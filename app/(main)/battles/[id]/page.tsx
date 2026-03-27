@@ -50,11 +50,15 @@ export default async function BattlePage({
 
         <BattleVote
           battleId={better.id}
+          title={better.title}
           imageAUrl={better.imageAUrl}
           imageBUrl={better.imageBUrl}
           counts={counts}
           userVote={userVote}
           readOnly
+          isTextOnly={better.isTextOnly ?? undefined}
+          imageAText={better.imageAText}
+          imageBText={better.imageBText}
         />
       </div>
     )

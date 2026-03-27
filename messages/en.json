@@ -257,6 +257,16 @@
     "deleteConfirmBtn": "Delete",
     "deleting": "Deleting..."
   },
+  "share": {
+    "winnerA": "{percent}% touched A!",
+    "winnerB": "{percent}% touched B!",
+    "tie": "It's a tie at {percent}%!",
+    "participants": "{count} people participated",
+    "scanDownload": "Scan to download the app",
+    "save": "Save",
+    "share": "Share",
+    "shareTitle": "Touched vote result"
+  },
   "privacy": {
     "title": "Privacy Policy",
     "lastUpdated": "Last updated: March 2025",
