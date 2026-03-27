@@ -225,10 +225,16 @@ async function buildShareCanvas(opts: {
   })
 
   if (opts.winner && logo.complete && logo.naturalWidth > 0) {
-    const cx = opts.winner === 'A' ? imgXA + imgW / 2 : imgXB + imgW / 2
-    const cy = imgY + imgH / 2
-    const stampW = 300
+    const stampW = 150
     const stampH = logo.naturalHeight * (stampW / logo.naturalWidth)
+
+    // 선택된 카드의 우측 상단
+    const aCardRight = imgXA + imgW   // 540
+    const bCardRight = imgXB + imgW   // 1020
+    const cx = opts.winner === 'A'
+      ? aCardRight - stampW * 0.6
+      : bCardRight - stampW * 0.6
+    const cy = imgY + stampH * 0.6
 
     ctx.save()
     ctx.translate(cx, cy)
