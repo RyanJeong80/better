@@ -38,7 +38,7 @@
   --card-foreground: oklch(0.14 0.025 278);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.14 0.025 278);
-  --primary: oklch(0.585 0.233 277.5);
+  --primary: #3D2B1F;
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.958 0.018 277);
   --secondary-foreground: oklch(0.35 0.06 277);
@@ -46,11 +46,11 @@
   --muted-foreground: oklch(0.52 0.025 278);
   --accent: oklch(0.948 0.022 277);
   --accent-foreground: oklch(0.35 0.06 277);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: #FF4444;
   --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.918 0.014 277);
-  --input: oklch(0.918 0.014 277);
-  --ring: oklch(0.585 0.233 277.5);
+  --border: oklch(0.88 0.018 60);
+  --input: oklch(0.88 0.018 60);
+  --ring: #3D2B1F;
   --radius: 0.875rem;
 }
 
@@ -80,9 +80,26 @@
   border-color: var(--color-border);
 }
 
-
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-plus-jakarta), 'Pretendard Variable', var(--font-m-plus), var(--font-noto-sc), sans-serif;
+}
+
+/* ── 입력창: 베이지 배경에서도 항상 흰색 ── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]),
+select,
+textarea {
+  background-color: #ffffff;
+}
+
+/* ── bg-background를 버튼/링크에 쓰면 흰색 (보조 버튼 패턴) ── */
+button.bg-background,
+a.bg-background {
+  background-color: #ffffff;
+}
+
+/* ── 버튼 기본: 투명하게 유지 (beige 상속 방지) ── */
+button {
+  background-color: transparent;
 }

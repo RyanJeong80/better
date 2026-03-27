@@ -19,7 +19,7 @@ export function BottomNav({ isLoggedIn }: { isLoggedIn: boolean }) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden"
-      style={{ background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(20px)', borderTop: '1px solid var(--color-border)' }}>
+      style={{ background: 'rgba(237,228,218,0.96)', backdropFilter: 'blur(20px)', borderTop: '1px solid rgba(61,43,31,0.12)' }}>
       <div className="flex items-center justify-around px-2" style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
         {NAV_ITEMS.map(({ href, icon: Icon, label, primary }) => {
           const resolvedHref = href === '/profile' && !isLoggedIn ? '/login' : href
