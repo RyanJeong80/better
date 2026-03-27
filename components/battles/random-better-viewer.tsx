@@ -524,6 +524,7 @@ export function RandomBetterViewer({
         @keyframes _slideDown    { from { transform: translateY(-60px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
         @keyframes _slideUpModal { from { transform: translateY(100%) } to { transform: translateY(0) } }
         @keyframes _checkPop     { 0% { transform: translate(-50%,-50%) scale(0); opacity:0 } 65% { transform: translate(-50%,-50%) scale(1.3); opacity:1 } 100% { transform: translate(-50%,-50%) scale(1); opacity:1 } }
+        @keyframes bounceY       { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
       `}</style>
 
       {/* ── 정보 바 ── */}
@@ -828,13 +829,25 @@ export function RandomBetterViewer({
         <div style={{
           position: 'absolute',
           bottom: 0, left: 24, right: 24,
-          height: 80,
+          height: 60,
           background: '#ffffff',
           borderRadius: '12px 12px 0 0',
-          boxShadow: '0 -4px 12px rgba(0,0,0,0.08)',
-          opacity: 0.7,
-          transform: 'scale(0.95)',
-        }} />
+          boxShadow: '0 -2px 8px rgba(0,0,0,0.06)',
+          opacity: 0.75,
+          transform: 'scale(0.96)',
+        }}>
+          {/* 스와이프 안내 오버레이 */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: 2,
+          }}>
+            <span style={{ color: 'rgba(61,43,31,0.55)', fontSize: '11px', fontWeight: 600, letterSpacing: '0.3px' }}>
+              {t('swipe.next')}
+            </span>
+            <span style={{ color: 'rgba(61,43,31,0.45)', fontSize: '16px', animation: 'bounceY 1.5s ease-in-out infinite', lineHeight: 1 }}>∧</span>
+          </div>
+        </div>
       )}
 
       {/* ── 폴라로이드 카드 ── */}
@@ -962,21 +975,6 @@ export function RandomBetterViewer({
                   </p>
                 )}
 
-                {/* 터치! 버튼 (voting) */}
-                {phase === 'voting' && (
-                  <button
-                    onClick={e => { e.stopPropagation(); handlePickPhoto('A') }}
-                    style={{
-                      position: 'absolute', bottom: 8, right: 10, zIndex: 8,
-                      background: 'rgba(255,255,255,0.9)', color: '#3D2B1F',
-                      fontWeight: 800, fontSize: '0.78rem',
-                      padding: '6px 14px', borderRadius: 20, border: 'none',
-                      cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-                      letterSpacing: '-0.01em',
-                    }}
-                  >터치!</button>
-                )}
-
                 {/* 선택됨 오버레이 */}
                 {(phase === 'picked' || phase === 'submitting') && selectedChoice === 'A' && (
                   <>
@@ -1068,21 +1066,6 @@ export function RandomBetterViewer({
                   }}>
                     {translated?.descB ?? battle.imageBDescription}
                   </p>
-                )}
-
-                {/* 터치! 버튼 (voting) */}
-                {phase === 'voting' && (
-                  <button
-                    onClick={e => { e.stopPropagation(); handlePickPhoto('B') }}
-                    style={{
-                      position: 'absolute', bottom: 8, right: 10, zIndex: 8,
-                      background: 'rgba(255,255,255,0.9)', color: '#3D2B1F',
-                      fontWeight: 800, fontSize: '0.78rem',
-                      padding: '6px 14px', borderRadius: 20, border: 'none',
-                      cursor: 'pointer', boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-                      letterSpacing: '-0.01em',
-                    }}
-                  >터치!</button>
                 )}
 
                 {/* 선택됨 오버레이 */}
@@ -1189,15 +1172,6 @@ export function RandomBetterViewer({
                   <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'white', textShadow: '0 1px 3px rgba(0,0,0,0.8)', lineHeight: 1 }}>{t('vote.share')}</span>
                 </button>
               </div>
-
-              {/* ── 스와이프 힌트 ── */}
-              {phase === 'voting' && !handleClose && (
-                <div style={{ position: 'absolute', bottom: 10, left: 0, right: 0, zIndex: 25, textAlign: 'center', pointerEvents: 'none' }}>
-                  <span style={{ color: 'rgba(255,255,255,0.82)', fontSize: '0.7rem', fontWeight: 600, background: 'rgba(0,0,0,0.28)', padding: '3px 10px', borderRadius: 999 }}>
-                    {t('swipe.hint')}
-                  </span>
-                </div>
-              )}
 
               {/* ── 투표 완료: 이전 / 다음 ── */}
               {phase === 'voted' && (

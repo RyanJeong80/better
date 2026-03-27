@@ -243,7 +243,8 @@
   },
   "swipe": {
     "hint": "↑ Swipe to continue",
-    "up": "↑ Swipe up"
+    "up": "↑ Swipe up",
+    "next": "Next"
   },
   "username": {
     "save": "Save",
