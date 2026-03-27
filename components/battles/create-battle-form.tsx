@@ -22,16 +22,16 @@ const JPEG_QUALITY = 0.82
 const TEXT_IMAGE_SIZE = 800
 
 const TEXT_BG_COLORS = [
-  { bg: '#18181b', text: '#ffffff' },
-  { bg: '#7c3aed', text: '#ffffff' },
-  { bg: '#db2777', text: '#ffffff' },
-  { bg: '#0891b2', text: '#ffffff' },
-  { bg: '#f8fafc', text: '#18181b' },
-  { bg: '#E0F0EC', text: '#18181b' },
-  { bg: '#EDE0F0', text: '#18181b' },
-  { bg: '#F0E4E0', text: '#18181b' },
-  { bg: '#E0EAF0', text: '#18181b' },
-  { bg: '#F0EEE0', text: '#18181b' },
+  { bg: '#1A1A2E', text: '#ffffff' },  // 딥 네이비
+  { bg: '#E63946', text: '#ffffff' },  // 레드
+  { bg: '#F4845F', text: '#ffffff' },  // 오렌지
+  { bg: '#52B788', text: '#ffffff' },  // 그린
+  { bg: '#4361EE', text: '#ffffff' },  // 블루
+  { bg: '#9B5DE5', text: '#ffffff' },  // 퍼플
+  { bg: '#F72585', text: '#ffffff' },  // 핑크
+  { bg: '#0096C7', text: '#ffffff' },  // 오션
+  { bg: '#FFBE0B', text: '#18181b' },  // 옐로우
+  { bg: '#06D6A0', text: '#18181b' },  // 민트
 ]
 
 // ─── 이미지 리사이징 ──────────────────────────────────────────────
