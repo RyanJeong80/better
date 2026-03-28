@@ -7,6 +7,8 @@ import { CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 import type { PanelHotEntry } from '@/app/api/panels/hot/route'
 import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
+import { countryToFlag } from '@/lib/utils/country'
+import { UserProfileModal } from '@/components/ui/user-profile-modal'
 
 const CAT_COLOR: Record<BetterCategory, { bg: string; text: string }> = {
   fashion:    { bg: '#DBEAFE', text: '#1D4ED8' },
@@ -73,6 +75,7 @@ export function HotPanelClient({
   const locale = useLocale()
   const [entries, setEntries] = useState<PanelHotEntry[]>([])
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
+  const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [sortOrder, setSortOrder] = useState<SortOrder>('popular')
@@ -348,15 +351,43 @@ export function HotPanelClient({
                       {cat.emoji} {t(`categories.${entry.category}` as Parameters<typeof t>[0])}
                     </span>
 
-                    {/* 제목 */}
-                    <p style={{
-                      margin: '6px 0 8px', fontSize: '0.9rem', fontWeight: 700, lineHeight: 1.4,
-                      color: '#3D2B1F',
-                      overflow: 'hidden', display: '-webkit-box',
-                      WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-                    }}>
-                      {tr?.title ?? entry.title}
-                    </p>
+                    {/* 제목 + 작성자 */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '6px 0 8px' }}>
+                      <p style={{
+                        flex: 1, margin: 0, fontSize: '0.9rem', fontWeight: 700, lineHeight: 1.4,
+                        color: '#3D2B1F',
+                        overflow: 'hidden', display: '-webkit-box',
+                        WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                      }}>
+                        {tr?.title ?? entry.title}
+                      </p>
+                      {entry.author && (
+                        <button
+                          onClick={e => { e.stopPropagation(); setProfileModalUserId(entry.author!.id) }}
+                          style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        >
+                          {entry.author.avatarUrl ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img src={entry.author.avatarUrl} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                          ) : (
+                            <span style={{
+                              width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: '0.6rem', fontWeight: 900, color: 'white',
+                            }}>
+                              {entry.author.displayName[0]?.toUpperCase() ?? '?'}
+                            </span>
+                          )}
+                          {entry.author.country && (
+                            <span style={{ fontSize: '1rem', lineHeight: 1 }}>{countryToFlag(entry.author.country)}</span>
+                          )}
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {entry.author.displayName}
+                          </span>
+                        </button>
+                      )}
+                    </div>
 
                     {/* 좋아요 */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -395,6 +426,10 @@ export function HotPanelClient({
             </div>
           )}
         </div>
+      )}
+
+      {profileModalUserId && (
+        <UserProfileModal userId={profileModalUserId} onClose={() => setProfileModalUserId(null)} />
       )}
     </div>
   )

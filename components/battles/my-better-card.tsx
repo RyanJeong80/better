@@ -9,10 +9,12 @@ import type { BetterCategory } from '@/lib/constants/categories'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
 import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
 import { countryToFlag } from '@/lib/utils/country'
+import { UserProfileModal } from '@/components/ui/user-profile-modal'
 
 interface Reason {
   choice: 'A' | 'B'
   reason: string
+  voterId: string | null
   voterName: string | null
   voterAvatarUrl: string | null
   voterCountry: string | null
@@ -144,6 +146,7 @@ function ReasonsSheet({
   t: ReturnType<typeof useTranslations>
 }) {
   const [tab, setTab] = useState<'A' | 'B' | 'all'>('all')
+  const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
   const aCount = reasons.filter(r => r.choice === 'A').length
   const bCount = reasons.filter(r => r.choice === 'B').length
   const filtered = tab === 'all' ? reasons : reasons.filter(r => r.choice === tab)
@@ -204,7 +207,7 @@ function ReasonsSheet({
         </div>
 
         {/* 이유 목록 */}
-        <div style={{ overflowY: 'auto', flex: 1, paddingBottom: 24 }}>
+        <div style={{ overflowY: 'auto', flex: 1, paddingBottom: 24 }} onClick={e => e.stopPropagation()}>
           {filtered.length === 0 ? (
             <p style={{ textAlign: 'center', padding: '32px 16px', color: '#9CA3AF', fontSize: '0.85rem', margin: 0 }}>
               이유가 없어요
@@ -219,22 +222,30 @@ function ReasonsSheet({
                   borderBottom: i < filtered.length - 1 ? '1px solid #F5EFE8' : undefined,
                 }}
               >
-                {/* Voter avatar */}
-                {r.voterAvatarUrl ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={r.voterAvatarUrl} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                ) : (
-                  <span style={{
-                    width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-                    background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '0.65rem', fontWeight: 900, color: 'white',
-                  }}>
-                    {(r.voterName?.[0] ?? '?').toUpperCase()}
-                  </span>
-                )}
+                {/* Voter avatar — clickable if we have a userId */}
+                <button
+                  onClick={() => r.voterId && setProfileModalUserId(r.voterId)}
+                  style={{ background: 'none', border: 'none', padding: 0, cursor: r.voterId ? 'pointer' : 'default', flexShrink: 0 }}
+                >
+                  {r.voterAvatarUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={r.voterAvatarUrl} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                  ) : (
+                    <span style={{
+                      width: 32, height: 32, borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '0.65rem', fontWeight: 900, color: 'white',
+                    }}>
+                      {(r.voterName?.[0] ?? '?').toUpperCase()}
+                    </span>
+                  )}
+                </button>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
+                  <button
+                    onClick={() => r.voterId && setProfileModalUserId(r.voterId)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3, background: 'none', border: 'none', padding: 0, cursor: r.voterId ? 'pointer' : 'default' }}
+                  >
                     {r.voterCountry && <span style={{ fontSize: '0.8rem' }}>{countryToFlag(r.voterCountry)}</span>}
                     <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3D2B1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {r.voterName ?? '익명'}
@@ -247,7 +258,7 @@ function ReasonsSheet({
                     }}>
                       {r.choice}
                     </span>
-                  </div>
+                  </button>
                   <p style={{ fontSize: '0.875rem', color: '#3D2B1F', opacity: 0.82, margin: 0, lineHeight: 1.55 }}>
                     {r.reason}
                   </p>
@@ -257,6 +268,9 @@ function ReasonsSheet({
           )}
         </div>
       </div>
+      {profileModalUserId && (
+        <UserProfileModal userId={profileModalUserId} onClose={() => setProfileModalUserId(null)} />
+      )}
     </div>
   )
 }

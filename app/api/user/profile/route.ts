@@ -10,6 +10,7 @@ import type { BetterCategory } from '@/lib/constants/categories'
 export type VoteReason = {
   choice: 'A' | 'B'
   reason: string
+  voterId: string | null
   voterName: string | null
   voterAvatarUrl: string | null
   voterCountry: string | null
@@ -120,6 +121,7 @@ export async function GET() {
       ? await Promise.all([
           db.select({
             betterId: votes.betterId,
+            voterId: votes.voterId,
             choice: votes.choice,
             reason: votes.reason,
             voterUsername: users.username,
@@ -134,11 +136,11 @@ export async function GET() {
         ])
       : [[], []]
 
-    type VoteRow = { choice: 'A' | 'B'; reason: string | null; voterUsername: string | null; voterAvatarUrl: string | null; voterCountry: string | null }
+    type VoteRow = { voterId: string; choice: 'A' | 'B'; reason: string | null; voterUsername: string | null; voterAvatarUrl: string | null; voterCountry: string | null }
     const votesByBetter = new Map<string, VoteRow[]>()
     for (const v of myVotes) {
       if (!votesByBetter.has(v.betterId)) votesByBetter.set(v.betterId, [])
-      votesByBetter.get(v.betterId)!.push({ choice: v.choice, reason: v.reason, voterUsername: v.voterUsername, voterAvatarUrl: v.voterAvatarUrl, voterCountry: v.voterCountry })
+      votesByBetter.get(v.betterId)!.push({ voterId: v.voterId, choice: v.choice, reason: v.reason, voterUsername: v.voterUsername, voterAvatarUrl: v.voterAvatarUrl, voterCountry: v.voterCountry })
     }
     const likeCountMap = new Map<string, number>()
     for (const l of myLikes) {
@@ -162,6 +164,7 @@ export async function GET() {
             .map(v => ({
               choice: v.choice,
               reason: v.reason,
+              voterId: v.voterId ?? null,
               voterName: v.voterUsername ?? null,
               voterAvatarUrl: v.voterAvatarUrl ?? null,
               voterCountry: v.voterCountry ?? null,

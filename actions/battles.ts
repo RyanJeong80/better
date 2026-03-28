@@ -22,6 +22,7 @@ export type BattleForVoting = {
   isLiked: boolean
   category: BetterCategory
   author: {
+    id: string
     displayName: string
     avatarUrl: string | null
     country: string | null
@@ -119,6 +120,7 @@ export async function getRandomBattle(
       isLiked: userId ? pickedLikes.some((l) => l.userId === userId) : false,
       category: picked.category,
       author: {
+        id: picked.userId,
         displayName: picked.authorUsername ?? picked.authorName ?? picked.authorEmail?.split('@')[0] ?? '?',
         avatarUrl: picked.authorAvatarUrl ?? null,
         country: picked.authorCountry ?? null,
@@ -290,6 +292,7 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
 
     const [battle] = await db.select({
       id: betters.id,
+      authorId: betters.userId,
       title: betters.title,
       imageAUrl: betters.imageAUrl,
       imageADescription: betters.imageADescription,
@@ -330,6 +333,7 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
       isLiked: user ? battleLikes.some((l) => l.userId === user.id) : false,
       category: battle.category,
       author: {
+        id: battle.authorId,
         displayName: battle.authorUsername ?? battle.authorName ?? battle.authorEmail?.split('@')[0] ?? '?',
         avatarUrl: battle.authorAvatarUrl ?? null,
         country: battle.authorCountry ?? null,
