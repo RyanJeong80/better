@@ -9,9 +9,11 @@ import type { FollowUserItem } from '@/app/api/user/profile/follows/route'
 export function FollowsList({
   type,
   currentUserId,
+  onCount,
 }: {
   type: 'following' | 'followers'
   currentUserId: string
+  onCount?: (n: number) => void
 }) {
   const t = useTranslations()
   const [list, setList] = useState<FollowUserItem[]>([])
@@ -22,9 +24,13 @@ export function FollowsList({
     setStatus('loading')
     fetch(`/api/user/profile/follows?type=${type}`)
       .then(r => r.json())
-      .then((d: FollowUserItem[]) => { setList(d); setStatus('done') })
+      .then((d: FollowUserItem[]) => {
+        setList(d)
+        setStatus('done')
+        onCount?.(d.length)
+      })
       .catch(() => setStatus('error'))
-  }, [type])
+  }, [type]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (status === 'loading') {
     return (

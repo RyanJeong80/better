@@ -198,8 +198,8 @@ export async function GET() {
     battles,
     battlesVoteTotal,
     battlesLikesTotal,
-    followerCount: followerResult[0]?.count ?? 0,
-    followingCount: followingResult[0]?.count ?? 0,
+    followerCount: Number(followerResult[0]?.count ?? 0),
+    followingCount: Number(followingResult[0]?.count ?? 0),
     userId: user.id,
   }
 

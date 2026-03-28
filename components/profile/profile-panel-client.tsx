@@ -47,13 +47,21 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
   const [country, setCountry] = useState<string | null>(null)
   const [countryEditing, setCountryEditing] = useState(false)
   const [activeTab, setActiveTab] = useState<ProfileTab>('touches')
+  const [followingCount, setFollowingCount] = useState(0)
+  const [followerCount, setFollowerCount] = useState(0)
   const selectRef = useRef<HTMLSelectElement>(null)
 
   useEffect(() => {
     if (!user) { setStatus('done'); return }
     fetch('/api/user/profile')
       .then(r => r.json())
-      .then((d: UserProfileData) => { setData(d); setCountry(d.country); setStatus('done') })
+      .then((d: UserProfileData) => {
+      setData(d)
+      setCountry(d.country)
+      setFollowingCount(Number(d.followingCount) || 0)
+      setFollowerCount(Number(d.followerCount) || 0)
+      setStatus('done')
+    })
       .catch(() => setStatus('error'))
   }, [user])
 
@@ -288,14 +296,18 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
               cursor: 'pointer',
             }}
           >
-            {tab === 'touches' ? t('profile.myTouchesTab') : tab === 'following' ? `${t('profile.followingTab')} ${data.followingCount}` : `${t('profile.followersTab')} ${data.followerCount}`}
+            {tab === 'touches'
+              ? t('profile.myTouchesTab')
+              : tab === 'following'
+                ? `${t('profile.followingTab')} ${followingCount}`
+                : `${t('profile.followersTab')} ${followerCount}`}
           </button>
         ))}
       </div>
 
       {activeTab === 'touches' && <ProfileBetterList battles={battles} />}
-      {activeTab === 'following' && <FollowsList type="following" currentUserId={data.userId} />}
-      {activeTab === 'followers' && <FollowsList type="followers" currentUserId={data.userId} />}
+      {activeTab === 'following' && <FollowsList type="following" currentUserId={data.userId} onCount={setFollowingCount} />}
+      {activeTab === 'followers' && <FollowsList type="followers" currentUserId={data.userId} onCount={setFollowerCount} />}
 
       {/* 푸터 링크 */}
       <div style={{ marginTop: 32, paddingTop: 16, borderTop: '1px solid var(--color-border)', textAlign: 'center' }}>
