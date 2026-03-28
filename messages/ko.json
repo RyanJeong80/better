@@ -208,7 +208,12 @@
     "noBettersDesc": "두 사진을 올리고 사람들의 선택을 받아보세요",
     "createFirstBetter": "첫 Touched 만들기",
     "noCategoryBetters": "이 카테고리의 Touched가 없어요",
-    "loadError": "프로필을 불러올 수 없어요"
+    "loadError": "프로필을 불러올 수 없어요",
+    "myTouchesTab": "내 터치",
+    "followingTab": "팔로잉",
+    "followersTab": "팔로워",
+    "noFollowing": "팔로잉하는 유저가 없어요",
+    "noFollowers": "아직 팔로워가 없어요"
   },
   "hot": {
     "title": "Hot 100",
@@ -274,6 +279,17 @@
     "save": "저장",
     "share": "공유",
     "shareTitle": "Touched 투표 결과"
+  },
+  "follow": {
+    "follow": "팔로우",
+    "following": "팔로잉",
+    "unfollow": "언팔로우",
+    "followersLabel": "팔로워",
+    "followingLabel": "팔로잉",
+    "touchesLabel": "터치",
+    "votesLabel": "투표",
+    "personUnit": "명",
+    "viewTouches": "터치 보기"
   },
   "privacy": {
     "title": "개인정보처리방침",

@@ -208,7 +208,12 @@
     "noBettersDesc": "2枚の写真をアップして選んでもらいましょう",
     "createFirstBetter": "最初のTouchedを作成",
     "noCategoryBetters": "このカテゴリのTouchedがありません",
-    "loadError": "プロフィールを読み込めませんでした"
+    "loadError": "プロフィールを読み込めませんでした",
+    "myTouchesTab": "マイタッチ",
+    "followingTab": "フォロー中",
+    "followersTab": "フォロワー",
+    "noFollowing": "フォロー中のユーザーはいません",
+    "noFollowers": "まだフォロワーはいません"
   },
   "hot": {
     "title": "Hot 100",
@@ -274,6 +279,17 @@
     "save": "保存",
     "share": "共有",
     "shareTitle": "Touched 投票結果"
+  },
+  "follow": {
+    "follow": "フォロー",
+    "following": "フォロー中",
+    "unfollow": "フォロー解除",
+    "followersLabel": "フォロワー",
+    "followingLabel": "フォロー中",
+    "touchesLabel": "タッチ",
+    "votesLabel": "投票",
+    "personUnit": "人",
+    "viewTouches": "タッチを見る"
   },
   "privacy": {
     "title": "プライバシーポリシー",

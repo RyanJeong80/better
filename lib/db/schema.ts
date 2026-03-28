@@ -1,4 +1,4 @@
-import { pgTable, uuid, text, timestamp, pgEnum, integer, numeric, smallint, primaryKey, boolean } from 'drizzle-orm/pg-core'
+import { pgTable, uuid, text, timestamp, pgEnum, integer, numeric, smallint, primaryKey, boolean, uniqueIndex } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
 export const voteChoiceEnum = pgEnum('vote_choice', ['A', 'B'])
@@ -100,6 +100,26 @@ export const betterTags = pgTable('better_tags', {
   tagId: uuid('tag_id').notNull().references(() => tags.id, { onDelete: 'cascade' }),
 }, (t) => [primaryKey({ columns: [t.betterId, t.tagId] })])
 
+// SQL migration (run in Supabase SQL Editor):
+// CREATE TABLE follows (
+//   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+//   follower_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+//   following_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+//   created_at timestamptz DEFAULT NOW() NOT NULL,
+//   UNIQUE(follower_id, following_id)
+// );
+// ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
+// CREATE POLICY "follows_public_read" ON follows FOR SELECT USING (true);
+// CREATE POLICY "follows_auth_insert" ON follows FOR INSERT TO authenticated WITH CHECK (follower_id = auth.uid());
+// CREATE POLICY "follows_auth_delete" ON follows FOR DELETE USING (follower_id = auth.uid());
+
+export const follows = pgTable('follows', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  followerId: uuid('follower_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  followingId: uuid('following_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (t) => [uniqueIndex('follows_follower_following_unique').on(t.followerId, t.followingId)])
+
 // ─── Relations ────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ one, many }) => ({
@@ -108,6 +128,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   likes: many(likes),
   comments: many(comments),
   stats: one(userStats, { fields: [users.id], references: [userStats.userId] }),
+  followers: many(follows, { relationName: 'follows_following' }),
+  following: many(follows, { relationName: 'follows_follower' }),
 }))
 
 export const bettersRelations = relations(betters, ({ one, many }) => ({
@@ -146,6 +168,11 @@ export const userStatsRelations = relations(userStats, ({ one }) => ({
   user: one(users, { fields: [userStats.userId], references: [users.id] }),
 }))
 
+export const followsRelations = relations(follows, ({ one }) => ({
+  followerUser: one(users, { fields: [follows.followerId], references: [users.id], relationName: 'follows_follower' }),
+  followingUser: one(users, { fields: [follows.followingId], references: [users.id], relationName: 'follows_following' }),
+}))
+
 // ─── Types ────────────────────────────────────────────────────────
 
 export type User = typeof users.$inferSelect
@@ -159,3 +186,4 @@ export type NewLike = typeof likes.$inferInsert
 export type NewComment = typeof comments.$inferInsert
 export type UserStats = typeof userStats.$inferSelect
 export type Tag = typeof tags.$inferSelect
+export type Follow = typeof follows.$inferSelect

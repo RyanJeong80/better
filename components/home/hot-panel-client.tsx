@@ -68,8 +68,10 @@ type TranslatedEntry = { title: string; imageAText: string | null; imageBText: s
 
 export function HotPanelClient({
   onSelectBattle,
+  viewerUserId,
 }: {
   onSelectBattle?: (entry: PanelHotEntry) => void
+  viewerUserId?: string | null
 }) {
   const t = useTranslations()
   const locale = useLocale()
@@ -429,7 +431,7 @@ export function HotPanelClient({
       )}
 
       {profileModalUserId && (
-        <UserProfileModal userId={profileModalUserId} onClose={() => setProfileModalUserId(null)} />
+        <UserProfileModal userId={profileModalUserId} viewerUserId={viewerUserId} onClose={() => setProfileModalUserId(null)} />
       )}
     </div>
   )

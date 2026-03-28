@@ -72,6 +72,7 @@ export function RandomBetterViewer({
   onClose,
   showBack = false,
   onCommentOpen,
+  viewerUserId,
 }: {
   initialBattle: BattleForVoting | null
   initialCategory?: CategoryFilter
@@ -79,6 +80,7 @@ export function RandomBetterViewer({
   onClose?: () => void
   showBack?: boolean
   onCommentOpen?: (open: boolean) => void
+  viewerUserId?: string | null
 }) {
   const router = useRouter()
   const t = useTranslations()
@@ -1355,7 +1357,7 @@ export function RandomBetterViewer({
       </div>{/* ── 사진 영역 끝 ── */}
 
       {profileModalUserId && (
-        <UserProfileModal userId={profileModalUserId} onClose={() => setProfileModalUserId(null)} />
+        <UserProfileModal userId={profileModalUserId} viewerUserId={viewerUserId} onClose={() => setProfileModalUserId(null)} />
       )}
     </div>
   )

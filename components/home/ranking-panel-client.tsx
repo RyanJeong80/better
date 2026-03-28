@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import { Trophy } from 'lucide-react'
 import { calcLevel } from '@/lib/level'
 import { LevelBadge } from '@/components/ui/level-badge'
+import { UserProfileModal } from '@/components/ui/user-profile-modal'
 import type { PanelRankEntry, PanelRankResponse } from '@/app/api/panels/ranking/route'
 import { countryToFlag } from '@/lib/utils/country'
 
@@ -54,11 +55,12 @@ function Skeleton() {
   )
 }
 
-export function RankingPanelClient() {
+export function RankingPanelClient({ viewerUserId }: { viewerUserId?: string | null }) {
   const t = useTranslations()
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [data, setData] = useState<PanelRankResponse | null>(null)
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
+  const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
   const tabsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -211,10 +213,12 @@ export function RankingPanelClient() {
             return (
               <div
                 key={entry.id}
+                onClick={() => setProfileModalUserId(entry.id)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 12,
                   padding: '11px 16px',
                   borderBottom: i < entries.length - 1 ? '1px solid var(--color-border)' : undefined,
+                  cursor: 'pointer',
                 }}
               >
                 {rank <= 3 ? (
@@ -287,6 +291,14 @@ export function RankingPanelClient() {
       >
         {t('ranking.viewAll')}
       </Link>
+
+      {profileModalUserId && (
+        <UserProfileModal
+          userId={profileModalUserId}
+          viewerUserId={viewerUserId}
+          onClose={() => setProfileModalUserId(null)}
+        />
+      )}
     </div>
   )
 }

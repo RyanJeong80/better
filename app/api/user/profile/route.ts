@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
-import { eq, inArray } from 'drizzle-orm'
+import { eq, inArray, count } from 'drizzle-orm'
 import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
-import { betters, votes, likes, users, userStats } from '@/lib/db/schema'
+import { betters, votes, likes, users, userStats, follows } from '@/lib/db/schema'
 import { calcLevel } from '@/lib/level'
 import type { LevelInfo } from '@/lib/level'
 import type { BetterCategory } from '@/lib/constants/categories'
@@ -51,6 +51,9 @@ export type UserProfileData = {
   battles: ProfileBattleStats[]
   battlesVoteTotal: number
   battlesLikesTotal: number
+  followerCount: number
+  followingCount: number
+  userId: string
 }
 
 export async function GET() {
@@ -58,7 +61,7 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const [dbUser, stats] = await Promise.all([
+  const [dbUser, stats, followerResult, followingResult] = await Promise.all([
     db.query.users.findFirst({
       where: eq(users.id, user.id),
       columns: { username: true, name: true, avatarUrl: true, country: true },
@@ -66,6 +69,8 @@ export async function GET() {
     db.query.userStats.findFirst({
       where: eq(userStats.userId, user.id),
     }).catch(() => null),
+    db.select({ count: count() }).from(follows).where(eq(follows.followingId, user.id)).catch(() => [{ count: 0 }]),
+    db.select({ count: count() }).from(follows).where(eq(follows.followerId, user.id)).catch(() => [{ count: 0 }]),
   ])
 
   const username = dbUser?.username ?? user.user_metadata?.username ?? dbUser?.name ?? ''
@@ -193,6 +198,9 @@ export async function GET() {
     battles,
     battlesVoteTotal,
     battlesLikesTotal,
+    followerCount: followerResult[0]?.count ?? 0,
+    followingCount: followingResult[0]?.count ?? 0,
+    userId: user.id,
   }
 
   return NextResponse.json(data)

@@ -11,11 +11,14 @@ import { LevelUpToast } from '@/components/profile/level-up-toast'
 import { UsernameEditor } from '@/components/profile/username-editor'
 import { AvatarUpload } from '@/components/profile/avatar-upload'
 import { ProfileBetterList } from '@/components/profile/profile-better-list'
+import { FollowsList } from '@/components/profile/follows-list'
 import { CATEGORY_LABELS } from '@/lib/level'
 import { COUNTRY_OPTIONS, countryToFlag } from '@/lib/utils/country'
 import type { UserInfo } from '@/app/(main)/page'
 import type { UserProfileData } from '@/app/api/user/profile/route'
 import type { BattleWithStats } from '@/components/profile/profile-better-list'
+
+type ProfileTab = 'touches' | 'following' | 'followers'
 
 function Skeleton() {
   return (
@@ -43,6 +46,7 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [country, setCountry] = useState<string | null>(null)
   const [countryEditing, setCountryEditing] = useState(false)
+  const [activeTab, setActiveTab] = useState<ProfileTab>('touches')
   const selectRef = useRef<HTMLSelectElement>(null)
 
   useEffect(() => {
@@ -270,8 +274,28 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
         ))}
       </div>
 
-      {/* Better 목록 */}
-      <ProfileBetterList battles={battles} />
+      {/* 탭 버튼 */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        {(['touches', 'following', 'followers'] as ProfileTab[]).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            style={{
+              flexShrink: 0, padding: '6px 14px', borderRadius: 999, border: 'none',
+              background: activeTab === tab ? '#3D2B1F' : '#D4C4B0',
+              color: activeTab === tab ? '#ffffff' : '#3D2B1F',
+              fontSize: '0.875rem', fontWeight: activeTab === tab ? 700 : 500,
+              cursor: 'pointer',
+            }}
+          >
+            {tab === 'touches' ? t('profile.myTouchesTab') : tab === 'following' ? `${t('profile.followingTab')} ${data.followingCount}` : `${t('profile.followersTab')} ${data.followerCount}`}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'touches' && <ProfileBetterList battles={battles} />}
+      {activeTab === 'following' && <FollowsList type="following" currentUserId={data.userId} />}
+      {activeTab === 'followers' && <FollowsList type="followers" currentUserId={data.userId} />}
 
       {/* 푸터 링크 */}
       <div style={{ marginTop: 32, paddingTop: 16, borderTop: '1px solid var(--color-border)', textAlign: 'center' }}>

@@ -8,6 +8,7 @@ import { calcLevel } from '@/lib/level'
 import type { LevelInfo } from '@/lib/level'
 
 export type UserInfo = {
+  id: string
   initial: string
   name: string
   email: string
@@ -56,7 +57,7 @@ export default async function HomePage({
         avatarUrl = dbUser?.avatarUrl ?? null
       } catch {}
 
-      userInfo = { initial: (nm || email || '?')[0].toUpperCase(), name: nm, email, avatarUrl, levelInfo }
+      userInfo = { id: data.user.id, initial: (nm || email || '?')[0].toUpperCase(), name: nm, email, avatarUrl, levelInfo }
     }
   } catch {}
 

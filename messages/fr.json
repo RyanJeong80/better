@@ -208,7 +208,12 @@
     "noBettersDesc": "Téléchargez deux photos et laissez les gens choisir",
     "createFirstBetter": "Créer le premier Touched",
     "noCategoryBetters": "Pas de Touches dans cette catégorie",
-    "loadError": "Impossible de charger le profil"
+    "loadError": "Impossible de charger le profil",
+    "myTouchesTab": "Mes Touches",
+    "followingTab": "Abonnements",
+    "followersTab": "Abonnés",
+    "noFollowing": "Vous ne suivez personne",
+    "noFollowers": "Pas encore d'abonnés"
   },
   "hot": {
     "title": "Hot 100",
@@ -274,6 +279,17 @@
     "save": "Enregistrer",
     "share": "Partager",
     "shareTitle": "Résultat Touched"
+  },
+  "follow": {
+    "follow": "Suivre",
+    "following": "Abonné",
+    "unfollow": "Se désabonner",
+    "followersLabel": "Abonnés",
+    "followingLabel": "Abonnements",
+    "touchesLabel": "Touches",
+    "votesLabel": "Votes",
+    "personUnit": "",
+    "viewTouches": "Voir les Touches"
   },
   "privacy": {
     "title": "Politique de confidentialité",

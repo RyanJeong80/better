@@ -56,11 +56,12 @@ export function HomeClient({
               key={currentBattle?.id ?? 'empty'}
               initialBattle={currentBattle}
               onCommentOpen={setCommentOpen}
+              viewerUserId={user?.id}
             />
           </div>
         }
-        hotContent={<HotPanelClient onSelectBattle={handleSelectFromHot} />}
-        rankingContent={<RankingPanelClient />}
+        hotContent={<HotPanelClient onSelectBattle={handleSelectFromHot} viewerUserId={user?.id} />}
+        rankingContent={<RankingPanelClient viewerUserId={user?.id} />}
         profileContent={<ProfilePanelClient user={user} />}
         hideIndicator={commentOpen}
       />
