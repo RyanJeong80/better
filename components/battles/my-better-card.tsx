@@ -284,6 +284,7 @@ export function MyBetterCard({
 }) {
   const [showSheet, setShowSheet] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
   const t = useTranslations()
 
   useEffect(() => setMounted(true), [])
@@ -413,24 +414,55 @@ export function MyBetterCard({
               key={i}
               style={{
                 display: 'flex', alignItems: 'flex-start', gap: 8,
-                marginBottom: i < previewReasons.length - 1 ? 8 : 0,
+                marginBottom: i < previewReasons.length - 1 ? 10 : 0,
               }}
             >
-              <span style={{
-                flexShrink: 0, borderRadius: 4, padding: '1px 7px',
-                fontSize: '0.62rem', fontWeight: 800, marginTop: 2,
-                background: r.choice === 'A' ? '#3D2B1F' : '#D4C4B0',
-                color: r.choice === 'A' ? 'white' : '#3D2B1F',
-              }}>
-                {r.choice}
-              </span>
-              <p style={{
-                margin: 0, fontSize: '0.78rem', color: '#5C4A3A', lineHeight: 1.5,
-                overflow: 'hidden', display: '-webkit-box',
-                WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-              }}>
-                {r.reason}
-              </p>
+              {/* 투표자 아바타 */}
+              <button
+                onClick={() => r.voterId && setProfileModalUserId(r.voterId)}
+                style={{ background: 'none', border: 'none', padding: 0, cursor: r.voterId ? 'pointer' : 'default', flexShrink: 0 }}
+              >
+                {r.voterAvatarUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={r.voterAvatarUrl} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                ) : (
+                  <span style={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.6rem', fontWeight: 900, color: 'white',
+                  }}>
+                    {(r.voterName?.[0] ?? '?').toUpperCase()}
+                  </span>
+                )}
+              </button>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                {/* 투표자 정보 행 */}
+                <button
+                  onClick={() => r.voterId && setProfileModalUserId(r.voterId)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3, background: 'none', border: 'none', padding: 0, cursor: r.voterId ? 'pointer' : 'default' }}
+                >
+                  {r.voterCountry && <span style={{ fontSize: '0.78rem' }}>{countryToFlag(r.voterCountry)}</span>}
+                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5C4A3A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {r.voterName ?? '익명'}
+                  </span>
+                  <span style={{
+                    flexShrink: 0, borderRadius: 4, padding: '1px 6px',
+                    fontSize: '0.58rem', fontWeight: 800,
+                    background: r.choice === 'A' ? '#3D2B1F' : '#D4C4B0',
+                    color: r.choice === 'A' ? 'white' : '#3D2B1F',
+                  }}>
+                    {r.choice}
+                  </span>
+                </button>
+                <p style={{
+                  margin: 0, fontSize: '0.78rem', color: '#5C4A3A', lineHeight: 1.5,
+                  overflow: 'hidden', display: '-webkit-box',
+                  WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                }}>
+                  {r.reason}
+                </p>
+              </div>
             </div>
           ))}
           {extraCount > 0 && (
@@ -453,6 +485,11 @@ export function MyBetterCard({
       {mounted && showSheet && createPortal(
         <ReasonsSheet reasons={battle.reasons} onClose={() => setShowSheet(false)} t={t} />,
         document.body,
+      )}
+
+      {/* 투표자 프로필 모달 (미리보기 영역에서 클릭 시) */}
+      {mounted && profileModalUserId && (
+        <UserProfileModal userId={profileModalUserId} onClose={() => setProfileModalUserId(null)} />
       )}
     </div>
   )
