@@ -562,15 +562,15 @@ export function RandomBetterViewer({
             </span>
           ) : (() => {
             const li = calcLevel(accuracyTotal, accuracy)
-            const sep = <span style={{ color: 'rgba(61,43,31,0.25)', margin: '0 5px', fontSize: '0.68rem' }}>·</span>
+            const sep = <span style={{ color: 'rgba(61,43,31,0.25)', margin: '0 5px', fontSize: '0.875rem' }}>·</span>
             return (
               <>
-                <span style={{ color: '#3D2B1F', fontSize: '0.73rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <span style={{ fontSize: '0.83rem' }}>{li.emoji}</span>
+                <span style={{ color: '#3D2B1F', fontSize: '0.875rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <span style={{ fontSize: '1rem' }}>{li.emoji}</span>
                   {t(`levels.${li.levelKey}` as Parameters<typeof t>[0])}
                 </span>
                 {sep}
-                <span style={{ color: '#3D2B1F', fontSize: '0.73rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                <span style={{ color: '#3D2B1F', fontSize: '0.875rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
                   {accuracy !== null ? `${accuracy}%` : '-'}
                   <span style={{ color: 'rgba(61,43,31,0.4)', margin: '0 4px' }}>/</span>
                   {accuracyTotal}{t('participation.unit')}
@@ -602,7 +602,7 @@ export function RandomBetterViewer({
                   border: `1px solid ${catDropdownOpen ? 'rgba(61,43,31,0.4)' : 'rgba(61,43,31,0.15)'}`,
                   borderRadius: 999, padding: '3px 10px',
                   cursor: 'pointer', color: '#3D2B1F',
-                  fontSize: '0.78rem', fontWeight: 700,
+                  fontSize: '0.875rem', fontWeight: 700,
                   position: 'relative', zIndex: 9991,
                 }}
               >
@@ -1235,15 +1235,15 @@ export function RandomBetterViewer({
                   return (
                     <>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: badge.bg, color: badge.text, fontSize: '0.68rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: badge.bg, color: badge.text, fontSize: '0.875rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
                           {cat.emoji} {t(`categories.${battle.category}` as Parameters<typeof t>[0])}
                         </span>
                         {translated && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.1)', color: '#6366F1', fontSize: '0.62rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>✦ AI</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.1)', color: '#6366F1', fontSize: '0.875rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>✦ AI</span>
                         )}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <h2 style={{ flex: 1, margin: 0, fontWeight: 800, fontSize: '0.96rem', lineHeight: 1.3, color: '#3D2B1F', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
+                        <h2 style={{ flex: 1, margin: 0, fontWeight: 800, fontSize: '1.125rem', lineHeight: 1.3, color: '#3D2B1F', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
                           {translated?.title ?? battle.title}
                         </h2>
                         {battle.author && (
@@ -1265,15 +1265,15 @@ export function RandomBetterViewer({
                               </span>
                             )}
                             {battle.author.country && (
-                              <span style={{ fontSize: '1.08rem', lineHeight: 1 }}>{countryToFlag(battle.author.country)}</span>
+                              <span style={{ fontSize: '1.125rem', lineHeight: 1 }}>{countryToFlag(battle.author.country)}</span>
                             )}
-                            <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {battle.author.displayName}
                             </span>
                           </button>
                         )}
                       </div>
-                      <p style={{ margin: '2px 0 0', fontSize: '0.68rem', color: '#9CA3AF', fontWeight: 500 }}>
+                      <p style={{ margin: '2px 0 0', fontSize: '0.875rem', color: '#9CA3AF', fontWeight: 500 }}>
                         {phase === 'voting' && t('vote.tapToSelect')}
                         {(phase === 'picked' || phase === 'submitting') && t('vote.addReasonOptional')}
                         {phase === 'voted' && t('vote.voteDone')}

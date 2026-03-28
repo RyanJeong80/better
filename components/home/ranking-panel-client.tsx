@@ -92,8 +92,8 @@ export function RankingPanelClient() {
           <Trophy size={20} color="white" />
         </div>
         <div>
-          <h2 style={{ fontSize: '1.23rem', fontWeight: 900, lineHeight: 1.2, margin: 0 }}>{t('ranking.title')}</h2>
-          <p style={{ fontSize: '0.80rem', color: 'var(--color-muted-foreground)', marginTop: 2 }}>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: 900, lineHeight: 1.2, margin: 0 }}>{t('ranking.title')}</h2>
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-muted-foreground)', marginTop: 2 }}>
             {isCategoryMode
               ? t('ranking.topAccuracy', { emoji: activeTabInfo.emoji, label: tabLabel(activeTab) })
               : t('ranking.topParticipation')}
@@ -126,7 +126,7 @@ export function RankingPanelClient() {
                 border: 'none',
                 background: active ? '#3D2B1F' : '#D4C4B0',
                 color: active ? '#ffffff' : '#3D2B1F',
-                fontSize: '0.83rem', fontWeight: active ? 800 : 500,
+                fontSize: '1rem', fontWeight: active ? 800 : 500,
                 cursor: 'pointer', transition: 'all 0.15s',
                 whiteSpace: 'nowrap',
               }}
@@ -149,13 +149,13 @@ export function RankingPanelClient() {
             width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
             background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '0.78rem', fontWeight: 900, color: 'white',
+            fontSize: '0.875rem', fontWeight: 900, color: 'white',
           }}>
             {t('vote.me')}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <p style={{ margin: 0, fontSize: '0.86rem', fontWeight: 700 }}>{t('ranking.myRanking')}</p>
-            <p style={{ margin: '2px 0 0', fontSize: '0.78rem', color: 'var(--color-muted-foreground)' }}>
+            <p style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>{t('ranking.myRanking')}</p>
+            <p style={{ margin: '2px 0 0', fontSize: '0.875rem', color: 'var(--color-muted-foreground)' }}>
               {isCategoryMode
                 ? myEntry.accuracy !== null
                   ? t('ranking.myAccuracyStats', { emoji: activeTabInfo.emoji, label: tabLabel(activeTab), accuracy: myEntry.accuracy, count: myEntry.participated })
@@ -165,13 +165,13 @@ export function RankingPanelClient() {
           </div>
           {myEntry.rank !== null ? (
             <span style={{
-              fontSize: '1.08rem', fontWeight: 900, color: '#6366F1',
+              fontSize: '1.125rem', fontWeight: 900, color: '#6366F1',
               fontVariantNumeric: 'tabular-nums',
             }}>
               {t('ranking.rank', { n: myEntry.rank })}
             </span>
           ) : (
-            <span style={{ fontSize: '0.80rem', color: 'var(--color-muted-foreground)' }}>
+            <span style={{ fontSize: '0.875rem', color: 'var(--color-muted-foreground)' }}>
               {myEntry.participated === 0 ? t('ranking.notParticipated') : t('ranking.outOfTop30')}
             </span>
           )}
@@ -221,14 +221,14 @@ export function RankingPanelClient() {
                   <span style={{
                     width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '0.76rem', fontWeight: 900,
+                    fontSize: '0.875rem', fontWeight: 900,
                     background: rank === 1 ? '#FEF3C7' : rank === 2 ? '#F3F4F6' : '#FEF3C7',
                     color: RANK_COLOR[rank - 1],
                   }}>
                     {rank}
                   </span>
                 ) : (
-                  <span style={{ width: 24, textAlign: 'center', fontSize: '0.86rem', fontWeight: 700, color: 'var(--color-muted-foreground)', flexShrink: 0 }}>
+                  <span style={{ width: 24, textAlign: 'center', fontSize: '1rem', fontWeight: 700, color: 'var(--color-muted-foreground)', flexShrink: 0 }}>
                     {rank}
                   </span>
                 )}
@@ -241,30 +241,30 @@ export function RankingPanelClient() {
                     width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
                     background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '0.6rem', fontWeight: 900, color: 'white',
+                    fontSize: '0.875rem', fontWeight: 900, color: 'white',
                   }}>
                     {(entry.name?.[0] ?? '?').toUpperCase()}
                   </span>
                 )}
                 {/* Country flag */}
                 {entry.country && (
-                  <span style={{ fontSize: '0.93rem', flexShrink: 0 }}>{countryToFlag(entry.country)}</span>
+                  <span style={{ fontSize: '1rem', flexShrink: 0 }}>{countryToFlag(entry.country)}</span>
                 )}
-                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.96rem', fontWeight: 600 }}>
+                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '1.125rem', fontWeight: 600 }}>
                   {entry.name}
                 </span>
                 <LevelBadge level={calcLevel(entry.participated, entry.accuracy)} size="xs" showName={false} />
                 {isCategoryMode ? (
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <span style={{ fontSize: '0.93rem', fontWeight: 800, color: '#6366F1', fontVariantNumeric: 'tabular-nums' }}>
+                    <span style={{ fontSize: '1rem', fontWeight: 800, color: '#6366F1', fontVariantNumeric: 'tabular-nums' }}>
                       {entry.accuracy}%
                     </span>
-                    <span style={{ fontSize: '0.76rem', color: 'var(--color-muted-foreground)', marginLeft: 4 }}>
+                    <span style={{ fontSize: '0.875rem', color: 'var(--color-muted-foreground)', marginLeft: 4 }}>
                       {entry.participated}{t('ranking.countUnit')}
                     </span>
                   </div>
                 ) : (
-                  <span style={{ fontSize: '0.90rem', fontWeight: 800, color: '#6366F1', fontVariantNumeric: 'tabular-nums' }}>
+                  <span style={{ fontSize: '1rem', fontWeight: 800, color: '#6366F1', fontVariantNumeric: 'tabular-nums' }}>
                     {entry.participated}{t('ranking.countUnit')}
                   </span>
                 )}
@@ -281,7 +281,7 @@ export function RankingPanelClient() {
           marginTop: 16, padding: '12px 0',
           borderRadius: 16, border: 'none',
           background: '#3D2B1F',
-          fontSize: '0.93rem', fontWeight: 700, color: '#ffffff',
+          fontSize: '1rem', fontWeight: 700, color: '#ffffff',
           textDecoration: 'none',
         }}
       >

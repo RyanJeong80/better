@@ -75,7 +75,7 @@ export function SwipeSections({
         {/* 로고 */}
         <span
           style={{
-            fontSize: '1.23rem', fontWeight: 900, letterSpacing: '-0.03em',
+            fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.03em',
             background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             flexShrink: 0, lineHeight: 1,
@@ -94,13 +94,13 @@ export function SwipeSections({
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 3,
               background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-              color: 'white', fontWeight: 700, fontSize: '0.86rem',
+              color: 'white', fontWeight: 700, fontSize: '1rem',
               padding: '7px 13px', borderRadius: 999,
               border: 'none', cursor: 'pointer', flexShrink: 0, lineHeight: 1,
               letterSpacing: '-0.01em',
             }}
           >
-            <span style={{ fontSize: '1.08rem', marginTop: -1 }}>+</span>
+            <span style={{ fontSize: '1.125rem', marginTop: -1 }}>+</span>
             {t('nav.create')}
           </button>
         ) : (
@@ -109,13 +109,13 @@ export function SwipeSections({
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 3,
               background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-              color: 'white', fontWeight: 700, fontSize: '0.86rem',
+              color: 'white', fontWeight: 700, fontSize: '1rem',
               padding: '7px 13px', borderRadius: 999,
               textDecoration: 'none', flexShrink: 0, lineHeight: 1,
               letterSpacing: '-0.01em',
             }}
           >
-            <span style={{ fontSize: '1.08rem', marginTop: -1 }}>+</span>
+            <span style={{ fontSize: '1.125rem', marginTop: -1 }}>+</span>
             {t('nav.create')}
           </Link>
         )}
@@ -137,7 +137,7 @@ export function SwipeSections({
               border: active === 3 ? '2px solid #6366F1' : '2px solid var(--color-border)',
               cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '0.90rem', fontWeight: 800,
+              fontSize: '1rem', fontWeight: 800,
               color: active === 3 ? 'white' : 'var(--color-foreground)',
               transition: 'all 0.2s',
               overflow: 'hidden', padding: 0,
@@ -157,7 +157,7 @@ export function SwipeSections({
           <Link
             href="/login"
             style={{
-              flexShrink: 0, fontSize: '0.83rem', fontWeight: 700,
+              flexShrink: 0, fontSize: '1rem', fontWeight: 700,
               color: '#6366F1', textDecoration: 'none',
               padding: '5px 10px', borderRadius: 999,
               border: '1.5px solid #6366F1',

@@ -164,8 +164,8 @@ export function HotPanelClient({
           <Flame size={18} color="white" />
         </div>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: '1.08rem', fontWeight: 900, lineHeight: 1.2, margin: 0 }}>Hot Touched</h2>
-          <p style={{ fontSize: '0.80rem', color: 'var(--color-muted-foreground)', margin: '2px 0 0' }}>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: 900, lineHeight: 1.2, margin: 0 }}>Hot Touched</h2>
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-muted-foreground)', margin: '2px 0 0' }}>
             {t('hot.subtitle')}
           </p>
         </div>
@@ -177,7 +177,7 @@ export function HotPanelClient({
             background: '#D4C4B0',
             border: 'none', cursor: 'pointer',
             borderRadius: 999, padding: '5px 10px',
-            fontSize: '0.72rem', fontWeight: 700,
+            fontSize: '0.875rem', fontWeight: 700,
             color: '#3D2B1F',
             flexShrink: 0,
           }}
@@ -206,7 +206,7 @@ export function HotPanelClient({
                 border: 'none',
                 background: active ? '#3D2B1F' : '#D4C4B0',
                 color: active ? '#ffffff' : '#3D2B1F',
-                fontSize: '0.83rem', fontWeight: active ? 800 : 500,
+                fontSize: '1rem', fontWeight: active ? 800 : 500,
                 cursor: 'pointer',
                 transition: 'all 0.15s',
               }}
@@ -354,7 +354,7 @@ export function HotPanelClient({
                     {/* 제목 + 작성자 */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '6px 0 8px' }}>
                       <p style={{
-                        flex: 1, margin: 0, fontSize: '0.98rem', fontWeight: 700, lineHeight: 1.4,
+                        flex: 1, margin: 0, fontSize: '1.125rem', fontWeight: 700, lineHeight: 1.4,
                         color: '#3D2B1F',
                         overflow: 'hidden', display: '-webkit-box',
                         WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
@@ -380,9 +380,9 @@ export function HotPanelClient({
                             </span>
                           )}
                           {entry.author.country && (
-                            <span style={{ fontSize: '1.08rem', lineHeight: 1 }}>{countryToFlag(entry.author.country)}</span>
+                            <span style={{ fontSize: '1.125rem', lineHeight: 1 }}>{countryToFlag(entry.author.country)}</span>
                           )}
-                          <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {entry.author.displayName}
                           </span>
                         </button>
@@ -392,7 +392,7 @@ export function HotPanelClient({
                     {/* 좋아요 */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Heart size={12} style={{ fill: '#F43F5E', stroke: '#F43F5E', flexShrink: 0 }} />
-                      <span style={{ fontSize: '0.83rem', fontWeight: 700, color: '#F43F5E' }}>
+                      <span style={{ fontSize: '1rem', fontWeight: 700, color: '#F43F5E' }}>
                         {entry.likeCount}
                       </span>
                     </div>
@@ -420,7 +420,7 @@ export function HotPanelClient({
             </div>
           ) : (
             <div style={{ padding: '16px 0', textAlign: 'center' }}>
-              <p style={{ fontSize: '0.86rem', color: 'var(--color-muted-foreground)' }}>
+              <p style={{ fontSize: '1rem', color: 'var(--color-muted-foreground)' }}>
                 {t('hot.viewConfirmed', { category: categoryLabel(category), count: filtered.length })}
               </p>
             </div>
