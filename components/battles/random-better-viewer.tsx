@@ -540,7 +540,7 @@ export function RandomBetterViewer({
 
       {/* ── 정보 바 ── */}
       <div style={{
-        height: 36, flexShrink: 0, zIndex: 20,
+        height: 38, flexShrink: 0, zIndex: 20,
         background: 'rgba(237,228,218,0.97)',
         display: 'flex', alignItems: 'center',
         paddingLeft: 12, paddingRight: 10, gap: 0,
@@ -548,29 +548,29 @@ export function RandomBetterViewer({
         {/* 좌측: 태그 필터 활성 시 태그명 표시 / 아니면 레벨·적중률·참여 수 */}
         <div style={{ flex: 1, minWidth: 0, overflow: 'hidden', display: 'flex', alignItems: 'center' }}>
           {tagFilter ? (
-            <span style={{ color: '#6366F1', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{ color: '#6366F1', fontSize: '0.73rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
               <Hash size={10} strokeWidth={2.5} />
               {tagFilter} {t('vote.tagSearching')}
             </span>
           ) : accuracyStatus === 'no-auth' ? (
-            <span style={{ color: 'rgba(61,43,31,0.5)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'rgba(61,43,31,0.5)', fontSize: '0.73rem', whiteSpace: 'nowrap' }}>
               {t('vote.loginPrompt')}
             </span>
           ) : accuracyStatus === 'loading' ? (
-            <span style={{ color: 'rgba(61,43,31,0.4)', fontSize: '0.65rem', whiteSpace: 'nowrap' }}>
+            <span style={{ color: 'rgba(61,43,31,0.4)', fontSize: '0.73rem', whiteSpace: 'nowrap' }}>
               {t('vote.loading')}
             </span>
           ) : (() => {
             const li = calcLevel(accuracyTotal, accuracy)
-            const sep = <span style={{ color: 'rgba(61,43,31,0.25)', margin: '0 5px', fontSize: '0.6rem' }}>·</span>
+            const sep = <span style={{ color: 'rgba(61,43,31,0.25)', margin: '0 5px', fontSize: '0.68rem' }}>·</span>
             return (
               <>
-                <span style={{ color: '#3D2B1F', fontSize: '0.65rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <span style={{ fontSize: '0.75rem' }}>{li.emoji}</span>
+                <span style={{ color: '#3D2B1F', fontSize: '0.73rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 3 }}>
+                  <span style={{ fontSize: '0.83rem' }}>{li.emoji}</span>
                   {t(`levels.${li.levelKey}` as Parameters<typeof t>[0])}
                 </span>
                 {sep}
-                <span style={{ color: '#3D2B1F', fontSize: '0.65rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                <span style={{ color: '#3D2B1F', fontSize: '0.73rem', fontWeight: 600, whiteSpace: 'nowrap' }}>
                   {accuracy !== null ? `${accuracy}%` : '-'}
                   <span style={{ color: 'rgba(61,43,31,0.4)', margin: '0 4px' }}>/</span>
                   {accuracyTotal}{t('participation.unit')}
@@ -602,7 +602,7 @@ export function RandomBetterViewer({
                   border: `1px solid ${catDropdownOpen ? 'rgba(61,43,31,0.4)' : 'rgba(61,43,31,0.15)'}`,
                   borderRadius: 999, padding: '3px 10px',
                   cursor: 'pointer', color: '#3D2B1F',
-                  fontSize: '0.7rem', fontWeight: 700,
+                  fontSize: '0.78rem', fontWeight: 700,
                   position: 'relative', zIndex: 9991,
                 }}
               >
@@ -610,7 +610,7 @@ export function RandomBetterViewer({
                 <span style={{ maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {categoryFilter === 'all' ? t('categories.all') : t(`categories.${categoryFilter}` as Parameters<typeof t>[0])}
                 </span>
-                <ChevronDown size={11} style={{ flexShrink: 0, transform: catDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s' }} />
+                <ChevronDown size={12} style={{ flexShrink: 0, transform: catDropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s' }} />
               </button>
               {catDropdownOpen && (
                 <div style={{
@@ -671,7 +671,7 @@ export function RandomBetterViewer({
                 cursor: 'pointer', color: '#3D2B1F',
               }}
             >
-              {tagFilter ? <X size={13} /> : <Search size={13} />}
+              {tagFilter ? <X size={13} /> : <Search size={14} />}
             </button>
           </div>
         )}
@@ -1235,15 +1235,15 @@ export function RandomBetterViewer({
                   return (
                     <>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: badge.bg, color: badge.text, fontSize: '0.6rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: badge.bg, color: badge.text, fontSize: '0.68rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
                           {cat.emoji} {t(`categories.${battle.category}` as Parameters<typeof t>[0])}
                         </span>
                         {translated && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.1)', color: '#6366F1', fontSize: '0.54rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>✦ AI</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.1)', color: '#6366F1', fontSize: '0.62rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>✦ AI</span>
                         )}
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <h2 style={{ flex: 1, margin: 0, fontWeight: 800, fontSize: '0.88rem', lineHeight: 1.3, color: '#3D2B1F', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
+                        <h2 style={{ flex: 1, margin: 0, fontWeight: 800, fontSize: '0.96rem', lineHeight: 1.3, color: '#3D2B1F', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
                           {translated?.title ?? battle.title}
                         </h2>
                         {battle.author && (
@@ -1253,10 +1253,10 @@ export function RandomBetterViewer({
                           >
                             {battle.author.avatarUrl ? (
                               /* eslint-disable-next-line @next/next/no-img-element */
-                              <img src={battle.author.avatarUrl} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                              <img src={battle.author.avatarUrl} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                             ) : (
                               <span style={{
-                                width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                                width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
                                 background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 fontSize: '0.6rem', fontWeight: 900, color: 'white',
@@ -1265,15 +1265,15 @@ export function RandomBetterViewer({
                               </span>
                             )}
                             {battle.author.country && (
-                              <span style={{ fontSize: '1rem', lineHeight: 1 }}>{countryToFlag(battle.author.country)}</span>
+                              <span style={{ fontSize: '1.08rem', lineHeight: 1 }}>{countryToFlag(battle.author.country)}</span>
                             )}
-                            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontSize: '0.80rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {battle.author.displayName}
                             </span>
                           </button>
                         )}
                       </div>
-                      <p style={{ margin: '2px 0 0', fontSize: '0.6rem', color: '#9CA3AF', fontWeight: 500 }}>
+                      <p style={{ margin: '2px 0 0', fontSize: '0.68rem', color: '#9CA3AF', fontWeight: 500 }}>
                         {phase === 'voting' && t('vote.tapToSelect')}
                         {(phase === 'picked' || phase === 'submitting') && t('vote.addReasonOptional')}
                         {phase === 'voted' && t('vote.voteDone')}
@@ -1287,7 +1287,7 @@ export function RandomBetterViewer({
               {!battle.isTextOnly && ((translated?.descA ?? battle.imageADescription) || (translated?.descB ?? battle.imageBDescription)) && (
                 <div style={{ flexShrink: 0, maxWidth: 86, textAlign: 'right' }}>
                   {(translated?.descA ?? battle.imageADescription) && (
-                    <p style={{ margin: 0, fontSize: '0.58rem', color: '#B0A090', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
+                    <p style={{ margin: 0, fontSize: '0.66rem', color: '#B0A090', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
                       A: {translated?.descA ?? battle.imageADescription}
                     </p>
                   )}

@@ -138,7 +138,7 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
                     await updateCountry(val)
                   }}
                   style={{
-                    fontSize: '0.62rem', borderRadius: 6, border: '1px solid #E5E7EB',
+                    fontSize: '0.70rem', borderRadius: 6, border: '1px solid #E5E7EB',
                     padding: '1px 4px', background: 'white', cursor: 'pointer', outline: 'none',
                   }}
                 >
@@ -155,18 +155,18 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: 3,
                     background: 'none', border: '1px dashed #D4C4B0', borderRadius: 6,
-                    padding: '1px 6px', cursor: 'pointer', fontSize: '0.62rem', color: '#6B7280',
+                    padding: '1px 6px', cursor: 'pointer', fontSize: '0.70rem', color: '#6B7280',
                   }}
                 >
                   {country ? (
-                    <><span style={{ fontSize: '0.85rem' }}>{countryToFlag(country)}</span> {COUNTRY_OPTIONS.find(c => c.code === country)?.name ?? country}</>
+                    <><span style={{ fontSize: '0.93rem' }}>{countryToFlag(country)}</span> {COUNTRY_OPTIONS.find(c => c.code === country)?.name ?? country}</>
                   ) : (
                     '+ 국적'
                   )}
                 </button>
               )}
               {data.bestCat && (
-                <span style={{ fontSize: '0.62rem', color: 'var(--color-muted-foreground)' }}>
+                <span style={{ fontSize: '0.70rem', color: 'var(--color-muted-foreground)' }}>
                   {CATEGORY_LABELS[data.bestCat.key].emoji}{' '}
                   {t('profile.expertBadge', { category: t(`categories.${data.bestCat.key}` as Parameters<typeof t>[0]) })}
                 </span>
@@ -178,7 +178,7 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
           <button
             type="submit"
             style={{
-              padding: '6px 14px', borderRadius: 999, fontSize: '0.75rem', fontWeight: 700,
+              padding: '6px 14px', borderRadius: 999, fontSize: '0.83rem', fontWeight: 700,
               border: '1.5px solid #3D2B1F', background: 'transparent',
               cursor: 'pointer', color: '#3D2B1F',
             }}
@@ -197,29 +197,29 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <span style={{ fontSize: '2.6rem', lineHeight: 1 }}>{data.levelInfo.emoji}</span>
           <div style={{ flex: 1 }}>
-            <p style={{ fontSize: '0.68rem', fontWeight: 700, color: data.levelInfo.color, letterSpacing: '0.06em', marginBottom: 4 }}>
+            <p style={{ fontSize: '0.76rem', fontWeight: 700, color: data.levelInfo.color, letterSpacing: '0.06em', marginBottom: 4 }}>
               Lv.{data.levelInfo.level} · {data.levelInfo.levelName}
             </p>
             <div style={{ display: 'flex', gap: 14 }}>
               <div>
-                <p style={{ fontSize: '0.62rem', color: '#6B7280', margin: 0 }}>{t('profile.totalVotesLabel')}</p>
-                <p style={{ fontSize: '1.15rem', fontWeight: 900, color: data.levelInfo.color, lineHeight: 1.1, margin: 0 }}>
+                <p style={{ fontSize: '0.70rem', color: '#6B7280', margin: 0 }}>{t('profile.totalVotesLabel')}</p>
+                <p style={{ fontSize: '1.23rem', fontWeight: 900, color: data.levelInfo.color, lineHeight: 1.1, margin: 0 }}>
                   {data.totalVotes}
-                  <span style={{ fontSize: '0.65rem', fontWeight: 600 }}>{t('ranking.countUnit')}</span>
+                  <span style={{ fontSize: '0.73rem', fontWeight: 600 }}>{t('ranking.countUnit')}</span>
                 </p>
               </div>
               <div>
-                <p style={{ fontSize: '0.62rem', color: '#6B7280', margin: 0 }}>{t('profile.accuracy')}</p>
-                <p style={{ fontSize: '1.15rem', fontWeight: 900, color: data.levelInfo.color, lineHeight: 1.1, margin: 0 }}>
+                <p style={{ fontSize: '0.70rem', color: '#6B7280', margin: 0 }}>{t('profile.accuracy')}</p>
+                <p style={{ fontSize: '1.23rem', fontWeight: 900, color: data.levelInfo.color, lineHeight: 1.1, margin: 0 }}>
                   {data.accuracyRate != null ? `${data.accuracyRate.toFixed(1)}%` : '-'}
                 </p>
               </div>
               {data.bestCat && (
                 <div>
-                  <p style={{ fontSize: '0.62rem', color: '#6B7280', margin: 0 }}>{t('profile.specialtyLabel')}</p>
-                  <p style={{ fontSize: '1.15rem', fontWeight: 900, color: data.levelInfo.color, lineHeight: 1.1, margin: 0 }}>
+                  <p style={{ fontSize: '0.70rem', color: '#6B7280', margin: 0 }}>{t('profile.specialtyLabel')}</p>
+                  <p style={{ fontSize: '1.23rem', fontWeight: 900, color: data.levelInfo.color, lineHeight: 1.1, margin: 0 }}>
                     {CATEGORY_LABELS[data.bestCat.key].emoji}
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, marginLeft: 2 }}>
+                    <span style={{ fontSize: '0.80rem', fontWeight: 700, marginLeft: 2 }}>
                       {data.bestCat.value.toFixed(0)}%
                     </span>
                   </p>
@@ -241,7 +241,7 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
                     display: 'inline-flex', alignItems: 'center', gap: 3,
                     padding: '2px 7px', borderRadius: 999,
                     background: 'white', border: `1px solid ${data.levelInfo.color}30`,
-                    fontSize: '0.65rem', fontWeight: 700, color: '#374151',
+                    fontSize: '0.73rem', fontWeight: 700, color: '#374151',
                   }}
                 >
                   {CATEGORY_LABELS[c.key].emoji}
@@ -264,8 +264,8 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
             borderRadius: 14, border: '1px solid var(--color-border)',
             background: 'var(--color-card)', padding: '12px 10px', textAlign: 'center',
           }}>
-            <p style={{ fontSize: '0.68rem', color: 'var(--color-muted-foreground)', margin: 0 }}>{label}</p>
-            <p style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--color-foreground)', margin: '4px 0 0' }}>{value}</p>
+            <p style={{ fontSize: '0.76rem', color: 'var(--color-muted-foreground)', margin: 0 }}>{label}</p>
+            <p style={{ fontSize: '1.28rem', fontWeight: 900, color: 'var(--color-foreground)', margin: '4px 0 0' }}>{value}</p>
           </div>
         ))}
       </div>
@@ -277,7 +277,7 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
       <div style={{ marginTop: 32, paddingTop: 16, borderTop: '1px solid var(--color-border)', textAlign: 'center' }}>
         <Link
           href="/privacy"
-          style={{ fontSize: '0.72rem', color: 'var(--color-muted-foreground)', textDecoration: 'underline', textUnderlineOffset: 3 }}
+          style={{ fontSize: '0.80rem', color: 'var(--color-muted-foreground)', textDecoration: 'underline', textUnderlineOffset: 3 }}
         >
           {t('privacy.linkLabel')}
         </Link>

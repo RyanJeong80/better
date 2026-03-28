@@ -343,26 +343,26 @@ export function MyBetterCard({
             display: 'inline-flex', alignItems: 'center', gap: 3,
             background: catStyle.bg, color: catStyle.text,
             borderRadius: 4, padding: '2px 7px',
-            fontSize: '0.65rem', fontWeight: 700,
+            fontSize: '0.73rem', fontWeight: 700,
           }}>
             {cat.emoji} {cat.label}
           </span>
 
           {/* 제목 */}
-          <h3 style={{ margin: '6px 0 8px', fontWeight: 700, fontSize: '0.9rem', lineHeight: 1.4, color: '#3D2B1F' }}>
+          <h3 style={{ margin: '6px 0 8px', fontWeight: 700, fontSize: '0.98rem', lineHeight: 1.4, color: '#3D2B1F' }}>
             {battle.title}
           </h3>
 
           {/* 통계 + 액션 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: '0.7rem', color: '#9CA3AF' }}>
+              <span style={{ fontSize: '0.78rem', color: '#9CA3AF' }}>
                 {battle.total > 0 ? `총 ${battle.total}표` : '아직 투표 없음'}
               </span>
               {battle.likesCount > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                   <Heart size={10} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
-                  <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#F43F5E' }}>
+                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#F43F5E' }}>
                     {battle.likesCount}
                   </span>
                 </div>
@@ -424,10 +424,10 @@ export function MyBetterCard({
               >
                 {r.voterAvatarUrl ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={r.voterAvatarUrl} alt="" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+                  <img src={r.voterAvatarUrl} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
                 ) : (
                   <span style={{
-                    width: 28, height: 28, borderRadius: '50%',
+                    width: 30, height: 30, borderRadius: '50%',
                     background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: '0.6rem', fontWeight: 900, color: 'white',
@@ -443,12 +443,12 @@ export function MyBetterCard({
                   style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3, background: 'none', border: 'none', padding: 0, cursor: r.voterId ? 'pointer' : 'default' }}
                 >
                   {r.voterCountry && <span style={{ fontSize: '0.78rem' }}>{countryToFlag(r.voterCountry)}</span>}
-                  <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#5C4A3A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#5C4A3A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {r.voterName ?? '익명'}
                   </span>
                   <span style={{
                     flexShrink: 0, borderRadius: 4, padding: '1px 6px',
-                    fontSize: '0.58rem', fontWeight: 800,
+                    fontSize: '0.66rem', fontWeight: 800,
                     background: r.choice === 'A' ? '#3D2B1F' : '#D4C4B0',
                     color: r.choice === 'A' ? 'white' : '#3D2B1F',
                   }}>
@@ -456,7 +456,7 @@ export function MyBetterCard({
                   </span>
                 </button>
                 <p style={{
-                  margin: 0, fontSize: '0.78rem', color: '#5C4A3A', lineHeight: 1.5,
+                  margin: 0, fontSize: '0.86rem', color: '#5C4A3A', lineHeight: 1.5,
                   overflow: 'hidden', display: '-webkit-box',
                   WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                 }}>
