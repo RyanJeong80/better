@@ -129,18 +129,29 @@ export function SwipeSections({
             onClick={() => onActiveChange(3)}
             style={{
               width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
-              background: active === 3
-                ? 'linear-gradient(135deg, #6366F1, #8B5CF6)'
-                : 'var(--color-muted)',
-              border: active === 3 ? 'none' : '2px solid var(--color-border)',
+              background: user.avatarUrl
+                ? 'transparent'
+                : active === 3
+                  ? 'linear-gradient(135deg, #6366F1, #8B5CF6)'
+                  : 'var(--color-muted)',
+              border: active === 3 ? '2px solid #6366F1' : '2px solid var(--color-border)',
               cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: '0.82rem', fontWeight: 800,
               color: active === 3 ? 'white' : 'var(--color-foreground)',
               transition: 'all 0.2s',
+              overflow: 'hidden', padding: 0,
             }}
           >
-            {user.initial}
+            {user.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt="profile"
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+            ) : (
+              user.initial
+            )}
           </button>
         ) : (
           <Link

@@ -32,6 +32,7 @@ export type UserProfileData = {
   username: string
   email: string
   initial: string
+  avatarUrl: string | null
   levelInfo: LevelInfo
   totalVotes: number
   accuracyRate: number | null
@@ -50,7 +51,7 @@ export async function GET() {
   const [dbUser, stats] = await Promise.all([
     db.query.users.findFirst({
       where: eq(users.id, user.id),
-      columns: { username: true, name: true },
+      columns: { username: true, name: true, avatarUrl: true },
     }).catch(() => null),
     db.query.userStats.findFirst({
       where: eq(userStats.userId, user.id),
@@ -154,6 +155,7 @@ export async function GET() {
     username,
     email,
     initial,
+    avatarUrl: dbUser?.avatarUrl ?? null,
     levelInfo,
     totalVotes: stats?.totalVotes ?? 0,
     accuracyRate,

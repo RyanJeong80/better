@@ -12,6 +12,7 @@ export const users = pgTable('users', {
   username: text('username').unique(),
   name: text('name'),
   avatarUrl: text('avatar_url'),
+  country: text('country'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 

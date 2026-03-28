@@ -75,6 +75,17 @@ export async function setUsername(
   redirect('/')
 }
 
+// 프로필 사진 URL 업데이트
+export async function updateAvatarUrl(avatarUrl: string): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: '로그인이 필요합니다' }
+
+  await db.update(users).set({ avatarUrl }).where(eq(users.id, user.id))
+  revalidatePath('/', 'layout')
+  return {}
+}
+
 // 프로필에서 닉네임 변경
 export async function updateUsername(
   _prev: UsernameState,

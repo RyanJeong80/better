@@ -3,7 +3,7 @@ import { getRandomBattle, getBattleById } from '@/actions/battles'
 import { createClient } from '@/lib/supabase/server'
 import { HomeClient } from '@/components/home/home-client'
 import { db } from '@/lib/db'
-import { userStats } from '@/lib/db/schema'
+import { users, userStats } from '@/lib/db/schema'
 import { calcLevel } from '@/lib/level'
 import type { LevelInfo } from '@/lib/level'
 
@@ -11,6 +11,7 @@ export type UserInfo = {
   initial: string
   name: string
   email: string
+  avatarUrl: string | null
   levelInfo: LevelInfo
 }
 
@@ -39,15 +40,23 @@ export default async function HomePage({
       const email = data.user.email ?? ''
 
       let levelInfo = calcLevel(0, null)
+      let avatarUrl: string | null = null
       try {
-        const stats = await db.query.userStats.findFirst({
-          where: eq(userStats.userId, data.user.id),
-          columns: { totalVotes: true, accuracyRate: true },
-        })
+        const [stats, dbUser] = await Promise.all([
+          db.query.userStats.findFirst({
+            where: eq(userStats.userId, data.user.id),
+            columns: { totalVotes: true, accuracyRate: true },
+          }),
+          db.query.users.findFirst({
+            where: eq(users.id, data.user.id),
+            columns: { avatarUrl: true },
+          }),
+        ])
         if (stats) levelInfo = calcLevel(stats.totalVotes, parseFloat(stats.accuracyRate as string))
+        avatarUrl = dbUser?.avatarUrl ?? null
       } catch {}
 
-      userInfo = { initial: (nm || email || '?')[0].toUpperCase(), name: nm, email, levelInfo }
+      userInfo = { initial: (nm || email || '?')[0].toUpperCase(), name: nm, email, avatarUrl, levelInfo }
     }
   } catch {}
 

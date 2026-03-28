@@ -8,6 +8,7 @@ import { signOut } from '@/actions/auth'
 import { LevelBadge } from '@/components/ui/level-badge'
 import { LevelUpToast } from '@/components/profile/level-up-toast'
 import { UsernameEditor } from '@/components/profile/username-editor'
+import { AvatarUpload } from '@/components/profile/avatar-upload'
 import { ProfileBetterList } from '@/components/profile/profile-better-list'
 import { CATEGORY_LABELS } from '@/lib/level'
 import type { UserInfo } from '@/app/(main)/page'
@@ -104,14 +105,11 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
       {/* 유저 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{
-            width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
-            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '1.3rem', fontWeight: 900, color: 'white',
-          }}>
-            {data.initial}
-          </div>
+          <AvatarUpload
+            currentAvatarUrl={data.avatarUrl}
+            initial={data.initial}
+            size={52}
+          />
           <div>
             <UsernameEditor currentUsername={data.username} />
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
