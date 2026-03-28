@@ -374,8 +374,9 @@ function TagInput({ value, onChange }: { value: string[]; onChange: (tags: strin
     debounceRef.current = setTimeout(() => {
       fetch(`/api/tags/search?q=${encodeURIComponent(q)}`)
         .then(r => r.json())
-        .then((data: string[]) => {
-          const filtered = data.filter(t => !value.includes(t))
+        .then((data: { name: string }[] | string[]) => {
+          const names = data.map(d => typeof d === 'string' ? d : d.name)
+          const filtered = names.filter(t => !value.includes(t))
           setSuggestions(filtered)
           setShowSuggestions(filtered.length > 0)
           setSuggIdx(-1)
