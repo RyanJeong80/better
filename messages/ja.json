@@ -244,7 +244,7 @@
   "swipe": {
     "hint": "↑ スワイプして次へ",
     "up": "↑ 上にスワイプ",
-    "next": "次のTouched"
+    "next": "スワイプして次を見る"
   },
   "username": {
     "save": "保存",

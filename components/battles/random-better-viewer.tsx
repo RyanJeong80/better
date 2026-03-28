@@ -834,26 +834,30 @@ export function RandomBetterViewer({
 
       {/* ── 다음 카드 미리보기 ── */}
       {phase !== 'loading' && phase !== 'empty' && (
-        <div style={{
-          position: 'absolute',
-          bottom: 0, left: 24, right: 24,
-          height: 60,
-          background: '#ffffff',
-          borderRadius: '12px 12px 0 0',
-          boxShadow: '0 -2px 8px rgba(0,0,0,0.06)',
-          opacity: 0.75,
-          transform: 'scale(0.96)',
-        }}>
+        <div
+          onClick={phase !== 'submitting' ? handleNext : undefined}
+          style={{
+            position: 'absolute',
+            bottom: 0, left: 24, right: 24,
+            height: 60,
+            background: '#ffffff',
+            borderRadius: '12px 12px 0 0',
+            boxShadow: '0 -2px 8px rgba(0,0,0,0.06)',
+            opacity: 0.75,
+            transform: 'scale(0.96)',
+            cursor: 'pointer',
+          }}
+        >
           {/* 스와이프 안내 오버레이 */}
           <div style={{
             position: 'absolute', inset: 0,
             display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center', gap: 2,
           }}>
-            <span style={{ color: 'rgba(61,43,31,0.55)', fontSize: '11px', fontWeight: 600, letterSpacing: '0.3px' }}>
+            <span style={{ color: 'rgba(61,43,31,0.6)', fontSize: '11px', fontWeight: 600, letterSpacing: '0.3px' }}>
               {t('swipe.next')}
             </span>
-            <span style={{ color: 'rgba(61,43,31,0.45)', fontSize: '16px', animation: 'bounceY 1.5s ease-in-out infinite', lineHeight: 1 }}>∧</span>
+            <span style={{ color: 'rgba(61,43,31,0.5)', fontSize: '16px', animation: 'bounceY 1.5s ease-in-out infinite', lineHeight: 1 }}>∧</span>
           </div>
         </div>
       )}

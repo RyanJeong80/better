@@ -218,22 +218,23 @@ export function SwipeSections({
               aria-label="previous section"
               style={{
                 position: 'fixed',
-                left: 12,
+                left: 10,
                 top: '50%',
                 transform: 'translateY(-50%)',
                 zIndex: 150,
-                background: 'rgba(0,0,0,0.22)',
-                border: 'none',
+                background: 'rgba(0,0,0,0.48)',
+                border: '1px solid rgba(255,255,255,0.18)',
                 borderRadius: 999,
-                color: 'rgba(255,255,255,0.88)',
-                fontSize: 28,
+                color: 'white',
+                fontSize: 26,
                 cursor: 'pointer',
                 userSelect: 'none',
-                textShadow: '0 1px 6px rgba(0,0,0,0.4)',
+                textShadow: '0 1px 4px rgba(0,0,0,0.6)',
                 lineHeight: 1,
                 width: 36, height: 36,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 animation: '_bounceXLeft 1.6s ease-in-out infinite',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
               }}
             >
               ‹
@@ -247,22 +248,23 @@ export function SwipeSections({
               aria-label="next section"
               style={{
                 position: 'fixed',
-                right: 12,
+                right: 10,
                 top: '50%',
                 transform: 'translateY(-50%)',
                 zIndex: 150,
-                background: 'rgba(0,0,0,0.22)',
-                border: 'none',
+                background: 'rgba(0,0,0,0.48)',
+                border: '1px solid rgba(255,255,255,0.18)',
                 borderRadius: 999,
-                color: 'rgba(255,255,255,0.88)',
-                fontSize: 28,
+                color: 'white',
+                fontSize: 26,
                 cursor: 'pointer',
                 userSelect: 'none',
-                textShadow: '0 1px 6px rgba(0,0,0,0.4)',
+                textShadow: '0 1px 4px rgba(0,0,0,0.6)',
                 lineHeight: 1,
                 width: 36, height: 36,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 animation: '_bounceXRight 1.6s ease-in-out infinite',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
               }}
             >
               ›
