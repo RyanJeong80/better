@@ -306,7 +306,7 @@ async function buildShareCanvas(opts: {
 
   const QRCode = (await import('qrcode')).default
   const qrCanvas = document.createElement('canvas')
-  await QRCode.toCanvas(qrCanvas, SHARE_URL, {
+  await QRCode.toCanvas(qrCanvas, `${SHARE_URL}/?id=${opts.battleId}`, {
     width: qrSize, margin: 0,
     color: { dark: '#000000', light: '#ffffff' },
   })

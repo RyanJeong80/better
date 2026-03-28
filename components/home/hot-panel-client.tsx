@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Heart, Flame, ArrowUpDown } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 import type { PanelHotEntry } from '@/app/api/panels/hot/route'
@@ -62,18 +62,22 @@ function Skeleton() {
 
 const PAGE_SIZE = 10
 
+type TranslatedEntry = { title: string; imageAText: string | null; imageBText: string | null }
+
 export function HotPanelClient({
   onSelectBattle,
 }: {
   onSelectBattle?: (entry: PanelHotEntry) => void
 }) {
   const t = useTranslations()
+  const locale = useLocale()
   const [entries, setEntries] = useState<PanelHotEntry[]>([])
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [sortOrder, setSortOrder] = useState<SortOrder>('popular')
   const sentinelRef = useRef<HTMLDivElement>(null)
+  const [translations, setTranslations] = useState<Map<string, TranslatedEntry>>(new Map())
 
   useEffect(() => {
     fetch('/api/panels/hot')
@@ -81,6 +85,29 @@ export function HotPanelClient({
       .then((data: PanelHotEntry[]) => { setEntries(data); setStatus('done') })
       .catch(() => setStatus('error'))
   }, [])
+
+  useEffect(() => {
+    if (locale === 'ko' || entries.length === 0) return
+    const texts = entries.flatMap(e => [e.title, e.imageAText ?? '', e.imageBText ?? ''])
+    fetch('/api/translate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texts, target: locale }),
+    })
+      .then(r => r.json())
+      .then(({ translations: tr }: { translations: string[] }) => {
+        const map = new Map<string, TranslatedEntry>()
+        entries.forEach((e, i) => {
+          map.set(e.id, {
+            title: tr[i * 3] || e.title,
+            imageAText: tr[i * 3 + 1] || e.imageAText,
+            imageBText: tr[i * 3 + 2] || e.imageBText,
+          })
+        })
+        setTranslations(map)
+      })
+      .catch(() => {})
+  }, [entries, locale])
 
   const filtered = useMemo(() => {
     const base = category === 'all' ? entries : entries.filter(e => e.category === category)
@@ -206,6 +233,7 @@ export function HotPanelClient({
             const cat = CATEGORY_MAP[entry.category]
             const catColor = CAT_COLOR[entry.category]
             const rankStyle = RANK_STYLE[rank]
+            const tr = translations.get(entry.id)
 
             return (
               <div
@@ -237,7 +265,7 @@ export function HotPanelClient({
                               overflow: 'hidden', display: '-webkit-box',
                               WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', margin: 0,
                             }}>
-                              {entry.imageAText}
+                              {tr?.imageAText ?? entry.imageAText}
                             </p>
                           </div>
                         ) : (
@@ -270,7 +298,7 @@ export function HotPanelClient({
                               overflow: 'hidden', display: '-webkit-box',
                               WebkitLineClamp: 4, WebkitBoxOrient: 'vertical', margin: 0,
                             }}>
-                              {entry.imageBText}
+                              {tr?.imageBText ?? entry.imageBText}
                             </p>
                           </div>
                         ) : (
@@ -327,7 +355,7 @@ export function HotPanelClient({
                       overflow: 'hidden', display: '-webkit-box',
                       WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
                     }}>
-                      {entry.title}
+                      {tr?.title ?? entry.title}
                     </p>
 
                     {/* 좋아요 */}

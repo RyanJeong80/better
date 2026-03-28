@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm'
-import { getRandomBattle } from '@/actions/battles'
+import { getRandomBattle, getBattleById } from '@/actions/battles'
 import { createClient } from '@/lib/supabase/server'
 import { HomeClient } from '@/components/home/home-client'
 import { db } from '@/lib/db'
@@ -14,8 +14,16 @@ export type UserInfo = {
   levelInfo: LevelInfo
 }
 
-export default async function HomePage() {
-  const initialBattle = await getRandomBattle([], undefined, { skipAuth: true }).catch(() => null)
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ id?: string }>
+}) {
+  const { id } = await searchParams
+  let initialBattle = id ? await getBattleById(id).catch(() => null) : null
+  if (!initialBattle) {
+    initialBattle = await getRandomBattle([], undefined, { skipAuth: true }).catch(() => null)
+  }
 
   let userInfo: UserInfo | null = null
   try {

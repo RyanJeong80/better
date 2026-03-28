@@ -236,6 +236,14 @@ export function RandomBetterViewer({
     try { sessionStorage.setItem('seenBattleIds', JSON.stringify(seenIds)) } catch {}
   }, [seenIds])
 
+  // 현재 카드 ID를 URL에 동기화 — 언어 변경 시 reload해도 같은 카드 유지
+  useEffect(() => {
+    if (!battle || typeof window === 'undefined') return
+    const url = new URL(window.location.href)
+    url.searchParams.set('id', battle.id)
+    window.history.replaceState(null, '', url.toString())
+  }, [battle?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // 퍼센트 바 채우기 애니메이션: voted가 되면 한 프레임 후 fill 트리거
   useEffect(() => {
     if (phase === 'voted') {
@@ -429,7 +437,7 @@ export function RandomBetterViewer({
 
   async function handleShare() {
     if (!battle) return
-    const url = `${window.location.origin}/battles/${battle.id}`
+    const url = `${window.location.origin}/?id=${battle.id}`
     try {
       await navigator.share({ title: battle.title, url })
     } catch {
