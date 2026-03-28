@@ -9,6 +9,8 @@ import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 export type PanelRankEntry = {
   id: string
   name: string
+  avatarUrl: string | null
+  country: string | null
   participated: number
   accuracy: number | null
 }
@@ -59,16 +61,19 @@ async function buildAllRanking(currentUserId: string | null): Promise<PanelRankR
       voterUsername: users.username,
       voterName: users.name,
       voterEmail: users.email,
+      voterAvatarUrl: users.avatarUrl,
+      voterCountry: users.country,
     })
     .from(votes)
     .leftJoin(users, eq(votes.voterId, users.id))
 
-  const countMap = new Map<string, { name: string; count: number }>()
+  type CountEntry = { name: string; count: number; avatarUrl: string | null; country: string | null }
+  const countMap = new Map<string, CountEntry>()
   for (const v of rows) {
     if (!countMap.has(v.voterId)) {
       const name =
         v.voterUsername ?? v.voterName ?? v.voterEmail?.split('@')[0] ?? `#${v.voterId.slice(0, 6)}`
-      countMap.set(v.voterId, { name, count: 0 })
+      countMap.set(v.voterId, { name, count: 0, avatarUrl: v.voterAvatarUrl ?? null, country: v.voterCountry ?? null })
     }
     countMap.get(v.voterId)!.count++
   }
@@ -76,7 +81,7 @@ async function buildAllRanking(currentUserId: string | null): Promise<PanelRankR
   console.log('[panel/ranking all] countMap size:', countMap.size)
 
   const entries = [...countMap.entries()]
-    .map(([id, s]) => ({ id, name: s.name, participated: s.count, accuracy: null }))
+    .map(([id, s]) => ({ id, name: s.name, avatarUrl: s.avatarUrl, country: s.country, participated: s.count, accuracy: null }))
     .sort((a, b) => b.participated - a.participated)
     .slice(0, 30)
 
@@ -107,6 +112,8 @@ async function buildCategoryRanking(
       voterUsername: users.username,
       voterName: users.name,
       voterEmail: users.email,
+      voterAvatarUrl: users.avatarUrl,
+      voterCountry: users.country,
     })
     .from(votes)
     .innerJoin(betters, and(
@@ -135,14 +142,14 @@ async function buildCategoryRanking(
     )
   }
 
-  type Stats = { name: string; participated: number; eligible: number; correct: number }
+  type Stats = { name: string; avatarUrl: string | null; country: string | null; participated: number; eligible: number; correct: number }
   const statsMap = new Map<string, Stats>()
 
   for (const v of rows) {
     if (!statsMap.has(v.voterId)) {
       const name =
         v.voterUsername ?? v.voterName ?? v.voterEmail?.split('@')[0] ?? `#${v.voterId.slice(0, 6)}`
-      statsMap.set(v.voterId, { name, participated: 0, eligible: 0, correct: 0 })
+      statsMap.set(v.voterId, { name, avatarUrl: v.voterAvatarUrl ?? null, country: v.voterCountry ?? null, participated: 0, eligible: 0, correct: 0 })
     }
     const s = statsMap.get(v.voterId)!
     s.participated++
@@ -156,6 +163,8 @@ async function buildCategoryRanking(
   const allEntries = [...statsMap.entries()].map(([id, s]) => ({
     id,
     name: s.name,
+    avatarUrl: s.avatarUrl,
+    country: s.country,
     participated: s.participated,
     accuracy: s.eligible > 0 ? Math.round((s.correct / s.eligible) * 100) : null,
   }))

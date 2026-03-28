@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { checkUsernameAvailable, setUsername, type UsernameState } from '@/actions/users'
+import { COUNTRY_OPTIONS, countryToFlag } from '@/lib/utils/country'
 
 function SubmitButton({ disabled }: { disabled?: boolean }) {
   const { pending } = useFormStatus()
@@ -48,6 +49,7 @@ export function UsernameForm() {
 
   const isUnavailable = availability !== null && !availability.available
   const isAvailable = availability?.available === true
+  const [country, setCountry] = useState('')
 
   return (
     <form action={formAction} className="space-y-5">
@@ -83,6 +85,30 @@ export function UsernameForm() {
         {!isAvailable && !isUnavailable && (
           <p className="text-xs text-muted-foreground">2~20자, 한글·영문·숫자·_ 사용 가능</p>
         )}
+      </div>
+
+      {/* 국적 선택 */}
+      <div className="space-y-2">
+        <label htmlFor="country" className="text-sm font-semibold">
+          국적 <span className="text-muted-foreground font-normal">(선택)</span>
+        </label>
+        <div className="relative">
+          <select
+            id="country"
+            name="country"
+            value={country}
+            onChange={e => setCountry(e.target.value)}
+            className="w-full rounded-xl border border-input bg-white px-4 py-3 text-sm outline-none transition-shadow focus:ring-2 focus:ring-indigo-400 appearance-none"
+          >
+            <option value="">선택 안함</option>
+            {COUNTRY_OPTIONS.map(c => (
+              <option key={c.code} value={c.code}>
+                {countryToFlag(c.code)} {c.name}
+              </option>
+            ))}
+          </select>
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">▼</span>
+        </div>
       </div>
 
       {state?.error && (

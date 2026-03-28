@@ -43,6 +43,7 @@ export async function setUsername(
   formData: FormData,
 ): Promise<UsernameState> {
   const username = (formData.get('username') as string)?.trim()
+  const country = (formData.get('country') as string)?.trim() || null
 
   const validationError = validateUsername(username)
   if (validationError) return { error: validationError }
@@ -65,14 +66,26 @@ export async function setUsername(
       username,
       name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
       avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+      country,
     })
-    .onConflictDoUpdate({ target: users.id, set: { username } })
+    .onConflictDoUpdate({ target: users.id, set: { username, ...(country !== null ? { country } : {}) } })
 
   // auth 메타데이터에도 저장 → middleware에서 DB 없이 확인 가능
   await supabase.auth.updateUser({ data: { username } })
 
   revalidatePath('/', 'layout')
   redirect('/')
+}
+
+// 국적 업데이트
+export async function updateCountry(country: string | null): Promise<{ error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: '로그인이 필요합니다' }
+
+  await db.update(users).set({ country }).where(eq(users.id, user.id))
+  revalidatePath('/', 'layout')
+  return {}
 }
 
 // 프로필 사진 URL 업데이트

@@ -1,16 +1,18 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { LogIn } from 'lucide-react'
 import { signOut } from '@/actions/auth'
+import { updateCountry } from '@/actions/users'
 import { LevelBadge } from '@/components/ui/level-badge'
 import { LevelUpToast } from '@/components/profile/level-up-toast'
 import { UsernameEditor } from '@/components/profile/username-editor'
 import { AvatarUpload } from '@/components/profile/avatar-upload'
 import { ProfileBetterList } from '@/components/profile/profile-better-list'
 import { CATEGORY_LABELS } from '@/lib/level'
+import { COUNTRY_OPTIONS, countryToFlag } from '@/lib/utils/country'
 import type { UserInfo } from '@/app/(main)/page'
 import type { UserProfileData } from '@/app/api/user/profile/route'
 import type { BattleWithStats } from '@/components/profile/profile-better-list'
@@ -39,12 +41,15 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
   const t = useTranslations()
   const [data, setData] = useState<UserProfileData | null>(null)
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
+  const [country, setCountry] = useState<string | null>(null)
+  const [countryEditing, setCountryEditing] = useState(false)
+  const selectRef = useRef<HTMLSelectElement>(null)
 
   useEffect(() => {
     if (!user) { setStatus('done'); return }
     fetch('/api/user/profile')
       .then(r => r.json())
-      .then((d: UserProfileData) => { setData(d); setStatus('done') })
+      .then((d: UserProfileData) => { setData(d); setCountry(d.country); setStatus('done') })
       .catch(() => setStatus('error'))
   }, [user])
 
@@ -112,8 +117,54 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
           />
           <div>
             <UsernameEditor currentUsername={data.username} />
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
               <LevelBadge level={data.levelInfo} size="xs" />
+              {/* 국적 표시/편집 */}
+              {countryEditing ? (
+                <select
+                  ref={selectRef}
+                  defaultValue={country ?? ''}
+                  autoFocus
+                  onBlur={async (e) => {
+                    const val = e.target.value || null
+                    setCountry(val)
+                    setCountryEditing(false)
+                    await updateCountry(val)
+                  }}
+                  onChange={async (e) => {
+                    const val = e.target.value || null
+                    setCountry(val)
+                    setCountryEditing(false)
+                    await updateCountry(val)
+                  }}
+                  style={{
+                    fontSize: '0.62rem', borderRadius: 6, border: '1px solid #E5E7EB',
+                    padding: '1px 4px', background: 'white', cursor: 'pointer', outline: 'none',
+                  }}
+                >
+                  <option value="">국적 없음</option>
+                  {COUNTRY_OPTIONS.map(c => (
+                    <option key={c.code} value={c.code}>
+                      {countryToFlag(c.code)} {c.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <button
+                  onClick={() => setCountryEditing(true)}
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 3,
+                    background: 'none', border: '1px dashed #D4C4B0', borderRadius: 6,
+                    padding: '1px 6px', cursor: 'pointer', fontSize: '0.62rem', color: '#6B7280',
+                  }}
+                >
+                  {country ? (
+                    <><span style={{ fontSize: '0.85rem' }}>{countryToFlag(country)}</span> {COUNTRY_OPTIONS.find(c => c.code === country)?.name ?? country}</>
+                  ) : (
+                    '+ 국적'
+                  )}
+                </button>
+              )}
               {data.bestCat && (
                 <span style={{ fontSize: '0.62rem', color: 'var(--color-muted-foreground)' }}>
                   {CATEGORY_LABELS[data.bestCat.key].emoji}{' '}

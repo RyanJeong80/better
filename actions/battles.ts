@@ -21,6 +21,11 @@ export type BattleForVoting = {
   likeCount: number
   isLiked: boolean
   category: BetterCategory
+  author: {
+    displayName: string
+    avatarUrl: string | null
+    country: string | null
+  } | null
 }
 
 
@@ -73,6 +78,7 @@ export async function getRandomBattle(
 
     const eligible = await db.select({
       id: betters.id,
+      userId: betters.userId,
       title: betters.title,
       imageAUrl: betters.imageAUrl,
       imageADescription: betters.imageADescription,
@@ -82,8 +88,14 @@ export async function getRandomBattle(
       imageBText: betters.imageBText,
       isTextOnly: betters.isTextOnly,
       category: betters.category,
+      authorUsername: users.username,
+      authorName: users.name,
+      authorEmail: users.email,
+      authorAvatarUrl: users.avatarUrl,
+      authorCountry: users.country,
     })
       .from(betters)
+      .leftJoin(users, eq(betters.userId, users.id))
       .where(whereClause)
 
     if (!eligible.length) return null
@@ -106,6 +118,11 @@ export async function getRandomBattle(
       likeCount: pickedLikes.length,
       isLiked: userId ? pickedLikes.some((l) => l.userId === userId) : false,
       category: picked.category,
+      author: {
+        displayName: picked.authorUsername ?? picked.authorName ?? picked.authorEmail?.split('@')[0] ?? '?',
+        avatarUrl: picked.authorAvatarUrl ?? null,
+        country: picked.authorCountry ?? null,
+      },
     }
   } catch (e) {
     console.error('[getRandomBattle] DB error:', e)
@@ -282,8 +299,14 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
       imageBText: betters.imageBText,
       isTextOnly: betters.isTextOnly,
       category: betters.category,
+      authorUsername: users.username,
+      authorName: users.name,
+      authorEmail: users.email,
+      authorAvatarUrl: users.avatarUrl,
+      authorCountry: users.country,
     })
       .from(betters)
+      .leftJoin(users, eq(betters.userId, users.id))
       .where(eq(betters.id, id))
       .limit(1)
 
@@ -306,6 +329,11 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
       likeCount: battleLikes.length,
       isLiked: user ? battleLikes.some((l) => l.userId === user.id) : false,
       category: battle.category,
+      author: {
+        displayName: battle.authorUsername ?? battle.authorName ?? battle.authorEmail?.split('@')[0] ?? '?',
+        avatarUrl: battle.authorAvatarUrl ?? null,
+        country: battle.authorCountry ?? null,
+      },
     }
   } catch {
     return null

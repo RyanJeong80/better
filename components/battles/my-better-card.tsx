@@ -8,10 +8,14 @@ import { useTranslations } from 'next-intl'
 import type { BetterCategory } from '@/lib/constants/categories'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
 import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
+import { countryToFlag } from '@/lib/utils/country'
 
 interface Reason {
   choice: 'A' | 'B'
   reason: string
+  voterName: string | null
+  voterAvatarUrl: string | null
+  voterCountry: string | null
 }
 
 interface BattleStats {
@@ -215,17 +219,39 @@ function ReasonsSheet({
                   borderBottom: i < filtered.length - 1 ? '1px solid #F5EFE8' : undefined,
                 }}
               >
-                <span style={{
-                  flexShrink: 0, borderRadius: 4, padding: '2px 8px',
-                  fontSize: '0.68rem', fontWeight: 800, marginTop: 2,
-                  background: r.choice === 'A' ? '#3D2B1F' : '#D4C4B0',
-                  color: r.choice === 'A' ? 'white' : '#3D2B1F',
-                }}>
-                  {r.choice}
-                </span>
-                <p style={{ fontSize: '0.875rem', color: '#3D2B1F', opacity: 0.82, margin: 0, lineHeight: 1.55 }}>
-                  {r.reason}
-                </p>
+                {/* Voter avatar */}
+                {r.voterAvatarUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={r.voterAvatarUrl} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                ) : (
+                  <span style={{
+                    width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                    background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.65rem', fontWeight: 900, color: 'white',
+                  }}>
+                    {(r.voterName?.[0] ?? '?').toUpperCase()}
+                  </span>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3 }}>
+                    {r.voterCountry && <span style={{ fontSize: '0.8rem' }}>{countryToFlag(r.voterCountry)}</span>}
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3D2B1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {r.voterName ?? '익명'}
+                    </span>
+                    <span style={{
+                      flexShrink: 0, borderRadius: 4, padding: '1px 7px',
+                      fontSize: '0.62rem', fontWeight: 800,
+                      background: r.choice === 'A' ? '#3D2B1F' : '#D4C4B0',
+                      color: r.choice === 'A' ? 'white' : '#3D2B1F',
+                    }}>
+                      {r.choice}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: '0.875rem', color: '#3D2B1F', opacity: 0.82, margin: 0, lineHeight: 1.55 }}>
+                    {r.reason}
+                  </p>
+                </div>
               </div>
             ))
           )}

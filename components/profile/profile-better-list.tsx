@@ -22,7 +22,7 @@ export interface BattleWithStats {
   votesA: number
   votesB: number
   total: number
-  reasons: { choice: 'A' | 'B'; reason: string }[]
+  reasons: { choice: 'A' | 'B'; reason: string; voterName: string | null; voterAvatarUrl: string | null; voterCountry: string | null }[]
   createdAt: Date
   closedAt: Date | null
   winner: 'A' | 'B' | null

@@ -11,6 +11,7 @@ import { toggleLike } from '@/actions/likes'
 import { CATEGORY_FILTERS, CATEGORY_MAP } from '@/lib/constants/categories'
 import { calcLevel } from '@/lib/level'
 import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
+import { countryToFlag } from '@/lib/utils/country'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
 type Phase = 'voting' | 'picked' | 'submitting' | 'voted' | 'loading' | 'empty'
@@ -1231,12 +1232,36 @@ export function RandomBetterViewer({
                   const badge = CAT_BADGE[battle.category]
                   return (
                     <>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4, flexWrap: 'wrap' }}>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: badge.bg, color: badge.text, fontSize: '0.6rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
                           {cat.emoji} {t(`categories.${battle.category}` as Parameters<typeof t>[0])}
                         </span>
                         {translated && (
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.1)', color: '#6366F1', fontSize: '0.54rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>✦ AI</span>
+                        )}
+                        {battle.author && (
+                          <>
+                            <span style={{ color: '#D4C4B0', fontSize: '0.6rem', lineHeight: 1 }}>·</span>
+                            {battle.author.avatarUrl ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img src={battle.author.avatarUrl} alt="" style={{ width: 14, height: 14, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                            ) : (
+                              <span style={{
+                                width: 14, height: 14, borderRadius: '50%', flexShrink: 0,
+                                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                fontSize: '0.42rem', fontWeight: 900, color: 'white',
+                              }}>
+                                {battle.author.displayName[0]?.toUpperCase() ?? '?'}
+                              </span>
+                            )}
+                            {battle.author.country && (
+                              <span style={{ fontSize: '0.7rem', lineHeight: 1 }}>{countryToFlag(battle.author.country)}</span>
+                            )}
+                            <span style={{ fontSize: '0.58rem', color: '#9CA3AF', fontWeight: 600, maxWidth: 64, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {battle.author.displayName}
+                            </span>
+                          </>
                         )}
                       </div>
                       <h2 style={{ margin: 0, fontWeight: 800, fontSize: '0.88rem', lineHeight: 1.3, color: '#3D2B1F', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>

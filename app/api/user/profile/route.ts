@@ -7,6 +7,14 @@ import { calcLevel } from '@/lib/level'
 import type { LevelInfo } from '@/lib/level'
 import type { BetterCategory } from '@/lib/constants/categories'
 
+export type VoteReason = {
+  choice: 'A' | 'B'
+  reason: string
+  voterName: string | null
+  voterAvatarUrl: string | null
+  voterCountry: string | null
+}
+
 export type ProfileBattleStats = {
   id: string
   title: string
@@ -20,7 +28,7 @@ export type ProfileBattleStats = {
   votesA: number
   votesB: number
   total: number
-  reasons: { choice: 'A' | 'B'; reason: string }[]
+  reasons: VoteReason[]
   createdAt: string
   closedAt: string | null
   winner: 'A' | 'B' | null
@@ -33,6 +41,7 @@ export type UserProfileData = {
   email: string
   initial: string
   avatarUrl: string | null
+  country: string | null
   levelInfo: LevelInfo
   totalVotes: number
   accuracyRate: number | null
@@ -51,7 +60,7 @@ export async function GET() {
   const [dbUser, stats] = await Promise.all([
     db.query.users.findFirst({
       where: eq(users.id, user.id),
-      columns: { username: true, name: true, avatarUrl: true },
+      columns: { username: true, name: true, avatarUrl: true, country: true },
     }).catch(() => null),
     db.query.userStats.findFirst({
       where: eq(userStats.userId, user.id),
@@ -109,17 +118,27 @@ export async function GET() {
     const ids = myBetters.map(b => b.id)
     const [myVotes, myLikes] = ids.length
       ? await Promise.all([
-          db.select({ betterId: votes.betterId, choice: votes.choice, reason: votes.reason })
-            .from(votes).where(inArray(votes.betterId, ids)),
+          db.select({
+            betterId: votes.betterId,
+            choice: votes.choice,
+            reason: votes.reason,
+            voterUsername: users.username,
+            voterAvatarUrl: users.avatarUrl,
+            voterCountry: users.country,
+          })
+            .from(votes)
+            .leftJoin(users, eq(votes.voterId, users.id))
+            .where(inArray(votes.betterId, ids)),
           db.select({ betterId: likes.betterId })
             .from(likes).where(inArray(likes.betterId, ids)),
         ])
       : [[], []]
 
-    const votesByBetter = new Map<string, { choice: 'A' | 'B'; reason: string | null }[]>()
+    type VoteRow = { choice: 'A' | 'B'; reason: string | null; voterUsername: string | null; voterAvatarUrl: string | null; voterCountry: string | null }
+    const votesByBetter = new Map<string, VoteRow[]>()
     for (const v of myVotes) {
       if (!votesByBetter.has(v.betterId)) votesByBetter.set(v.betterId, [])
-      votesByBetter.get(v.betterId)!.push({ choice: v.choice, reason: v.reason })
+      votesByBetter.get(v.betterId)!.push({ choice: v.choice, reason: v.reason, voterUsername: v.voterUsername, voterAvatarUrl: v.voterAvatarUrl, voterCountry: v.voterCountry })
     }
     const likeCountMap = new Map<string, number>()
     for (const l of myLikes) {
@@ -140,7 +159,13 @@ export async function GET() {
           total: bvotes.length,
           reasons: bvotes
             .filter((v): v is typeof v & { reason: string } => !!v.reason)
-            .map(v => ({ choice: v.choice, reason: v.reason })),
+            .map(v => ({
+              choice: v.choice,
+              reason: v.reason,
+              voterName: v.voterUsername ?? null,
+              voterAvatarUrl: v.voterAvatarUrl ?? null,
+              voterCountry: v.voterCountry ?? null,
+            })),
           likesCount: likeCountMap.get(b.id) ?? 0,
         }
       })
@@ -156,6 +181,7 @@ export async function GET() {
     email,
     initial,
     avatarUrl: dbUser?.avatarUrl ?? null,
+    country: dbUser?.country ?? null,
     levelInfo,
     totalVotes: stats?.totalVotes ?? 0,
     accuracyRate,

@@ -7,6 +7,7 @@ import { Trophy } from 'lucide-react'
 import { calcLevel } from '@/lib/level'
 import { LevelBadge } from '@/components/ui/level-badge'
 import type { PanelRankEntry, PanelRankResponse } from '@/app/api/panels/ranking/route'
+import { countryToFlag } from '@/lib/utils/country'
 
 type TabKey = 'all' | 'fashion' | 'appearance' | 'love' | 'shopping' | 'food' | 'it' | 'decision'
 
@@ -218,18 +219,36 @@ export function RankingPanelClient() {
               >
                 {rank <= 3 ? (
                   <span style={{
-                    width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                    width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '0.72rem', fontWeight: 900,
+                    fontSize: '0.68rem', fontWeight: 900,
                     background: rank === 1 ? '#FEF3C7' : rank === 2 ? '#F3F4F6' : '#FEF3C7',
                     color: RANK_COLOR[rank - 1],
                   }}>
                     {rank}
                   </span>
                 ) : (
-                  <span style={{ width: 28, textAlign: 'center', fontSize: '0.82rem', fontWeight: 700, color: 'var(--color-muted-foreground)', flexShrink: 0 }}>
+                  <span style={{ width: 22, textAlign: 'center', fontSize: '0.78rem', fontWeight: 700, color: 'var(--color-muted-foreground)', flexShrink: 0 }}>
                     {rank}
                   </span>
+                )}
+                {/* Avatar */}
+                {entry.avatarUrl ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={entry.avatarUrl} alt="" style={{ width: 26, height: 26, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                ) : (
+                  <span style={{
+                    width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
+                    background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '0.6rem', fontWeight: 900, color: 'white',
+                  }}>
+                    {(entry.name?.[0] ?? '?').toUpperCase()}
+                  </span>
+                )}
+                {/* Country flag */}
+                {entry.country && (
+                  <span style={{ fontSize: '0.85rem', flexShrink: 0 }}>{countryToFlag(entry.country)}</span>
                 )}
                 <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.88rem', fontWeight: 600 }}>
                   {entry.name}
