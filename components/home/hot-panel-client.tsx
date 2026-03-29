@@ -393,6 +393,22 @@ export function HotPanelClient({
                       )}
                     </div>
 
+                    {/* A/B 설명 */}
+                    {!entry.isTextOnly && (entry.imageADescription || entry.imageBDescription) && (
+                      <div style={{ marginBottom: 6 }}>
+                        {entry.imageADescription && (
+                          <p style={{ margin: 0, fontSize: '0.8125rem', color: '#3D2B1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            A. {entry.imageADescription}
+                          </p>
+                        )}
+                        {entry.imageBDescription && (
+                          <p style={{ margin: '2px 0 0', fontSize: '0.8125rem', color: '#3D2B1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            B. {entry.imageBDescription}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
                     {/* 좋아요 */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Heart size={12} style={{ fill: '#F43F5E', stroke: '#F43F5E', flexShrink: 0 }} />

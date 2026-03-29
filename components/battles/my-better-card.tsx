@@ -362,9 +362,25 @@ export function MyBetterCard({
           </span>
 
           {/* 제목 */}
-          <h3 style={{ margin: '6px 0 8px', fontWeight: 700, fontSize: '0.98rem', lineHeight: 1.4, color: '#3D2B1F' }}>
+          <h3 style={{ margin: '6px 0 4px', fontWeight: 700, fontSize: '0.98rem', lineHeight: 1.4, color: '#3D2B1F' }}>
             {battle.title}
           </h3>
+
+          {/* A/B 설명 */}
+          {!battle.isTextOnly && (battle.imageADescription || battle.imageBDescription) && (
+            <div style={{ marginBottom: 8 }}>
+              {battle.imageADescription && (
+                <p style={{ margin: 0, fontSize: '0.8125rem', color: '#3D2B1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  A. {battle.imageADescription}
+                </p>
+              )}
+              {battle.imageBDescription && (
+                <p style={{ margin: '2px 0 0', fontSize: '0.8125rem', color: '#3D2B1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  B. {battle.imageBDescription}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* 통계 + 액션 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

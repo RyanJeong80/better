@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { X } from 'lucide-react'
 import { LevelBadge } from '@/components/ui/level-badge'
@@ -11,15 +11,16 @@ import { toggleFollow } from '@/actions/follows'
 import type { PublicUserProfile } from '@/app/api/user/[id]/route'
 import type { PublicBetterItem } from '@/app/api/user/[id]/betters/route'
 
-function BetterCard({ better }: { better: PublicBetterItem }) {
+function BetterCard({ better, onClose }: { better: PublicBetterItem; onClose: () => void }) {
   const t = useTranslations()
+  const router = useRouter()
   return (
-    <Link
-      href={`/battles/${better.id}`}
+    <div
+      onClick={() => { onClose(); router.push(`/?id=${better.id}`) }}
       style={{
         display: 'flex', gap: 12, padding: '14px 0',
         borderBottom: '1px solid var(--color-border)',
-        textDecoration: 'none', color: 'inherit',
+        cursor: 'pointer',
       }}
     >
       {better.isTextOnly ? (
@@ -49,7 +50,7 @@ function BetterCard({ better }: { better: PublicBetterItem }) {
           {better.winner && <span>🏆 {better.winner}</span>}
         </div>
       </div>
-    </Link>
+    </div>
   )
 }
 
@@ -232,7 +233,7 @@ export function UserTouchesModal({
               </div>
             ) : (
               <div>
-                {betters.map(b => <BetterCard key={b.id} better={b} />)}
+                {betters.map(b => <BetterCard key={b.id} better={b} onClose={onClose} />)}
               </div>
             )}
           </>

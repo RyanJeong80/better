@@ -983,15 +983,16 @@ export function RandomBetterViewer({
 
                 {/* 설명 텍스트 */}
                 {!battle.isTextOnly && (translated?.descA ?? battle.imageADescription) && (
-                  <p style={{
-                    position: 'absolute', bottom: 10, left: 32, right: 60, zIndex: 3,
-                    margin: 0, color: 'white', fontSize: '0.72rem', lineHeight: 1.35,
-                    textShadow: '0 1px 4px rgba(0,0,0,0.9)',
-                    overflow: 'hidden', display: '-webkit-box',
-                    WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                  <div style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 3,
+                    padding: '8px 12px',
+                    backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                    backgroundColor: 'rgba(0,0,0,0.35)',
+                    color: '#ffffff', fontSize: '0.875rem', fontWeight: 500,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
-                    {translated?.descA ?? battle.imageADescription}
-                  </p>
+                    A. {translated?.descA ?? battle.imageADescription}
+                  </div>
                 )}
 
                 {/* 선택됨 오버레이 */}
@@ -1076,15 +1077,16 @@ export function RandomBetterViewer({
 
                 {/* 설명 텍스트 */}
                 {!battle.isTextOnly && (translated?.descB ?? battle.imageBDescription) && (
-                  <p style={{
-                    position: 'absolute', bottom: 10, left: 32, right: 60, zIndex: 3,
-                    margin: 0, color: 'white', fontSize: '0.72rem', lineHeight: 1.35,
-                    textShadow: '0 1px 4px rgba(0,0,0,0.9)',
-                    overflow: 'hidden', display: '-webkit-box',
-                    WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                  <div style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 3,
+                    padding: '8px 12px',
+                    backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                    backgroundColor: 'rgba(0,0,0,0.35)',
+                    color: '#ffffff', fontSize: '0.875rem', fontWeight: 500,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
-                    {translated?.descB ?? battle.imageBDescription}
-                  </p>
+                    B. {translated?.descB ?? battle.imageBDescription}
+                  </div>
                 )}
 
                 {/* 선택됨 오버레이 */}

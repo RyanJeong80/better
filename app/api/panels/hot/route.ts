@@ -10,6 +10,8 @@ export type PanelHotEntry = {
   title: string
   imageAUrl: string
   imageBUrl: string
+  imageADescription: string | null
+  imageBDescription: string | null
   category: BetterCategory
   likeCount: number
   createdAt: string
@@ -33,6 +35,8 @@ const getCachedHot = unstable_cache(
         title: betters.title,
         imageAUrl: betters.imageAUrl,
         imageBUrl: betters.imageBUrl,
+        imageADescription: betters.imageADescription,
+        imageBDescription: betters.imageBDescription,
         imageAText: betters.imageAText,
         imageBText: betters.imageBText,
         isTextOnly: betters.isTextOnly,

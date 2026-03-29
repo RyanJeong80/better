@@ -339,11 +339,11 @@ function TagInput({ value, onChange }: { value: string[]; onChange: (tags: strin
   const t = useTranslations('create')
 
   const cleanTag = (raw: string) =>
-    raw.toLowerCase().replace(/^#+/, '').replace(/\s+/g, '').slice(0, 30)
+    raw.replace(/^#+/, '').replace(/\s+/g, '').slice(0, 30)
 
   const addTag = (raw: string) => {
     const name = cleanTag(raw)
-    if (!name || value.includes(name) || value.length >= MAX_TAGS) return
+    if (!name || value.some(t => t.toLowerCase() === name.toLowerCase()) || value.length >= MAX_TAGS) return
     onChange([...value, name])
     setInput('')
     setSuggestions([])
@@ -827,7 +827,13 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
         {category ? (
           <p className="text-xs text-muted-foreground">{tCategories(`${category}Desc` as Parameters<typeof tCategories>[0])}</p>
         ) : (
-          <p className="text-xs text-muted-foreground/50">{t('categoryFirst')}</p>
+          <p style={{
+            backgroundColor: '#FFF3E0', color: '#E65100',
+            border: '1px solid #FFB74D',
+            padding: '10px 14px', borderRadius: 8,
+            fontSize: '0.875rem', fontWeight: 600,
+            margin: 0,
+          }}>{t('categoryFirst')}</p>
         )}
       </div>
 
