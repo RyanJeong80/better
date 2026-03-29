@@ -7,6 +7,7 @@ import { calcLevel } from '@/lib/level'
 import { LevelBadge } from '@/components/ui/level-badge'
 import { UserProfileModal } from '@/components/ui/user-profile-modal'
 import { RankingFullModal } from '@/components/ui/ranking-full-modal'
+import { UserTouchesModal } from '@/components/ui/user-touches-modal'
 import type { PanelRankEntry, PanelRankResponse } from '@/app/api/panels/ranking/route'
 import { countryToFlag } from '@/lib/utils/country'
 
@@ -61,6 +62,7 @@ export function RankingPanelClient({ viewerUserId }: { viewerUserId?: string | n
   const [data, setData] = useState<PanelRankResponse | null>(null)
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
+  const [touchesModalUserId, setTouchesModalUserId] = useState<string | null>(null)
   const [showRankingFull, setShowRankingFull] = useState(false)
   const tabsRef = useRef<HTMLDivElement>(null)
 
@@ -298,6 +300,14 @@ export function RankingPanelClient({ viewerUserId }: { viewerUserId?: string | n
           userId={profileModalUserId}
           viewerUserId={viewerUserId}
           onClose={() => setProfileModalUserId(null)}
+          onViewTouches={(id) => setTouchesModalUserId(id)}
+        />
+      )}
+      {touchesModalUserId && (
+        <UserTouchesModal
+          userId={touchesModalUserId}
+          viewerUserId={viewerUserId}
+          onClose={() => setTouchesModalUserId(null)}
         />
       )}
       {showRankingFull && (

@@ -9,6 +9,7 @@ import type { PanelHotEntry } from '@/app/api/panels/hot/route'
 import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
 import { countryToFlag } from '@/lib/utils/country'
 import { UserProfileModal } from '@/components/ui/user-profile-modal'
+import { UserTouchesModal } from '@/components/ui/user-touches-modal'
 
 const CAT_COLOR: Record<BetterCategory, { bg: string; text: string }> = {
   fashion:    { bg: '#DBEAFE', text: '#1D4ED8' },
@@ -78,6 +79,7 @@ export function HotPanelClient({
   const [entries, setEntries] = useState<PanelHotEntry[]>([])
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
+  const [touchesModalUserId, setTouchesModalUserId] = useState<string | null>(null)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [sortOrder, setSortOrder] = useState<SortOrder>('popular')
@@ -431,7 +433,19 @@ export function HotPanelClient({
       )}
 
       {profileModalUserId && (
-        <UserProfileModal userId={profileModalUserId} viewerUserId={viewerUserId} onClose={() => setProfileModalUserId(null)} />
+        <UserProfileModal
+          userId={profileModalUserId}
+          viewerUserId={viewerUserId}
+          onClose={() => setProfileModalUserId(null)}
+          onViewTouches={(id) => setTouchesModalUserId(id)}
+        />
+      )}
+      {touchesModalUserId && (
+        <UserTouchesModal
+          userId={touchesModalUserId}
+          viewerUserId={viewerUserId}
+          onClose={() => setTouchesModalUserId(null)}
+        />
       )}
     </div>
   )

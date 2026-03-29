@@ -10,6 +10,7 @@ import { CATEGORY_MAP } from '@/lib/constants/categories'
 import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
 import { countryToFlag } from '@/lib/utils/country'
 import { UserProfileModal } from '@/components/ui/user-profile-modal'
+import { UserTouchesModal } from '@/components/ui/user-touches-modal'
 
 interface Reason {
   choice: 'A' | 'B'
@@ -147,6 +148,7 @@ function ReasonsSheet({
 }) {
   const [tab, setTab] = useState<'A' | 'B' | 'all'>('all')
   const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
+  const [touchesModalUserId, setTouchesModalUserId] = useState<string | null>(null)
   const aCount = reasons.filter(r => r.choice === 'A').length
   const bCount = reasons.filter(r => r.choice === 'B').length
   const filtered = tab === 'all' ? reasons : reasons.filter(r => r.choice === tab)
@@ -269,7 +271,17 @@ function ReasonsSheet({
         </div>
       </div>
       {profileModalUserId && (
-        <UserProfileModal userId={profileModalUserId} onClose={() => setProfileModalUserId(null)} />
+        <UserProfileModal
+          userId={profileModalUserId}
+          onClose={() => setProfileModalUserId(null)}
+          onViewTouches={(id) => setTouchesModalUserId(id)}
+        />
+      )}
+      {touchesModalUserId && (
+        <UserTouchesModal
+          userId={touchesModalUserId}
+          onClose={() => setTouchesModalUserId(null)}
+        />
       )}
     </div>
   )
@@ -285,6 +297,7 @@ export function MyBetterCard({
   const [showSheet, setShowSheet] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
+  const [touchesModalUserId, setTouchesModalUserId] = useState<string | null>(null)
   const t = useTranslations()
 
   useEffect(() => setMounted(true), [])
@@ -489,7 +502,17 @@ export function MyBetterCard({
 
       {/* 투표자 프로필 모달 (미리보기 영역에서 클릭 시) */}
       {mounted && profileModalUserId && (
-        <UserProfileModal userId={profileModalUserId} onClose={() => setProfileModalUserId(null)} />
+        <UserProfileModal
+          userId={profileModalUserId}
+          onClose={() => setProfileModalUserId(null)}
+          onViewTouches={(id) => setTouchesModalUserId(id)}
+        />
+      )}
+      {mounted && touchesModalUserId && (
+        <UserTouchesModal
+          userId={touchesModalUserId}
+          onClose={() => setTouchesModalUserId(null)}
+        />
       )}
     </div>
   )

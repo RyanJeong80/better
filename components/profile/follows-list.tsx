@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { countryToFlag } from '@/lib/utils/country'
 import { UserProfileModal } from '@/components/ui/user-profile-modal'
+import { UserTouchesModal } from '@/components/ui/user-touches-modal'
 import type { FollowUserItem } from '@/app/api/user/profile/follows/route'
 
 export function FollowsList({
@@ -19,6 +20,7 @@ export function FollowsList({
   const [list, setList] = useState<FollowUserItem[]>([])
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
+  const [touchesModalUserId, setTouchesModalUserId] = useState<string | null>(null)
 
   useEffect(() => {
     setStatus('loading')
@@ -106,6 +108,14 @@ export function FollowsList({
           userId={profileModalUserId}
           viewerUserId={currentUserId}
           onClose={() => setProfileModalUserId(null)}
+          onViewTouches={(id) => setTouchesModalUserId(id)}
+        />
+      )}
+      {touchesModalUserId && (
+        <UserTouchesModal
+          userId={touchesModalUserId}
+          viewerUserId={currentUserId}
+          onClose={() => setTouchesModalUserId(null)}
         />
       )}
     </>

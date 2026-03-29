@@ -75,7 +75,7 @@ export function SwipeSections({
         {/* 로고 */}
         <span
           style={{
-            fontFamily: 'var(--font-josefin-sans), "Josefin Sans", sans-serif',
+            fontFamily: 'var(--font-josefin), "Josefin Sans", sans-serif',
             fontWeight: 300,
             letterSpacing: '0.15em',
             color: '#3D2B1F',

@@ -7,17 +7,18 @@ import { useTranslations } from 'next-intl'
 import { LevelBadge } from '@/components/ui/level-badge'
 import { countryToFlag } from '@/lib/utils/country'
 import { toggleFollow } from '@/actions/follows'
-import { UserTouchesModal } from '@/components/ui/user-touches-modal'
 import type { PublicUserProfile } from '@/app/api/user/[id]/route'
 
 export function UserProfileModal({
   userId,
   viewerUserId,
   onClose,
+  onViewTouches,
 }: {
   userId: string
   viewerUserId?: string | null
   onClose: () => void
+  onViewTouches?: (userId: string) => void
 }) {
   const t = useTranslations()
   const [profile, setProfile] = useState<PublicUserProfile | null>(null)
@@ -25,7 +26,6 @@ export function UserProfileModal({
   const [isFollowing, setIsFollowing] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const [showTouches, setShowTouches] = useState(false)
 
   useEffect(() => setMounted(true), [])
 
@@ -161,7 +161,7 @@ export function UserProfileModal({
             {/* Action buttons */}
             <div style={{ display: 'flex', gap: 10 }}>
               <button
-                onClick={() => setShowTouches(true)}
+                onClick={() => { onClose(); onViewTouches?.(userId) }}
                 style={{
                   flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   padding: '12px 0', borderRadius: 14,
@@ -197,17 +197,6 @@ export function UserProfileModal({
     document.body,
   )
 
-  return (
-    <>
-      {portal}
-      {showTouches && (
-        <UserTouchesModal
-          userId={userId}
-          viewerUserId={viewerUserId}
-          onClose={() => setShowTouches(false)}
-        />
-      )}
-    </>
-  )
+  return portal
 }
 

@@ -109,10 +109,11 @@ export function UserTouchesModal({
     <div
       style={{
         position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
-        backgroundColor: '#EDE4DA', zIndex: 9999,
+        backgroundColor: '#EDE4DA', zIndex: 10000,
         overflowY: 'auto', overscrollBehavior: 'contain',
         display: 'flex', flexDirection: 'column',
       }}
+      onClick={e => e.stopPropagation()}
     >
       {/* Header */}
       <div style={{

@@ -13,6 +13,7 @@ import { calcLevel } from '@/lib/level'
 import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
 import { countryToFlag } from '@/lib/utils/country'
 import { UserProfileModal } from '@/components/ui/user-profile-modal'
+import { UserTouchesModal } from '@/components/ui/user-touches-modal'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
 type Phase = 'voting' | 'picked' | 'submitting' | 'voted' | 'loading' | 'empty'
@@ -99,6 +100,7 @@ export function RandomBetterViewer({
   const [battle, setBattle] = useState<BattleForVoting | null>(initialBattle)
   const [phase, setPhase] = useState<Phase>(initialBattle ? 'voting' : 'empty')
   const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
+  const [touchesModalUserId, setTouchesModalUserId] = useState<string | null>(null)
   const [selectedChoice, setSelectedChoice] = useState<'A' | 'B' | null>(null)
   const [reason, setReason] = useState('')
   const [voteResult, setVoteResult] = useState<VoteResult | null>(null)
@@ -1357,7 +1359,19 @@ export function RandomBetterViewer({
       </div>{/* ── 사진 영역 끝 ── */}
 
       {profileModalUserId && (
-        <UserProfileModal userId={profileModalUserId} viewerUserId={viewerUserId} onClose={() => setProfileModalUserId(null)} />
+        <UserProfileModal
+          userId={profileModalUserId}
+          viewerUserId={viewerUserId}
+          onClose={() => setProfileModalUserId(null)}
+          onViewTouches={(id) => setTouchesModalUserId(id)}
+        />
+      )}
+      {touchesModalUserId && (
+        <UserTouchesModal
+          userId={touchesModalUserId}
+          viewerUserId={viewerUserId}
+          onClose={() => setTouchesModalUserId(null)}
+        />
       )}
     </div>
   )

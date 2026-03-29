@@ -7,6 +7,7 @@ import { X, Trophy } from 'lucide-react'
 import { calcLevel } from '@/lib/level'
 import { LevelBadge } from '@/components/ui/level-badge'
 import { UserProfileModal } from '@/components/ui/user-profile-modal'
+import { UserTouchesModal } from '@/components/ui/user-touches-modal'
 import { countryToFlag } from '@/lib/utils/country'
 import type { PanelRankEntry, PanelRankResponse } from '@/app/api/panels/ranking/route'
 
@@ -40,6 +41,7 @@ export function RankingFullModal({
   const [data, setData] = useState<PanelRankResponse | null>(null)
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
+  const [touchesModalUserId, setTouchesModalUserId] = useState<string | null>(null)
   const tabsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
@@ -275,6 +277,14 @@ export function RankingFullModal({
           userId={profileModalUserId}
           viewerUserId={viewerUserId}
           onClose={() => setProfileModalUserId(null)}
+          onViewTouches={(id) => setTouchesModalUserId(id)}
+        />
+      )}
+      {touchesModalUserId && (
+        <UserTouchesModal
+          userId={touchesModalUserId}
+          viewerUserId={viewerUserId}
+          onClose={() => setTouchesModalUserId(null)}
         />
       )}
     </div>
