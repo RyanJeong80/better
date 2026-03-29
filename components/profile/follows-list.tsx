@@ -92,12 +92,12 @@ export function FollowsList({
                 {(user.username[0] ?? '?').toUpperCase()}
               </span>
             )}
-            {user.country && (
-              <span style={{ fontSize: '1rem', flexShrink: 0 }}>{countryToFlag(user.country)}</span>
-            )}
             <span style={{ flex: 1, fontWeight: 600, fontSize: '1rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--color-foreground)' }}>
               {user.username || '?'}
             </span>
+            {user.country && (
+              <span style={{ fontSize: '1rem', flexShrink: 0 }}>{countryToFlag(user.country)}</span>
+            )}
           </button>
         ))}
       </div>

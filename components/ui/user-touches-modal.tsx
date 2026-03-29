@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState, useTransition } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { ArrowLeft } from 'lucide-react'
+import { X } from 'lucide-react'
 import { LevelBadge } from '@/components/ui/level-badge'
 import { countryToFlag } from '@/lib/utils/country'
 import { toggleFollow } from '@/actions/follows'
@@ -52,19 +53,24 @@ function BetterCard({ better }: { better: PublicBetterItem }) {
   )
 }
 
-export function UserProfilePageClient({
+export function UserTouchesModal({
   userId,
   viewerUserId,
+  onClose,
 }: {
   userId: string
-  viewerUserId: string | null
+  viewerUserId?: string | null
+  onClose: () => void
 }) {
   const t = useTranslations()
+  const [mounted, setMounted] = useState(false)
   const [profile, setProfile] = useState<PublicUserProfile | null>(null)
   const [betters, setBetters] = useState<PublicBetterItem[]>([])
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [isFollowing, setIsFollowing] = useState(false)
   const [isPending, startTransition] = useTransition()
+
+  useEffect(() => { setMounted(true) }, [])
 
   useEffect(() => {
     Promise.all([
@@ -97,24 +103,37 @@ export function UserProfilePageClient({
   const isSelf = viewerUserId === userId
   const showFollowBtn = viewerUserId && !isSelf
 
-  return (
-    <div style={{ minHeight: '100dvh', background: 'var(--color-background)' }}>
+  if (!mounted) return null
+
+  const modal = (
+    <div
+      style={{
+        position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
+        backgroundColor: '#EDE4DA', zIndex: 9999,
+        overflowY: 'auto', overscrollBehavior: 'contain',
+        display: 'flex', flexDirection: 'column',
+      }}
+    >
       {/* Header */}
       <div style={{
         position: 'sticky', top: 0, zIndex: 100,
         display: 'flex', alignItems: 'center', gap: 12,
         padding: '12px 16px',
-        background: 'var(--color-background)',
+        background: '#EDE4DA',
         borderBottom: '1px solid var(--color-border)',
       }}>
-        <Link href="/" style={{ display: 'flex', padding: 4, color: 'var(--color-foreground)', textDecoration: 'none' }}>
-          <ArrowLeft size={22} />
-        </Link>
         <h1 style={{ flex: 1, fontSize: '1.125rem', fontWeight: 800, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {profile?.username || '...'}
         </h1>
+        <button
+          onClick={onClose}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--color-foreground)', flexShrink: 0 }}
+        >
+          <X size={22} />
+        </button>
       </div>
 
+      {/* Content */}
       <div style={{ padding: '20px 16px 60px' }}>
         {status === 'loading' ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -220,4 +239,6 @@ export function UserProfilePageClient({
       </div>
     </div>
   )
+
+  return createPortal(modal, document.body)
 }

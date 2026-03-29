@@ -381,12 +381,12 @@ export function HotPanelClient({
                               {entry.author.displayName[0]?.toUpperCase() ?? '?'}
                             </span>
                           )}
-                          {entry.author.country && (
-                            <span style={{ fontSize: '1.125rem', lineHeight: 1 }}>{countryToFlag(entry.author.country)}</span>
-                          )}
                           <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {entry.author.displayName}
                           </span>
+                          {entry.author.country && (
+                            <span style={{ fontSize: '1.125rem', lineHeight: 1 }}>{countryToFlag(entry.author.country)}</span>
+                          )}
                         </button>
                       )}
                     </div>

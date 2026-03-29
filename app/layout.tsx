@@ -1,8 +1,16 @@
 import type { Metadata, Viewport } from 'next'
-import { Plus_Jakarta_Sans, M_PLUS_Rounded_1c, Noto_Sans_SC } from 'next/font/google'
+import { Josefin_Sans, Plus_Jakarta_Sans, M_PLUS_Rounded_1c, Noto_Sans_SC } from 'next/font/google'
+
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import './globals.css'
+
+const josefinSans = Josefin_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400'],
+  variable: '--font-josefin-sans',
+  display: 'swap',
+})
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -61,7 +69,7 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} className={`${plusJakarta.variable} ${mPlusRounded.variable} ${notoSansSC.variable}`}>
+    <html lang={locale} className={`${josefinSans.variable} ${plusJakarta.variable} ${mPlusRounded.variable} ${notoSansSC.variable}`}>
       <head>
         <link
           href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable.css"

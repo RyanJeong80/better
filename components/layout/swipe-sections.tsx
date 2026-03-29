@@ -75,13 +75,16 @@ export function SwipeSections({
         {/* 로고 */}
         <span
           style={{
-            fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.03em',
-            background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            flexShrink: 0, lineHeight: 1,
+            fontFamily: 'var(--font-josefin-sans), "Josefin Sans", sans-serif',
+            fontWeight: 300,
+            letterSpacing: '0.15em',
+            color: '#3D2B1F',
+            fontSize: '20px',
+            flexShrink: 0,
+            lineHeight: 1,
           }}
         >
-          Touched
+          TOUCHED
         </span>
 
         {/* 중앙 spacer */}

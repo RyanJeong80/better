@@ -2,12 +2,12 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { createPortal } from 'react-dom'
-import Link from 'next/link'
 import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { LevelBadge } from '@/components/ui/level-badge'
 import { countryToFlag } from '@/lib/utils/country'
 import { toggleFollow } from '@/actions/follows'
+import { UserTouchesModal } from '@/components/ui/user-touches-modal'
 import type { PublicUserProfile } from '@/app/api/user/[id]/route'
 
 export function UserProfileModal({
@@ -25,6 +25,7 @@ export function UserProfileModal({
   const [isFollowing, setIsFollowing] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [showTouches, setShowTouches] = useState(false)
 
   useEffect(() => setMounted(true), [])
 
@@ -61,7 +62,7 @@ export function UserProfileModal({
 
   if (!mounted) return null
 
-  return createPortal(
+  const portal = createPortal(
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 99999, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
       onClick={onClose}
@@ -123,12 +124,12 @@ export function UserProfileModal({
               )}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  {profile.country && (
-                    <span style={{ fontSize: '1.125rem' }}>{countryToFlag(profile.country)}</span>
-                  )}
                   <span style={{ fontWeight: 800, fontSize: '1.125rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {profile.username || '?'}
                   </span>
+                  {profile.country && (
+                    <span style={{ fontSize: '1.125rem' }}>{countryToFlag(profile.country)}</span>
+                  )}
                 </div>
                 <LevelBadge level={profile.levelInfo} size="sm" />
               </div>
@@ -159,20 +160,19 @@ export function UserProfileModal({
 
             {/* Action buttons */}
             <div style={{ display: 'flex', gap: 10 }}>
-              <Link
-                href={`/user/${userId}`}
-                onClick={onClose}
+              <button
+                onClick={() => setShowTouches(true)}
                 style={{
                   flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   padding: '12px 0', borderRadius: 14,
                   border: '1.5px solid #3D2B1F',
                   background: 'transparent',
                   fontSize: '1rem', fontWeight: 700, color: '#3D2B1F',
-                  textDecoration: 'none',
+                  cursor: 'pointer',
                 }}
               >
                 {t('follow.viewTouches')}
-              </Link>
+              </button>
               {showFollowBtn && (
                 <button
                   onClick={handleFollow}
@@ -196,4 +196,18 @@ export function UserProfileModal({
     </div>,
     document.body,
   )
+
+  return (
+    <>
+      {portal}
+      {showTouches && (
+        <UserTouchesModal
+          userId={userId}
+          viewerUserId={viewerUserId}
+          onClose={() => setShowTouches(false)}
+        />
+      )}
+    </>
+  )
 }
+

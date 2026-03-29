@@ -1,12 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { Trophy } from 'lucide-react'
 import { calcLevel } from '@/lib/level'
 import { LevelBadge } from '@/components/ui/level-badge'
 import { UserProfileModal } from '@/components/ui/user-profile-modal'
+import { RankingFullModal } from '@/components/ui/ranking-full-modal'
 import type { PanelRankEntry, PanelRankResponse } from '@/app/api/panels/ranking/route'
 import { countryToFlag } from '@/lib/utils/country'
 
@@ -61,6 +61,7 @@ export function RankingPanelClient({ viewerUserId }: { viewerUserId?: string | n
   const [data, setData] = useState<PanelRankResponse | null>(null)
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
+  const [showRankingFull, setShowRankingFull] = useState(false)
   const tabsRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -250,13 +251,13 @@ export function RankingPanelClient({ viewerUserId }: { viewerUserId?: string | n
                     {(entry.name?.[0] ?? '?').toUpperCase()}
                   </span>
                 )}
+                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '1.125rem', fontWeight: 600 }}>
+                  {entry.name}
+                </span>
                 {/* Country flag */}
                 {entry.country && (
                   <span style={{ fontSize: '1rem', flexShrink: 0 }}>{countryToFlag(entry.country)}</span>
                 )}
-                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '1.125rem', fontWeight: 600 }}>
-                  {entry.name}
-                </span>
                 <LevelBadge level={calcLevel(entry.participated, entry.accuracy)} size="xs" showName={false} />
                 {isCategoryMode ? (
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -278,25 +279,32 @@ export function RankingPanelClient({ viewerUserId }: { viewerUserId?: string | n
         </div>
       )}
 
-      <Link
-        href={`/ranking${isCategoryMode ? `?category=${activeTab}` : ''}`}
+      <button
+        onClick={() => setShowRankingFull(true)}
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          marginTop: 16, padding: '12px 0',
+          marginTop: 16, padding: '12px 0', width: '100%',
           borderRadius: 16, border: 'none',
           background: '#3D2B1F',
           fontSize: '1rem', fontWeight: 700, color: '#ffffff',
-          textDecoration: 'none',
+          cursor: 'pointer',
         }}
       >
         {t('ranking.viewAll')}
-      </Link>
+      </button>
 
       {profileModalUserId && (
         <UserProfileModal
           userId={profileModalUserId}
           viewerUserId={viewerUserId}
           onClose={() => setProfileModalUserId(null)}
+        />
+      )}
+      {showRankingFull && (
+        <RankingFullModal
+          initialTab={activeTab}
+          viewerUserId={viewerUserId}
+          onClose={() => setShowRankingFull(false)}
         />
       )}
     </div>

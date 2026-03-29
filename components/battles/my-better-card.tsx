@@ -246,10 +246,10 @@ function ReasonsSheet({
                     onClick={() => r.voterId && setProfileModalUserId(r.voterId)}
                     style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3, background: 'none', border: 'none', padding: 0, cursor: r.voterId ? 'pointer' : 'default' }}
                   >
-                    {r.voterCountry && <span style={{ fontSize: '0.8rem' }}>{countryToFlag(r.voterCountry)}</span>}
                     <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3D2B1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {r.voterName ?? '익명'}
                     </span>
+                    {r.voterCountry && <span style={{ fontSize: '0.8rem' }}>{countryToFlag(r.voterCountry)}</span>}
                     <span style={{
                       flexShrink: 0, borderRadius: 4, padding: '1px 7px',
                       fontSize: '0.62rem', fontWeight: 800,
@@ -442,10 +442,10 @@ export function MyBetterCard({
                   onClick={() => r.voterId && setProfileModalUserId(r.voterId)}
                   style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 3, background: 'none', border: 'none', padding: 0, cursor: r.voterId ? 'pointer' : 'default' }}
                 >
-                  {r.voterCountry && <span style={{ fontSize: '0.78rem' }}>{countryToFlag(r.voterCountry)}</span>}
                   <span style={{ fontSize: '0.76rem', fontWeight: 700, color: '#5C4A3A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {r.voterName ?? '익명'}
                   </span>
+                  {r.voterCountry && <span style={{ fontSize: '0.78rem' }}>{countryToFlag(r.voterCountry)}</span>}
                   <span style={{
                     flexShrink: 0, borderRadius: 4, padding: '1px 6px',
                     fontSize: '0.66rem', fontWeight: 800,
