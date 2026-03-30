@@ -1248,37 +1248,9 @@ export function RandomBetterViewer({
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.1)', color: '#6366F1', fontSize: '0.875rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>✦ AI</span>
                         )}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <h2 style={{ flex: 1, margin: 0, fontWeight: 800, fontSize: '1.125rem', lineHeight: 1.3, color: '#3D2B1F', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
-                          {translated?.title ?? battle.title}
-                        </h2>
-                        {battle.author && (
-                          <button
-                            onClick={() => setProfileModalUserId(battle.author!.id)}
-                            style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                          >
-                            {battle.author.avatarUrl ? (
-                              /* eslint-disable-next-line @next/next/no-img-element */
-                              <img src={battle.author.avatarUrl} alt="" style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                            ) : (
-                              <span style={{
-                                width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-                                background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontSize: '0.6rem', fontWeight: 900, color: 'white',
-                              }}>
-                                {battle.author.displayName[0]?.toUpperCase() ?? '?'}
-                              </span>
-                            )}
-                            <span style={{ fontSize: '0.875rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 72, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {battle.author.displayName}
-                            </span>
-                            {battle.author.country && (
-                              <span style={{ fontSize: '1.125rem', lineHeight: 1 }}>{countryToFlag(battle.author.country)}</span>
-                            )}
-                          </button>
-                        )}
-                      </div>
+                      <h2 style={{ margin: 0, fontWeight: 800, fontSize: '1.125rem', lineHeight: 1.3, color: '#3D2B1F', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
+                        {translated?.title ?? battle.title}
+                      </h2>
                       <p style={{ margin: '2px 0 0', fontSize: '0.875rem', color: '#9CA3AF', fontWeight: 500 }}>
                         {phase === 'voting' && t('vote.tapToSelect')}
                         {(phase === 'picked' || phase === 'submitting') && t('vote.addReasonOptional')}
@@ -1289,20 +1261,32 @@ export function RandomBetterViewer({
                 })()}
               </div>
 
-              {/* 우측: A/B 설명 (작게) */}
-              {!battle.isTextOnly && ((translated?.descA ?? battle.imageADescription) || (translated?.descB ?? battle.imageBDescription)) && (
-                <div style={{ flexShrink: 0, maxWidth: 86, textAlign: 'right' }}>
-                  {(translated?.descA ?? battle.imageADescription) && (
-                    <p style={{ margin: 0, fontSize: '0.66rem', color: '#B0A090', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
-                      A: {translated?.descA ?? battle.imageADescription}
-                    </p>
+              {/* 우측: 작성자 */}
+              {battle.author && (
+                <button
+                  onClick={() => setProfileModalUserId(battle.author!.id)}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                >
+                  {battle.author.avatarUrl ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={battle.author.avatarUrl} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
+                  ) : (
+                    <span style={{
+                      width: 32, height: 32, borderRadius: '50%',
+                      background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '0.6rem', fontWeight: 900, color: 'white',
+                    }}>
+                      {battle.author.displayName[0]?.toUpperCase() ?? '?'}
+                    </span>
                   )}
-                  {(translated?.descB ?? battle.imageBDescription) && (
-                    <p style={{ margin: '3px 0 0', fontSize: '0.58rem', color: '#B0A090', lineHeight: 1.4, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
-                      B: {translated?.descB ?? battle.imageBDescription}
-                    </p>
+                  <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {battle.author.displayName}
+                  </span>
+                  {battle.author.country && (
+                    <span style={{ fontSize: '0.875rem', lineHeight: 1 }}>{countryToFlag(battle.author.country)}</span>
                   )}
-                </div>
+                </button>
               )}
             </div>
 

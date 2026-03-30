@@ -366,22 +366,6 @@ export function MyBetterCard({
             {battle.title}
           </h3>
 
-          {/* A/B 설명 */}
-          {!battle.isTextOnly && (battle.imageADescription || battle.imageBDescription) && (
-            <div style={{ marginBottom: 8 }}>
-              {battle.imageADescription && (
-                <p style={{ margin: 0, fontSize: '0.8125rem', color: '#3D2B1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  A. {battle.imageADescription}
-                </p>
-              )}
-              {battle.imageBDescription && (
-                <p style={{ margin: '2px 0 0', fontSize: '0.8125rem', color: '#3D2B1F', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  B. {battle.imageBDescription}
-                </p>
-              )}
-            </div>
-          )}
-
           {/* 통계 + 액션 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
