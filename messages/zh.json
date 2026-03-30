@@ -201,7 +201,7 @@
     "expertBadge": "{category}专家",
     "specialtyLabel": "专长",
     "totalVotesLabel": "总投票",
-    "likesLabel": "喜欢",
+    "likesLabel": "获得的点赞",
     "betterCountValue": "{count}个",
     "totalVotesValue": "{count}票",
     "noBettersYet": "还没有Touched",
@@ -218,9 +218,12 @@
     "votedHit": "猜对了！",
     "votedMiss": "很可惜！",
     "votedTie": "平局",
-    "votedCounting": "统计中...",
+    "votedCounting": "尚未截止",
     "noVotedYet": "还没有投票过的触碰",
-    "noVotedDesc": "在随机触碰中投票后将显示在这里"
+    "noVotedDesc": "在随机触碰中投票后将显示在这里",
+    "likedTouchesTab": "点赞的触碰",
+    "noLikedYet": "还没有点赞",
+    "noLikedDesc": "给触碰点赞后将显示在这里"
   },
   "hot": {
     "title": "Hot 100",

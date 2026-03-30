@@ -201,7 +201,7 @@
     "expertBadge": "{category} 전문",
     "specialtyLabel": "전문 분야",
     "totalVotesLabel": "총 투표",
-    "likesLabel": "좋아요",
+    "likesLabel": "받은 좋아요",
     "betterCountValue": "{count}개",
     "totalVotesValue": "{count}표",
     "noBettersYet": "아직 Touched가 없어요",
@@ -218,9 +218,12 @@
     "votedHit": "맞췄어요!",
     "votedMiss": "아쉽네요!",
     "votedTie": "동률",
-    "votedCounting": "집계 중...",
+    "votedCounting": "아직 마감전",
     "noVotedYet": "아직 투표한 터치가 없어요",
-    "noVotedDesc": "랜덤 터치에서 투표하면 여기에 기록돼요"
+    "noVotedDesc": "랜덤 터치에서 투표하면 여기에 기록돼요",
+    "likedTouchesTab": "좋아요한 터치",
+    "noLikedYet": "좋아요한 터치가 없어요",
+    "noLikedDesc": "마음에 드는 터치에 좋아요를 눌러보세요"
   },
   "hot": {
     "title": "Hot 100",

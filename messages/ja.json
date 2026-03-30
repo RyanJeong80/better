@@ -201,7 +201,7 @@
     "expertBadge": "{category} 専門",
     "specialtyLabel": "得意分野",
     "totalVotesLabel": "合計投票",
-    "likesLabel": "いいね",
+    "likesLabel": "もらったいいね",
     "betterCountValue": "{count}件",
     "totalVotesValue": "{count}票",
     "noBettersYet": "まだTouchedがありません",
@@ -218,9 +218,12 @@
     "votedHit": "正解！",
     "votedMiss": "惜しい！",
     "votedTie": "同率",
-    "votedCounting": "集計中...",
+    "votedCounting": "まだ締切前",
     "noVotedYet": "まだ投票したタッチがありません",
-    "noVotedDesc": "ランダムタッチで投票するとここに記録されます"
+    "noVotedDesc": "ランダムタッチで投票するとここに記録されます",
+    "likedTouchesTab": "いいねしたタッチ",
+    "noLikedYet": "まだいいねしていません",
+    "noLikedDesc": "タッチにいいねするとここに表示されます"
   },
   "hot": {
     "title": "Hot 100",

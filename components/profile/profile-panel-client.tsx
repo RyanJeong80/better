@@ -13,13 +13,14 @@ import { AvatarUpload } from '@/components/profile/avatar-upload'
 import { ProfileBetterList } from '@/components/profile/profile-better-list'
 import { FollowsList } from '@/components/profile/follows-list'
 import { VotedBetterList } from '@/components/profile/voted-better-list'
+import { LikedBetterList } from '@/components/profile/liked-better-list'
 import { CATEGORY_LABELS } from '@/lib/level'
 import { COUNTRY_OPTIONS, countryToFlag } from '@/lib/utils/country'
 import type { UserInfo } from '@/app/(main)/page'
 import type { UserProfileData } from '@/app/api/user/profile/route'
 import type { BattleWithStats } from '@/components/profile/profile-better-list'
 
-type ProfileTab = 'touches' | 'voted' | 'following' | 'followers'
+type ProfileTab = 'touches' | 'voted' | 'liked' | 'following' | 'followers'
 
 function Skeleton() {
   return (
@@ -288,6 +289,7 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
         const tabs: { id: ProfileTab; label: string }[] = [
           { id: 'touches',   label: t('profile.myTouchesTab') },
           { id: 'voted',     label: t('profile.votedTouchesTab') },
+          { id: 'liked',     label: t('profile.likedTouchesTab') },
           { id: 'following', label: `${t('profile.followingTab')} ${followingCount}` },
           { id: 'followers', label: `${t('profile.followersTab')} ${followerCount}` },
         ]
@@ -330,6 +332,7 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
 
       {activeTab === 'touches' && <ProfileBetterList battles={battles} />}
       {activeTab === 'voted' && <VotedBetterList />}
+      {activeTab === 'liked' && <LikedBetterList />}
       {activeTab === 'following' && <FollowsList type="following" currentUserId={data.userId} onCount={setFollowingCount} />}
       {activeTab === 'followers' && <FollowsList type="followers" currentUserId={data.userId} onCount={setFollowerCount} />}
 

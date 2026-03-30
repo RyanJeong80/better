@@ -201,7 +201,7 @@
     "expertBadge": "Expert {category}",
     "specialtyLabel": "Spécialité",
     "totalVotesLabel": "Votes totaux",
-    "likesLabel": "J'aime",
+    "likesLabel": "J'aime reçus",
     "betterCountValue": "{count}",
     "totalVotesValue": "{count} votes",
     "noBettersYet": "Pas encore de Touches",
@@ -218,9 +218,12 @@
     "votedHit": "Bien joué !",
     "votedMiss": "Dommage !",
     "votedTie": "Égalité",
-    "votedCounting": "En cours...",
+    "votedCounting": "Pas encore clôturé",
     "noVotedYet": "Aucun Touch voté pour l'instant",
-    "noVotedDesc": "Votez sur des Touches aléatoires et ils apparaîtront ici"
+    "noVotedDesc": "Votez sur des Touches aléatoires et ils apparaîtront ici",
+    "likedTouchesTab": "Touches aimées",
+    "noLikedYet": "Pas encore de touches aimées",
+    "noLikedDesc": "Aimez un Touch et il apparaîtra ici"
   },
   "hot": {
     "title": "Hot 100",

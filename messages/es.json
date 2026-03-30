@@ -201,7 +201,7 @@
     "expertBadge": "Experto en {category}",
     "specialtyLabel": "Especialidad",
     "totalVotesLabel": "Votos totales",
-    "likesLabel": "Me gusta",
+    "likesLabel": "Me gustas recibidos",
     "betterCountValue": "{count}",
     "totalVotesValue": "{count} votos",
     "noBettersYet": "Todavía no hay Touches",
@@ -218,9 +218,12 @@
     "votedHit": "¡Acertaste!",
     "votedMiss": "¡Casi!",
     "votedTie": "Empate",
-    "votedCounting": "Contando...",
+    "votedCounting": "Aún abierto",
     "noVotedYet": "Aún no has votado en ningún Touched",
-    "noVotedDesc": "Vota en Touches aleatorios y aparecerán aquí"
+    "noVotedDesc": "Vota en Touches aleatorios y aparecerán aquí",
+    "likedTouchesTab": "Toques con me gusta",
+    "noLikedYet": "Sin toques con me gusta",
+    "noLikedDesc": "Dale me gusta a un Touch y aparecerá aquí"
   },
   "hot": {
     "title": "Hot 100",

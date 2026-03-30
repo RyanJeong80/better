@@ -4,7 +4,7 @@ import { useState, useRef, useTransition, useCallback, useEffect } from 'react'
 import { Heart, ChevronRight, Check, Shuffle, X, Search } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
-import { toggleLike } from '@/actions/likes'
+import { toggleLike, getMyLikedBattleIds } from '@/actions/likes'
 import { CATEGORY_FILTERS, CATEGORY_MAP } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
 
@@ -41,11 +41,18 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
   const [isLoading, setIsLoading]       = useState(false)
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all')
   const [isEmpty, setIsEmpty]           = useState(!initialBattle)
+  const [likedMap, setLikedMap]         = useState<Map<string, boolean>>(new Map())
 
   const seenIdsRef   = useRef<string[]>(initialBattle ? [initialBattle.id] : [])
   const isLoadingRef = useRef(false)
 
   const [, startTransition] = useTransition()
+
+  useEffect(() => {
+    getMyLikedBattleIds().then(ids => {
+      setLikedMap(new Map(ids.map(id => [id, true])))
+    })
+  }, [])
 
   // 다음 터치 로드 (사용자 액션으로만 호출)
   const loadNext = useCallback((cat: CategoryFilter, resetSeen = false) => {
@@ -104,21 +111,28 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
     })
   }
 
-  // 좋아요 (낙관적 업데이트)
+  // 좋아요 (낙관적 업데이트 + Map으로 상태 유지)
   function handleLike() {
     if (!card) return
-    const prev = { isLiked: card.isLiked, likeCount: card.likeCount }
-    setCard(c => c ? { ...c, isLiked: !c.isLiked, likeCount: c.isLiked ? c.likeCount - 1 : c.likeCount + 1 } : null)
+    const battleId = card.battle.id
+    const isLiked = likedMap.get(battleId) ?? card.isLiked
+    const prevLikeCount = card.likeCount
+    // 낙관적 업데이트
+    setLikedMap(prev => new Map(prev).set(battleId, !isLiked))
+    setCard(c => c ? { ...c, likeCount: isLiked ? c.likeCount - 1 : c.likeCount + 1 } : null)
     startTransition(async () => {
       try {
-        const res = await toggleLike(card.battle.id)
+        const res = await toggleLike(battleId)
         if ('error' in res) {
-          setCard(c => c ? { ...c, isLiked: prev.isLiked, likeCount: prev.likeCount } : null)
+          setLikedMap(prev => new Map(prev).set(battleId, isLiked))
+          setCard(c => c ? { ...c, likeCount: prevLikeCount } : null)
         } else {
-          setCard(c => c ? { ...c, isLiked: res.isLiked, likeCount: res.likeCount } : null)
+          setLikedMap(prev => new Map(prev).set(battleId, res.isLiked))
+          setCard(c => c ? { ...c, likeCount: res.likeCount } : null)
         }
       } catch {
-        setCard(c => c ? { ...c, isLiked: prev.isLiked, likeCount: prev.likeCount } : null)
+        setLikedMap(prev => new Map(prev).set(battleId, isLiked))
+        setCard(c => c ? { ...c, likeCount: prevLikeCount } : null)
       }
     })
   }
@@ -208,6 +222,7 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
       ) : (
         <BattleCard
           card={card}
+          isLiked={likedMap.get(card.battle.id) ?? card.isLiked}
           onVote={handleVote}
           onNext={goNext}
           onLike={handleLike}
@@ -219,13 +234,14 @@ export function HomeBetterViewer({ initialBattle }: { initialBattle: BattleForVo
 
 // ─── 개별 터치 카드 ────────────────────────────────────────────────
 
-function BattleCard({ card, onVote, onNext, onLike }: {
+function BattleCard({ card, isLiked, onVote, onNext, onLike }: {
   card: CardData
+  isLiked: boolean
   onVote: (choice: 'A' | 'B') => void
   onNext: () => void
   onLike: () => void
 }) {
-  const { battle, phase, choice, result, likeCount, isLiked, voteError } = card
+  const { battle, phase, choice, result, likeCount, voteError } = card
   const cat      = CATEGORY_MAP[battle.category]
   const catStyle = CAT_BADGE[battle.category]
   const [modalSide, setModalSide] = useState<'A' | 'B' | null>(null)

@@ -5,6 +5,20 @@ import { createClient } from '@/lib/supabase/server'
 import { db } from '@/lib/db'
 import { likes, users } from '@/lib/db/schema'
 
+export async function getMyLikedBattleIds(): Promise<string[]> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+  try {
+    const myLikes = await db.select({ betterId: likes.betterId })
+      .from(likes)
+      .where(eq(likes.userId, user.id))
+    return myLikes.map(l => l.betterId)
+  } catch {
+    return []
+  }
+}
+
 export async function toggleLike(
   betterId: string,
 ): Promise<{ isLiked: boolean; likeCount: number } | { error: string }> {

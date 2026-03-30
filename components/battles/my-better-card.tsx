@@ -372,14 +372,12 @@ export function MyBetterCard({
               <span style={{ fontSize: '0.78rem', color: '#9CA3AF' }}>
                 {battle.total > 0 ? `총 ${battle.total}표` : '아직 투표 없음'}
               </span>
-              {battle.likesCount > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                  <Heart size={10} style={{ fill: '#F43F5E', stroke: '#F43F5E' }} />
-                  <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#F43F5E' }}>
-                    {battle.likesCount}
-                  </span>
-                </div>
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                <Heart size={10} style={{ fill: battle.likesCount > 0 ? '#F43F5E' : 'none', stroke: '#F43F5E' }} />
+                <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#F43F5E' }}>
+                  {battle.likesCount}
+                </span>
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <ShareButton
