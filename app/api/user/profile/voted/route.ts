@@ -8,6 +8,7 @@ import type { BetterCategory } from '@/lib/constants/categories'
 export type VotedBattle = {
   id: string
   title: string
+  description: string | null
   category: BetterCategory
   imageAUrl: string
   imageADescription: string | null
@@ -47,6 +48,7 @@ export async function GET() {
       imageAText: betters.imageAText,
       imageBText: betters.imageBText,
       isTextOnly: betters.isTextOnly,
+      description: betters.description,
       winner: betters.winner,
       closedAt: betters.closedAt,
       betterCreatedAt: betters.createdAt,
@@ -94,6 +96,7 @@ export async function GET() {
       imageAText: v.imageAText ?? null,
       imageBText: v.imageBText ?? null,
       isTextOnly: v.isTextOnly,
+      description: v.description ?? null,
       myChoice: v.choice,
       votesA: counts.A,
       votesB: counts.B,

@@ -29,6 +29,7 @@ export const betters = pgTable('betters', {
   imageAText: text('image_a_text'),
   imageBText: text('image_b_text'),
   isTextOnly: boolean('is_text_only').default(false).notNull(),
+  description: text('description'),
   category: betterCategoryEnum('category').notNull().default('decision'),
   winner: voteChoiceEnum('winner'),
   createdAt: timestamp('created_at').defaultNow().notNull(),

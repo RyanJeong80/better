@@ -19,6 +19,7 @@ export type VoteReason = {
 export type ProfileBattleStats = {
   id: string
   title: string
+  description: string | null
   imageAUrl: string
   imageADescription: string | null
   imageBUrl: string
@@ -106,6 +107,7 @@ export async function GET() {
     const myBetters = await db.select({
       id: betters.id,
       title: betters.title,
+      description: betters.description,
       imageAUrl: betters.imageAUrl,
       imageADescription: betters.imageADescription,
       imageBUrl: betters.imageBUrl,

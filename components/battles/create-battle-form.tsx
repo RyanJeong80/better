@@ -615,6 +615,7 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
   const [slotA, setSlotA] = useState<SlotState>(initSlot)
   const [slotB, setSlotB] = useState<SlotState>(initSlot)
   const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [category, setCategory] = useState<BetterCategory | null>(null)
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [view, setView] = useState<'input' | 'preview'>('input')
@@ -693,6 +694,7 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
     formData.set('imageBText', isTextOnly ? slotB.desc.trim() : '')
     formData.set('category', category ?? 'decision')
     formData.set('tags', JSON.stringify(selectedTags))
+    formData.set('description', description.trim())
 
     try {
       const result = await saveBattle(null, formData)
@@ -856,6 +858,35 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
           {t('tagsLabel')} <span className="text-muted-foreground/50 text-xs font-normal">{t('optional')}</span>
         </label>
         <TagInput value={selectedTags} onChange={setSelectedTags} />
+      </div>
+
+      {/* 간단한 설명 */}
+      <div>
+        <label style={{
+          fontSize: '14px', fontWeight: '600', color: '#3D2B1F',
+          display: 'block', marginBottom: '6px',
+        }}>
+          {t('battleDescLabel')}
+          <span style={{ color: '#888', fontWeight: '400', marginLeft: '4px', fontSize: '12px' }}>
+            {t('battleDescHint')}
+          </span>
+        </label>
+        <textarea
+          value={description}
+          onChange={(e) => { if (e.target.value.length <= 100) setDescription(e.target.value) }}
+          placeholder={t('battleDescPlaceholder')}
+          maxLength={100}
+          rows={2}
+          style={{
+            width: '100%', backgroundColor: '#ffffff', color: '#000000',
+            border: '1px solid #D4C4B0', borderRadius: '8px',
+            padding: '10px 12px', fontSize: '14px', resize: 'none',
+            boxSizing: 'border-box', outline: 'none', fontFamily: 'inherit',
+          }}
+        />
+        <div style={{ textAlign: 'right', fontSize: '11px', color: '#888', marginTop: '4px' }}>
+          {description.length}/100
+        </div>
       </div>
 
       {/* 사진 두 장 */}

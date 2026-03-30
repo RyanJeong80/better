@@ -12,6 +12,7 @@ import { deleteBattle } from '@/actions/battles'
 export interface BattleWithStats {
   id: string
   title: string
+  description?: string | null
   imageAUrl: string
   imageADescription: string | null
   imageBUrl: string

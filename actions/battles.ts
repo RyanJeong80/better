@@ -11,6 +11,7 @@ import type { BetterCategory } from '@/lib/constants/categories'
 export type BattleForVoting = {
   id: string
   title: string
+  description: string | null
   imageAUrl: string
   imageADescription: string | null
   imageBUrl: string
@@ -88,6 +89,7 @@ export async function getRandomBattle(
       imageAText: betters.imageAText,
       imageBText: betters.imageBText,
       isTextOnly: betters.isTextOnly,
+      description: betters.description,
       category: betters.category,
       authorUsername: users.username,
       authorName: users.name,
@@ -109,6 +111,7 @@ export async function getRandomBattle(
     return {
       id: picked.id,
       title: picked.title,
+      description: picked.description ?? null,
       imageAUrl: picked.imageAUrl,
       imageADescription: picked.imageADescription,
       imageBUrl: picked.imageBUrl,
@@ -148,6 +151,7 @@ export async function saveBattle(
     if (!user) redirect('/login')
 
     const title = (formData.get('title') as string)?.trim()
+    const description = (formData.get('description') as string)?.trim() || null
     const imageAUrl = (formData.get('imageAUrl') as string) || ''
     const imageBUrl = (formData.get('imageBUrl') as string) || ''
     const descriptionA = (formData.get('descriptionA') as string) || ''
@@ -190,6 +194,7 @@ export async function saveBattle(
     const [newBetter] = await db.insert(betters).values({
       userId: user.id,
       title,
+      description: description || null,
       imageAUrl,
       imageADescription: descriptionA || null,
       imageBUrl,
@@ -294,6 +299,7 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
       id: betters.id,
       authorId: betters.userId,
       title: betters.title,
+      description: betters.description,
       imageAUrl: betters.imageAUrl,
       imageADescription: betters.imageADescription,
       imageBUrl: betters.imageBUrl,
@@ -322,6 +328,7 @@ export async function getBattleById(id: string): Promise<BattleForVoting | null>
     return {
       id: battle.id,
       title: battle.title,
+      description: battle.description ?? null,
       imageAUrl: battle.imageAUrl,
       imageADescription: battle.imageADescription,
       imageBUrl: battle.imageBUrl,

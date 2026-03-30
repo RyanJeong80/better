@@ -8,6 +8,7 @@ import type { BetterCategory } from '@/lib/constants/categories'
 export type LikedBattle = {
   id: string
   title: string
+  description: string | null
   category: BetterCategory
   imageAUrl: string
   imageADescription: string | null
@@ -46,6 +47,7 @@ export async function GET() {
       imageAText: betters.imageAText,
       imageBText: betters.imageBText,
       isTextOnly: betters.isTextOnly,
+      description: betters.description,
       winner: betters.winner,
       closedAt: betters.closedAt,
       betterCreatedAt: betters.createdAt,
@@ -103,6 +105,7 @@ export async function GET() {
       imageAText: l.imageAText ?? null,
       imageBText: l.imageBText ?? null,
       isTextOnly: l.isTextOnly,
+      description: l.description ?? null,
       myChoice: myVoteMap.get(l.betterId) ?? null,
       votesA: counts.A,
       votesB: counts.B,

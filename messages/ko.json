@@ -88,7 +88,10 @@
     "uploadError": "업로드 중 오류: {message}",
     "imageUploadError": "이미지 업로드 오류: {message}",
     "bothContentRequired": "A와 B 모두 이미지 또는 텍스트가 필요합니다",
-    "saveError": "저장 오류: {message}"
+    "saveError": "저장 오류: {message}",
+    "battleDescLabel": "간단한 설명",
+    "battleDescHint": "(선택사항, 100자 이내)",
+    "battleDescPlaceholder": "이 터치에 대해 간단히 설명해줘요"
   },
   "vote": {
     "tapToSelect": "사진을 눌러 선택하세요",

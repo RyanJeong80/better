@@ -88,7 +88,10 @@
     "uploadError": "Upload error: {message}",
     "imageUploadError": "Image upload error: {message}",
     "bothContentRequired": "Both A and B need image or text",
-    "saveError": "Save error: {message}"
+    "saveError": "Save error: {message}",
+    "battleDescLabel": "Brief description",
+    "battleDescHint": "(Optional, up to 100 characters)",
+    "battleDescPlaceholder": "Tell us about this touch"
   },
   "vote": {
     "tapToSelect": "Tap a photo to choose",

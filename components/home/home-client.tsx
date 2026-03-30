@@ -38,6 +38,7 @@ export function HomeClient({
       likeCount: entry.likeCount,
       isLiked: false,
       category: entry.category,
+      description: entry.description ?? null,
       author: entry.author ?? null,
     })
     setActivePanel(0) // 랜덤Better 패널로 전환

@@ -88,7 +88,10 @@
     "uploadError": "アップロードエラー: {message}",
     "imageUploadError": "画像アップロードエラー: {message}",
     "bothContentRequired": "AとBの両方にコンテンツが必要です",
-    "saveError": "保存エラー: {message}"
+    "saveError": "保存エラー: {message}",
+    "battleDescLabel": "簡単な説明",
+    "battleDescHint": "(任意、100文字以内)",
+    "battleDescPlaceholder": "このタッチについて教えてください"
   },
   "vote": {
     "tapToSelect": "写真をタップして選んでください",

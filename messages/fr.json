@@ -88,7 +88,10 @@
     "uploadError": "Erreur de téléchargement : {message}",
     "imageUploadError": "Erreur de téléchargement d'image : {message}",
     "bothContentRequired": "A et B nécessitent du contenu",
-    "saveError": "Erreur d'enregistrement : {message}"
+    "saveError": "Erreur d'enregistrement : {message}",
+    "battleDescLabel": "Description brève",
+    "battleDescHint": "(Facultatif, 100 caractères max)",
+    "battleDescPlaceholder": "Parlez-nous de ce touché"
   },
   "vote": {
     "tapToSelect": "Appuyez sur une photo pour choisir",

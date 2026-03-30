@@ -381,15 +381,21 @@ function BattleCard({ card, isLiked, onVote, onNext, onLike }: {
 
         {/* 푸터 */}
         <div style={{ padding: '10px 14px', borderTop: '1px solid var(--color-border)' }}>
+          {battle.description && phase === 'voting' && !voteError && (
+            <p style={{
+              fontSize: '12px', color: '#666666', marginBottom: 8,
+              overflow: 'hidden', textOverflow: 'ellipsis',
+              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+              lineHeight: '1.4',
+            }}>
+              {battle.description}
+            </p>
+          )}
           {voteError ? (
             <p style={{ textAlign: 'center', fontSize: '0.72rem', color: '#F43F5E', fontWeight: 600 }}>
               ⚠️ {voteError}
             </p>
-          ) : phase === 'voting' ? (
-            <p style={{ textAlign: 'center', fontSize: '0.72rem', color: 'var(--color-muted-foreground)' }}>
-              사진을 탭하여 선택하세요
-            </p>
-          ) : (
+          ) : phase === 'voted' && (
             <button
               onClick={onNext}
               style={{

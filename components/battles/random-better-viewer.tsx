@@ -114,6 +114,7 @@ export function RandomBetterViewer({
     title: string
     descA: string | null
     descB: string | null
+    description: string | null
   } | null>(null)
 
   // onClose 우선, 없으면 showBack 시 router.back()
@@ -183,6 +184,7 @@ export function RandomBetterViewer({
       battle.title,
       battle.isTextOnly ? (battle.imageAText ?? '') : (battle.imageADescription ?? ''),
       battle.isTextOnly ? (battle.imageBText ?? '') : (battle.imageBDescription ?? ''),
+      battle.description ?? '',
     ]
 
     fetch('/api/translate', {
@@ -196,6 +198,7 @@ export function RandomBetterViewer({
           title: translations[0] || battle.title,
           descA: translations[1] || battle.imageADescription,
           descB: translations[2] || battle.imageBDescription,
+          description: translations[3] || battle.description || null,
         })
       })
       .catch(() => {}) // 실패 시 원문 유지
@@ -1288,11 +1291,21 @@ export function RandomBetterViewer({
                     </div>
                     {/* 제목 (한 줄, 넘치면 폰트 축소) */}
                     <FitTitle text={translated?.title ?? battle.title} />
-                    <p style={{ margin: '2px 0 0', fontSize: '0.875rem', color: '#9CA3AF', fontWeight: 500 }}>
-                      {phase === 'voting' && t('vote.tapToSelect')}
-                      {(phase === 'picked' || phase === 'submitting') && t('vote.addReasonOptional')}
-                      {phase === 'voted' && t('vote.voteDone')}
-                    </p>
+                    {phase === 'voting' && battle.description ? (
+                      <p style={{
+                        margin: '2px 0 0', fontSize: '0.78rem', color: '#666666', fontWeight: 400,
+                        overflow: 'hidden', textOverflow: 'ellipsis',
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                        lineHeight: '1.4',
+                      }}>
+                        {translated?.description ?? battle.description}
+                      </p>
+                    ) : (
+                      <p style={{ margin: '2px 0 0', fontSize: '0.875rem', color: '#9CA3AF', fontWeight: 500 }}>
+                        {(phase === 'picked' || phase === 'submitting') && t('vote.addReasonOptional')}
+                        {phase === 'voted' && t('vote.voteDone')}
+                      </p>
+                    )}
                   </>
                 )
               })()}

@@ -65,7 +65,7 @@ function Skeleton() {
 
 const PAGE_SIZE = 10
 
-type TranslatedEntry = { title: string; imageAText: string | null; imageBText: string | null }
+type TranslatedEntry = { title: string; imageAText: string | null; imageBText: string | null; description: string | null }
 
 export function HotPanelClient({
   onSelectBattle,
@@ -95,7 +95,7 @@ export function HotPanelClient({
 
   useEffect(() => {
     if (locale === 'ko' || entries.length === 0) return
-    const texts = entries.flatMap(e => [e.title, e.imageAText ?? '', e.imageBText ?? ''])
+    const texts = entries.flatMap(e => [e.title, e.imageAText ?? '', e.imageBText ?? '', e.description ?? ''])
     fetch('/api/translate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -106,9 +106,10 @@ export function HotPanelClient({
         const map = new Map<string, TranslatedEntry>()
         entries.forEach((e, i) => {
           map.set(e.id, {
-            title: tr[i * 3] || e.title,
-            imageAText: tr[i * 3 + 1] || e.imageAText,
-            imageBText: tr[i * 3 + 2] || e.imageBText,
+            title: tr[i * 4] || e.title,
+            imageAText: tr[i * 4 + 1] || e.imageAText,
+            imageBText: tr[i * 4 + 2] || e.imageBText,
+            description: tr[i * 4 + 3] || e.description || null,
           })
         })
         setTranslations(map)
@@ -382,7 +383,7 @@ export function HotPanelClient({
                     </span>
 
                     {/* 제목 + 작성자 */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '6px 0 8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '6px 0 4px' }}>
                       <p style={{
                         flex: 1, margin: 0, fontSize: '1.125rem', fontWeight: 700, lineHeight: 1.4,
                         color: '#3D2B1F',
@@ -418,6 +419,18 @@ export function HotPanelClient({
                         </button>
                       )}
                     </div>
+
+                    {/* 설명 */}
+                    {(tr?.description ?? entry.description) && (
+                      <p style={{
+                        margin: '0 0 8px', fontSize: '12px', color: '#666666',
+                        overflow: 'hidden', textOverflow: 'ellipsis',
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                        lineHeight: '1.4',
+                      }}>
+                        {tr?.description ?? entry.description}
+                      </p>
+                    )}
 
                     {/* 좋아요 */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>

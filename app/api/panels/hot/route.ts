@@ -8,6 +8,7 @@ import type { BetterCategory } from '@/lib/constants/categories'
 export type PanelHotEntry = {
   id: string
   title: string
+  description: string | null
   imageAUrl: string
   imageBUrl: string
   imageADescription: string | null
@@ -40,6 +41,7 @@ const getCachedHot = unstable_cache(
         imageAText: betters.imageAText,
         imageBText: betters.imageBText,
         isTextOnly: betters.isTextOnly,
+        description: betters.description,
         category: betters.category,
         createdAt: betters.createdAt,
         authorUsername: users.username,
@@ -59,6 +61,7 @@ const getCachedHot = unstable_cache(
     return allBetters
       .map(b => ({
         ...b,
+        description: b.description ?? null,
         createdAt: b.createdAt instanceof Date ? b.createdAt.toISOString() : String(b.createdAt),
         likeCount: likeCountMap.get(b.id) ?? 0,
         author: {

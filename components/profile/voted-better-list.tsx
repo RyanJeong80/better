@@ -157,9 +157,19 @@ function VotedBattleCard({ battle }: { battle: VotedBattle }) {
           </div>
 
           {/* 제목 */}
-          <h3 style={{ margin: '0 0 10px', fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.4, color: '#3D2B1F' }}>
+          <h3 style={{ margin: '0 0 4px', fontWeight: 700, fontSize: '0.95rem', lineHeight: 1.4, color: '#3D2B1F' }}>
             {battle.title}
           </h3>
+          {battle.description && (
+            <p style={{
+              margin: '0 0 8px', fontSize: '12px', color: '#666666',
+              overflow: 'hidden', textOverflow: 'ellipsis',
+              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+              lineHeight: '1.4',
+            }}>
+              {battle.description}
+            </p>
+          )}
 
           {/* 내 선택 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>

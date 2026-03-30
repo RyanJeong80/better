@@ -24,6 +24,7 @@ interface Reason {
 interface BattleStats {
   id: string
   title: string
+  description?: string | null
   imageAUrl: string
   imageADescription: string | null
   imageBUrl: string
@@ -365,6 +366,16 @@ export function MyBetterCard({
           <h3 style={{ margin: '6px 0 4px', fontWeight: 700, fontSize: '0.98rem', lineHeight: 1.4, color: '#3D2B1F' }}>
             {battle.title}
           </h3>
+          {battle.description && (
+            <p style={{
+              margin: '0 0 6px', fontSize: '12px', color: '#666666',
+              overflow: 'hidden', textOverflow: 'ellipsis',
+              display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+              lineHeight: '1.4',
+            }}>
+              {battle.description}
+            </p>
+          )}
 
           {/* 통계 + 액션 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
