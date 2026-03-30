@@ -7,7 +7,7 @@ import { useTranslations, useLocale } from 'next-intl'
 import { ArrowLeft, Check, Heart, ChevronDown, ChevronRight, ChevronUp, Share2, X, Search, Hash } from 'lucide-react'
 import { getRandomBattle, type BattleForVoting } from '@/actions/battles'
 import { submitVote } from '@/actions/votes'
-import { toggleLike } from '@/actions/likes'
+import { toggleLike, getMyLikedBattleIds } from '@/actions/likes'
 import { CATEGORY_FILTERS, CATEGORY_MAP } from '@/lib/constants/categories'
 import { calcLevel } from '@/lib/level'
 import { TEXT_BG_COLORS, getTextColorIdx } from '@/lib/constants/text-colors'
@@ -140,9 +140,14 @@ export function RandomBetterViewer({
     }
   })
   const [error, setError] = useState<string | null>(null)
-  const [likeCount, setLikeCount] = useState(initialBattle?.likeCount ?? 0)
-  const [isLiked, setIsLiked] = useState(initialBattle?.isLiked ?? false)
+  const likedMap = useRef<Map<string, boolean>>(new Map())
+  const likeCountMap = useRef<Map<string, number>>(new Map())
+  const [, setLikeStateVersion] = useState(0)
   const [likePending, setLikePending] = useState(false)
+
+  // 현재 배틀의 좋아요 상태 (Map 우선, 없으면 배틀 원본값)
+  const isLiked = battle ? (likedMap.current.get(battle.id) ?? battle.isLiked) : false
+  const likeCount = battle ? (likeCountMap.current.get(battle.id) ?? battle.likeCount) : 0
   const [showHint, setShowHint] = useState(false)
   const [detailPhoto, setDetailPhoto] = useState<DetailPhoto | null>(null)
   const [historyStack, setHistoryStack] = useState<BattleForVoting[]>([])
@@ -220,6 +225,19 @@ export function RandomBetterViewer({
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // 마운트 시 내가 좋아요한 배틀 ID 전체 로드 → 스와이프 후 돌아와도 상태 유지
+  useEffect(() => {
+    if (initialBattle) {
+      if (!likeCountMap.current.has(initialBattle.id)) {
+        likeCountMap.current.set(initialBattle.id, initialBattle.likeCount)
+      }
+    }
+    getMyLikedBattleIds().then(ids => {
+      ids.forEach(id => likedMap.current.set(id, true))
+      setLikeStateVersion(v => v + 1)
+    })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 적중률 fetch
   function fetchAccuracy() {
@@ -387,8 +405,8 @@ export function RandomBetterViewer({
       setReason('')
       setVoteResult(null)
       setError(null)
-      setLikeCount(next.likeCount)
-      setIsLiked(next.isLiked)
+      if (!likedMap.current.has(next.id)) likedMap.current.set(next.id, next.isLiked)
+      if (!likeCountMap.current.has(next.id)) likeCountMap.current.set(next.id, next.likeCount)
       setPhase('voting')
       setSlideDir('enter-up')
       setTimeout(() => setSlideDir('none'), 300)
@@ -412,8 +430,8 @@ export function RandomBetterViewer({
       setReason('')
       setVoteResult(null)
       setError(null)
-      setLikeCount(prefetched.likeCount)
-      setIsLiked(prefetched.isLiked)
+      if (!likedMap.current.has(prefetched.id)) likedMap.current.set(prefetched.id, prefetched.isLiked)
+      if (!likeCountMap.current.has(prefetched.id)) likeCountMap.current.set(prefetched.id, prefetched.likeCount)
       setPhase('voting')
       setSlideDir('enter-up')
       setTimeout(() => setSlideDir('none'), 300)
@@ -435,8 +453,6 @@ export function RandomBetterViewer({
     setReason('')
     setVoteResult(null)
     setError(null)
-    setLikeCount(prev.likeCount)
-    setIsLiked(prev.isLiked)
     setPhase('voting')
     setSlideDir('enter-down')
     setTimeout(() => setSlideDir('none'), 300)
@@ -479,24 +495,30 @@ export function RandomBetterViewer({
 
   async function handleLike() {
     if (!battle || likePending) return
+    const prevLiked = likedMap.current.get(battle.id) ?? battle.isLiked
+    const prevCount = likeCountMap.current.get(battle.id) ?? battle.likeCount
     if (isDemo) {
-      setIsLiked(p => !p)
-      setLikeCount(p => (isLiked ? p - 1 : p + 1))
+      likedMap.current.set(battle.id, !prevLiked)
+      likeCountMap.current.set(battle.id, prevLiked ? prevCount - 1 : prevCount + 1)
+      setLikeStateVersion(v => v + 1)
       return
     }
-    const prevLiked = isLiked
-    const prevCount = likeCount
-    setIsLiked(p => !p)
-    setLikeCount(p => (prevLiked ? p - 1 : p + 1))
+    // 낙관적 업데이트
+    likedMap.current.set(battle.id, !prevLiked)
+    likeCountMap.current.set(battle.id, prevLiked ? prevCount - 1 : prevCount + 1)
+    setLikeStateVersion(v => v + 1)
     setLikePending(true)
     const result = await toggleLike(battle.id)
     setLikePending(false)
     if ('error' in result) {
-      setIsLiked(prevLiked)
-      setLikeCount(prevCount)
+      // 롤백
+      likedMap.current.set(battle.id, prevLiked)
+      likeCountMap.current.set(battle.id, prevCount)
+      setLikeStateVersion(v => v + 1)
     } else {
-      setIsLiked(result.isLiked)
-      setLikeCount(result.likeCount)
+      likedMap.current.set(battle.id, result.isLiked)
+      likeCountMap.current.set(battle.id, result.likeCount)
+      setLikeStateVersion(v => v + 1)
     }
   }
 
