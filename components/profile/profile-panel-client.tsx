@@ -12,13 +12,14 @@ import { UsernameEditor } from '@/components/profile/username-editor'
 import { AvatarUpload } from '@/components/profile/avatar-upload'
 import { ProfileBetterList } from '@/components/profile/profile-better-list'
 import { FollowsList } from '@/components/profile/follows-list'
+import { VotedBetterList } from '@/components/profile/voted-better-list'
 import { CATEGORY_LABELS } from '@/lib/level'
 import { COUNTRY_OPTIONS, countryToFlag } from '@/lib/utils/country'
 import type { UserInfo } from '@/app/(main)/page'
 import type { UserProfileData } from '@/app/api/user/profile/route'
 import type { BattleWithStats } from '@/components/profile/profile-better-list'
 
-type ProfileTab = 'touches' | 'following' | 'followers'
+type ProfileTab = 'touches' | 'voted' | 'following' | 'followers'
 
 function Skeleton() {
   return (
@@ -283,29 +284,52 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
       </div>
 
       {/* 탭 버튼 */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-        {(['touches', 'following', 'followers'] as ProfileTab[]).map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            style={{
-              flexShrink: 0, padding: '6px 14px', borderRadius: 999, border: 'none',
-              background: activeTab === tab ? '#3D2B1F' : '#D4C4B0',
-              color: activeTab === tab ? '#ffffff' : '#3D2B1F',
-              fontSize: '0.875rem', fontWeight: activeTab === tab ? 700 : 500,
-              cursor: 'pointer',
-            }}
-          >
-            {tab === 'touches'
-              ? t('profile.myTouchesTab')
-              : tab === 'following'
-                ? `${t('profile.followingTab')} ${followingCount}`
-                : `${t('profile.followersTab')} ${followerCount}`}
-          </button>
-        ))}
-      </div>
+      {(() => {
+        const tabs: { id: ProfileTab; label: string }[] = [
+          { id: 'touches',   label: t('profile.myTouchesTab') },
+          { id: 'voted',     label: t('profile.votedTouchesTab') },
+          { id: 'following', label: `${t('profile.followingTab')} ${followingCount}` },
+          { id: 'followers', label: `${t('profile.followersTab')} ${followerCount}` },
+        ]
+        return (
+          <div style={{
+            display: 'flex',
+            backgroundColor: '#D4C4B0',
+            borderRadius: '12px',
+            padding: '4px',
+            margin: '0 0 16px',
+            gap: '4px',
+          }}>
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  flex: 1,
+                  padding: '8px 4px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  backgroundColor: activeTab === tab.id ? '#ffffff' : 'transparent',
+                  color: activeTab === tab.id ? '#3D2B1F' : 'rgba(61,43,31,0.5)',
+                  fontWeight: activeTab === tab.id ? 600 : 400,
+                  fontSize: '11px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: activeTab === tab.id ? '0 1px 4px rgba(0,0,0,0.1)' : 'none',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )
+      })()}
 
       {activeTab === 'touches' && <ProfileBetterList battles={battles} />}
+      {activeTab === 'voted' && <VotedBetterList />}
       {activeTab === 'following' && <FollowsList type="following" currentUserId={data.userId} onCount={setFollowingCount} />}
       {activeTab === 'followers' && <FollowsList type="followers" currentUserId={data.userId} onCount={setFollowerCount} />}
 

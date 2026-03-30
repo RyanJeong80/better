@@ -210,10 +210,17 @@
     "noCategoryBetters": "No hay Touches en esta categoría",
     "loadError": "No se pudo cargar el perfil",
     "myTouchesTab": "Mis Touches",
+    "votedTouchesTab": "Votados",
     "followingTab": "Siguiendo",
     "followersTab": "Seguidores",
     "noFollowing": "Aún no sigues a nadie",
-    "noFollowers": "Aún no tienes seguidores"
+    "noFollowers": "Aún no tienes seguidores",
+    "votedHit": "¡Acertaste!",
+    "votedMiss": "¡Casi!",
+    "votedTie": "Empate",
+    "votedCounting": "Contando...",
+    "noVotedYet": "Aún no has votado en ningún Touched",
+    "noVotedDesc": "Vota en Touches aleatorios y aparecerán aquí"
   },
   "hot": {
     "title": "Hot 100",

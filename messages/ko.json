@@ -210,10 +210,17 @@
     "noCategoryBetters": "이 카테고리의 Touched가 없어요",
     "loadError": "프로필을 불러올 수 없어요",
     "myTouchesTab": "내 터치",
+    "votedTouchesTab": "투표한 터치",
     "followingTab": "팔로잉",
     "followersTab": "팔로워",
     "noFollowing": "팔로잉하는 유저가 없어요",
-    "noFollowers": "아직 팔로워가 없어요"
+    "noFollowers": "아직 팔로워가 없어요",
+    "votedHit": "맞췄어요!",
+    "votedMiss": "아쉽네요!",
+    "votedTie": "동률",
+    "votedCounting": "집계 중...",
+    "noVotedYet": "아직 투표한 터치가 없어요",
+    "noVotedDesc": "랜덤 터치에서 투표하면 여기에 기록돼요"
   },
   "hot": {
     "title": "Hot 100",

@@ -210,10 +210,17 @@
     "noCategoryBetters": "このカテゴリのTouchedがありません",
     "loadError": "プロフィールを読み込めませんでした",
     "myTouchesTab": "マイタッチ",
+    "votedTouchesTab": "投票済み",
     "followingTab": "フォロー中",
     "followersTab": "フォロワー",
     "noFollowing": "フォロー中のユーザーはいません",
-    "noFollowers": "まだフォロワーはいません"
+    "noFollowers": "まだフォロワーはいません",
+    "votedHit": "正解！",
+    "votedMiss": "惜しい！",
+    "votedTie": "同率",
+    "votedCounting": "集計中...",
+    "noVotedYet": "まだ投票したタッチがありません",
+    "noVotedDesc": "ランダムタッチで投票するとここに記録されます"
   },
   "hot": {
     "title": "Hot 100",
