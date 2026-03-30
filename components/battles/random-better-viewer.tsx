@@ -66,6 +66,28 @@ const CAT_BADGE: Record<BetterCategory, { bg: string; text: string }> = {
   decision:   { bg: '#F0FDF4', text: '#15803D' },
 }
 
+function FitTitle({ text }: { text: string }) {
+  const ref = useRef<HTMLHeadingElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    let size = 1.125
+    el.style.fontSize = `${size}rem`
+    while (el.scrollWidth > el.offsetWidth + 1 && size > 0.72) {
+      size = Math.round((size - 0.04) * 1000) / 1000
+      el.style.fontSize = `${size}rem`
+    }
+  }, [text])
+  return (
+    <h2
+      ref={ref}
+      style={{ margin: 0, fontWeight: 800, fontSize: '1.125rem', lineHeight: 1.3, color: '#3D2B1F', whiteSpace: 'nowrap', overflow: 'hidden' }}
+    >
+      {text}
+    </h2>
+  )
+}
+
 export function RandomBetterViewer({
   initialBattle,
   initialCategory = 'all',
@@ -1228,66 +1250,58 @@ export function RandomBetterViewer({
             </div>{/* 사진 섹션 끝 */}
 
             {/* ── 폴라로이드 하단 흰색 정보 바 ── */}
-            <div style={{
-              flexShrink: 0, background: '#ffffff',
-              padding: '10px 14px 20px',
-              display: 'flex', alignItems: 'flex-start', gap: 10,
-            }}>
-              {/* 좌측: 카테고리 + 제목 + 상태 */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                {(() => {
-                  const cat = CATEGORY_MAP[battle.category]
-                  const badge = CAT_BADGE[battle.category]
-                  return (
-                    <>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: badge.bg, color: badge.text, fontSize: '0.875rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
-                          {cat.emoji} {t(`categories.${battle.category}` as Parameters<typeof t>[0])}
-                        </span>
-                        {translated && (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.1)', color: '#6366F1', fontSize: '0.875rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>✦ AI</span>
-                        )}
-                      </div>
-                      <h2 style={{ margin: 0, fontWeight: 800, fontSize: '1.125rem', lineHeight: 1.3, color: '#3D2B1F', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical' }}>
-                        {translated?.title ?? battle.title}
-                      </h2>
-                      <p style={{ margin: '2px 0 0', fontSize: '0.875rem', color: '#9CA3AF', fontWeight: 500 }}>
-                        {phase === 'voting' && t('vote.tapToSelect')}
-                        {(phase === 'picked' || phase === 'submitting') && t('vote.addReasonOptional')}
-                        {phase === 'voted' && t('vote.voteDone')}
-                      </p>
-                    </>
-                  )
-                })()}
-              </div>
-
-              {/* 우측: 작성자 */}
-              {battle.author && (
-                <button
-                  onClick={() => setProfileModalUserId(battle.author!.id)}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                >
-                  {battle.author.avatarUrl ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={battle.author.avatarUrl} alt="" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }} />
-                  ) : (
-                    <span style={{
-                      width: 32, height: 32, borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '0.6rem', fontWeight: 900, color: 'white',
-                    }}>
-                      {battle.author.displayName[0]?.toUpperCase() ?? '?'}
-                    </span>
-                  )}
-                  <span style={{ fontSize: '0.6rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 52, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {battle.author.displayName}
-                  </span>
-                  {battle.author.country && (
-                    <span style={{ fontSize: '0.875rem', lineHeight: 1 }}>{countryToFlag(battle.author.country)}</span>
-                  )}
-                </button>
-              )}
+            <div style={{ flexShrink: 0, background: '#ffffff', padding: '10px 14px 20px' }}>
+              {(() => {
+                const cat = CATEGORY_MAP[battle.category]
+                const badge = CAT_BADGE[battle.category]
+                return (
+                  <>
+                    {/* 카테고리 + AI 배지 + 작성자 (한 줄) */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: badge.bg, color: badge.text, fontSize: '0.875rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
+                        {cat.emoji} {t(`categories.${battle.category}` as Parameters<typeof t>[0])}
+                      </span>
+                      {translated && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.1)', color: '#6366F1', fontSize: '0.875rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>✦ AI</span>
+                      )}
+                      <div style={{ flex: 1 }} />
+                      {battle.author && (
+                        <button
+                          onClick={() => setProfileModalUserId(battle.author!.id)}
+                          style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                        >
+                          {battle.author.avatarUrl ? (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img src={battle.author.avatarUrl} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
+                          ) : (
+                            <span style={{
+                              width: 22, height: 22, borderRadius: '50%',
+                              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              fontSize: '0.55rem', fontWeight: 900, color: 'white',
+                            }}>
+                              {battle.author.displayName[0]?.toUpperCase() ?? '?'}
+                            </span>
+                          )}
+                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 68, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {battle.author.displayName}
+                          </span>
+                          {battle.author.country && (
+                            <span style={{ fontSize: '0.875rem', lineHeight: 1 }}>{countryToFlag(battle.author.country)}</span>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                    {/* 제목 (한 줄, 넘치면 폰트 축소) */}
+                    <FitTitle text={translated?.title ?? battle.title} />
+                    <p style={{ margin: '2px 0 0', fontSize: '0.875rem', color: '#9CA3AF', fontWeight: 500 }}>
+                      {phase === 'voting' && t('vote.tapToSelect')}
+                      {(phase === 'picked' || phase === 'submitting') && t('vote.addReasonOptional')}
+                      {phase === 'voted' && t('vote.voteDone')}
+                    </p>
+                  </>
+                )
+              })()}
             </div>
 
             {/* ── 투표 이유 입력 바텀시트 (picked / submitting) ── */}
