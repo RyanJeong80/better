@@ -24,7 +24,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-brand-bg: #EDE4DA;
-  --font-sans: var(--font-josefin), var(--font-plus-jakarta), 'Pretendard Variable', var(--font-m-plus), var(--font-noto-sc), sans-serif;
+  --font-sans: var(--font-josefin), 'Pretendard', var(--font-zen-kaku), var(--font-zcool), sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -83,7 +83,12 @@
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
-  font-family: var(--font-josefin), 'Pretendard Variable', 'Noto Sans KR', 'Noto Sans JP', 'Noto Sans SC', sans-serif;
+  font-family:
+    var(--font-josefin),
+    'Pretendard',
+    var(--font-zen-kaku),
+    var(--font-zcool),
+    sans-serif;
 }
 
 /* ── 입력창: 베이지 배경에서도 항상 흰색 ── */

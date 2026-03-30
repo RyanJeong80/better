@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Josefin_Sans, Plus_Jakarta_Sans, M_PLUS_Rounded_1c, Noto_Sans_SC } from 'next/font/google'
+import { Josefin_Sans, Zen_Kaku_Gothic_New, ZCOOL_XiaoWei } from 'next/font/google'
 
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
@@ -12,24 +12,18 @@ const josefinSans = Josefin_Sans({
   display: 'swap',
 })
 
-const plusJakarta = Plus_Jakarta_Sans({
+const zenKaku = Zen_Kaku_Gothic_New({
+  weight: ['400', '500', '700', '900'],
   subsets: ['latin'],
-  variable: '--font-plus-jakarta',
-  display: 'swap',
-})
-
-const mPlusRounded = M_PLUS_Rounded_1c({
-  weight: ['400', '500', '700', '800'],
-  subsets: ['latin'],
-  variable: '--font-m-plus',
+  variable: '--font-zen-kaku',
   display: 'swap',
   preload: false,
 })
 
-const notoSansSC = Noto_Sans_SC({
-  weight: ['400', '500', '700', '900'],
+const zcoolXiaoWei = ZCOOL_XiaoWei({
+  weight: ['400'],
   subsets: ['latin'],
-  variable: '--font-noto-sc',
+  variable: '--font-zcool',
   display: 'swap',
   preload: false,
 })
@@ -69,10 +63,10 @@ export default async function RootLayout({
   const messages = await getMessages()
 
   return (
-    <html lang={locale} className={`${josefinSans.variable} ${plusJakarta.variable} ${mPlusRounded.variable} ${notoSansSC.variable}`}>
+    <html lang={locale} className={`${josefinSans.variable} ${zenKaku.variable} ${zcoolXiaoWei.variable}`}>
       <head>
         <link
-          href="https://cdn.jsdelivr.net/npm/pretendard@1.3.9/dist/web/variable/pretendardvariable.css"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"
           rel="stylesheet"
         />
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
