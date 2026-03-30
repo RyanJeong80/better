@@ -993,9 +993,6 @@ export function RandomBetterViewer({
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                 )}
-                {/* 하단 그라데이션 */}
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.42) 0%, transparent 55%)', pointerEvents: 'none' }} />
-
                 {/* A 배지 */}
                 <div style={{
                   position: 'absolute', bottom: 10, left: 10, zIndex: 3,
@@ -1087,9 +1084,6 @@ export function RandomBetterViewer({
                     style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                   />
                 )}
-                {/* 하단 그라데이션 */}
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.42) 0%, transparent 55%)', pointerEvents: 'none' }} />
-
                 {/* B 배지 */}
                 <div style={{
                   position: 'absolute', bottom: 10, left: 10, zIndex: 3,
