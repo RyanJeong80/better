@@ -91,7 +91,12 @@
     "saveError": "保存错误: {message}",
     "battleDescLabel": "简短描述",
     "battleDescHint": "(可选，100字以内)",
-    "battleDescPlaceholder": "简单介绍一下这个触摸"
+    "battleDescPlaceholder": "简单介绍一下这个触摸",
+    "durationLabel": "投票期限",
+    "durationCustom": "自定义",
+    "durationDays": "天",
+    "durationUntil": "之前",
+    "durationCustomRange": "请输入1~90天之间的数字"
   },
   "vote": {
     "tapToSelect": "点击照片进行选择",

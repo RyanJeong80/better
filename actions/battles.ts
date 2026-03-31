@@ -161,6 +161,8 @@ export async function saveBattle(
     const imageAText = (formData.get('imageAText') as string) || null
     const imageBText = (formData.get('imageBText') as string) || null
     const isTextOnly = formData.get('isTextOnly') === 'true'
+    const closedAtStr = formData.get('closedAt') as string | null
+    const closedAt = closedAtStr ? new Date(closedAtStr) : null
     const tagNames: string[] = rawTags
       ? JSON.parse(rawTags).map((t: string) => t.toLowerCase().replace(/\s+/g, '').replace(/^#+/, ''))
           .filter((t: string) => t.length > 0 && t.length <= 30).slice(0, 5)
@@ -203,6 +205,7 @@ export async function saveBattle(
       imageBText,
       isTextOnly,
       category,
+      closedAt,
     }).returning({ id: betters.id })
 
     // 태그 저장

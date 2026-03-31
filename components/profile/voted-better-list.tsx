@@ -213,6 +213,11 @@ function VotedBattleCard({ battle }: { battle: VotedBattle }) {
           ) : (
             <p style={{ margin: 0, fontSize: '0.72rem', color: '#9CA3AF' }}>
               {t('profile.votedCounting')}
+              {battle.closedAt && (
+                <span style={{ marginLeft: 4 }}>
+                  · {new Date(battle.closedAt).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} 마감
+                </span>
+              )}
             </p>
           )}
         </div>

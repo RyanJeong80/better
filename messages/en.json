@@ -91,7 +91,12 @@
     "saveError": "Save error: {message}",
     "battleDescLabel": "Brief description",
     "battleDescHint": "(Optional, up to 100 characters)",
-    "battleDescPlaceholder": "Tell us about this touch"
+    "battleDescPlaceholder": "Tell us about this touch",
+    "durationLabel": "Duration",
+    "durationCustom": "Custom",
+    "durationDays": "days",
+    "durationUntil": "until",
+    "durationCustomRange": "Enter between 1-90 days"
   },
   "vote": {
     "tapToSelect": "Tap a photo to choose",

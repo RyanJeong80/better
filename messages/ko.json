@@ -91,7 +91,12 @@
     "saveError": "저장 오류: {message}",
     "battleDescLabel": "간단한 설명",
     "battleDescHint": "(선택사항, 100자 이내)",
-    "battleDescPlaceholder": "이 터치에 대해 간단히 설명해줘요"
+    "battleDescPlaceholder": "이 터치에 대해 간단히 설명해줘요",
+    "durationLabel": "투표 기간",
+    "durationCustom": "직접입력",
+    "durationDays": "일",
+    "durationUntil": "까지",
+    "durationCustomRange": "1~90일 사이로 입력해주세요"
   },
   "vote": {
     "tapToSelect": "사진을 눌러 선택하세요",

@@ -91,7 +91,12 @@
     "saveError": "保存エラー: {message}",
     "battleDescLabel": "簡単な説明",
     "battleDescHint": "(任意、100文字以内)",
-    "battleDescPlaceholder": "このタッチについて教えてください"
+    "battleDescPlaceholder": "このタッチについて教えてください",
+    "durationLabel": "投票期間",
+    "durationCustom": "カスタム",
+    "durationDays": "日",
+    "durationUntil": "まで",
+    "durationCustomRange": "1〜90日の範囲で入力してください"
   },
   "vote": {
     "tapToSelect": "写真をタップして選んでください",

@@ -377,6 +377,13 @@ export function MyBetterCard({
             </p>
           )}
 
+          {/* 마감일 */}
+          {battle.closedAt && !battle.winner && (
+            <p style={{ margin: '0 0 6px', fontSize: '0.72rem', color: '#9CA3AF' }}>
+              {new Date(battle.closedAt).toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })} 마감
+            </p>
+          )}
+
           {/* 통계 + 액션 */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

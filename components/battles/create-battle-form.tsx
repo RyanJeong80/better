@@ -16,6 +16,14 @@ const ImageEditor = dynamic(
 )
 
 const MAX_DESC = 100
+
+const DURATION_PRESETS = [
+  { label: '1일', days: 1 },
+  { label: '3일', days: 3 },
+  { label: '7일', days: 7 },
+  { label: '14일', days: 14 },
+  { label: null, days: null }, // 직접입력
+]
 const MAX_FILE_MB = 5
 const MAX_IMAGE_PX = 1280
 const JPEG_QUALITY = 0.82
@@ -617,6 +625,9 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState<BetterCategory | null>(null)
+  const [selectedDuration, setSelectedDuration] = useState(7)
+  const [isCustom, setIsCustom] = useState(false)
+  const [customDays, setCustomDays] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [view, setView] = useState<'input' | 'preview'>('input')
   const [upload, setUpload] = useState<UploadState>(initUpload)
@@ -695,6 +706,10 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
     formData.set('category', category ?? 'decision')
     formData.set('tags', JSON.stringify(selectedTags))
     formData.set('description', description.trim())
+    const durationDays = isCustom ? (parseInt(customDays) || 7) : selectedDuration
+    const closedAt = new Date()
+    closedAt.setDate(closedAt.getDate() + durationDays)
+    formData.set('closedAt', closedAt.toISOString())
 
     try {
       const result = await saveBattle(null, formData)
@@ -761,12 +776,36 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
 
         {/* 버튼 */}
         {!upload.done && (
-          <div className="flex gap-3">
+          <div style={{
+            display: 'flex',
+            gap: '12px',
+            padding: '16px',
+            backgroundColor: '#EDE4DA',
+            borderTop: '1px solid #D4C4B0',
+            position: 'sticky',
+            bottom: 0,
+            margin: '0 -24px -24px',
+          }}>
             <button
               type="button"
               disabled={upload.running}
               onClick={() => { setUpload(initUpload()); setView('input') }}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-border bg-background py-3 text-sm font-semibold transition-opacity disabled:opacity-40"
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '14px',
+                borderRadius: '12px',
+                border: '2px solid #3D2B1F',
+                backgroundColor: '#ffffff',
+                color: '#3D2B1F',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: upload.running ? 'not-allowed' : 'pointer',
+                opacity: upload.running ? 0.4 : 1,
+              }}
             >
               <ArrowLeft size={15} />
               {t('goBack')}
@@ -775,7 +814,23 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
               type="button"
               disabled={upload.running}
               onClick={handleSubmit}
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+              style={{
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                padding: '14px',
+                borderRadius: '12px',
+                border: 'none',
+                backgroundColor: upload.running ? '#8a7060' : '#3D2B1F',
+                color: '#ffffff',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: upload.running ? 'not-allowed' : 'pointer',
+                opacity: upload.running ? 0.7 : 1,
+                boxShadow: upload.running ? 'none' : '0 2px 8px rgba(61,43,31,0.3)',
+              }}
             >
               {upload.running ? (
                 <>
@@ -887,6 +942,85 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
         <div style={{ textAlign: 'right', fontSize: '11px', color: '#888', marginTop: '4px' }}>
           {description.length}/100
         </div>
+      </div>
+
+      {/* 투표 기간 */}
+      <div>
+        <label style={{ fontSize: '14px', fontWeight: '600', color: '#3D2B1F', display: 'block', marginBottom: '8px' }}>
+          {t('durationLabel')}
+        </label>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          {DURATION_PRESETS.map((preset) => {
+            const isCustomPreset = preset.days === null
+            const isActive = isCustomPreset ? isCustom : (selectedDuration === preset.days && !isCustom)
+            return (
+              <button
+                key={preset.days ?? 'custom'}
+                type="button"
+                onClick={() => {
+                  if (isCustomPreset) {
+                    setIsCustom(true)
+                    setSelectedDuration(0)
+                  } else {
+                    setIsCustom(false)
+                    setSelectedDuration(preset.days!)
+                    setCustomDays('')
+                  }
+                }}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: '20px',
+                  border: 'none',
+                  backgroundColor: isActive ? '#3D2B1F' : '#D4C4B0',
+                  color: isActive ? '#ffffff' : '#3D2B1F',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                }}
+              >
+                {isCustomPreset ? t('durationCustom') : `${preset.days}${t('durationDays')}`}
+              </button>
+            )
+          })}
+        </div>
+        {isCustom && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px' }}>
+            <input
+              type="number"
+              min="1"
+              max="90"
+              value={customDays}
+              onChange={(e) => {
+                const raw = e.target.value
+                const val = parseInt(raw)
+                if (raw === '' || (val >= 1 && val <= 90)) {
+                  setCustomDays(raw)
+                  if (val >= 1 && val <= 90) setSelectedDuration(val)
+                }
+              }}
+              placeholder="1~90"
+              style={{
+                width: '80px',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                border: '1px solid #D4C4B0',
+                backgroundColor: '#ffffff',
+                color: '#000000',
+                fontSize: '14px',
+                textAlign: 'center',
+                outline: 'none',
+              }}
+            />
+            <span style={{ color: '#3D2B1F', fontSize: '14px' }}>{t('durationDays')}</span>
+            {customDays && parseInt(customDays) >= 1 && parseInt(customDays) <= 90 && (
+              <span style={{ color: '#888', fontSize: '12px' }}>
+                {new Date(Date.now() + parseInt(customDays) * 86400000)
+                  .toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+                {t('durationUntil')}
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 사진 두 장 */}

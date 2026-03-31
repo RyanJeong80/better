@@ -91,7 +91,12 @@
     "saveError": "Erreur d'enregistrement : {message}",
     "battleDescLabel": "Description brève",
     "battleDescHint": "(Facultatif, 100 caractères max)",
-    "battleDescPlaceholder": "Parlez-nous de ce touché"
+    "battleDescPlaceholder": "Parlez-nous de ce touché",
+    "durationLabel": "Durée",
+    "durationCustom": "Personnalisé",
+    "durationDays": "jours",
+    "durationUntil": "jusqu'au",
+    "durationCustomRange": "Entrez entre 1 et 90 jours"
   },
   "vote": {
     "tapToSelect": "Appuyez sur une photo pour choisir",

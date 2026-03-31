@@ -91,7 +91,12 @@
     "saveError": "Error al guardar: {message}",
     "battleDescLabel": "Descripción breve",
     "battleDescHint": "(Opcional, hasta 100 caracteres)",
-    "battleDescPlaceholder": "Cuéntanos sobre este toque"
+    "battleDescPlaceholder": "Cuéntanos sobre este toque",
+    "durationLabel": "Duración",
+    "durationCustom": "Personalizado",
+    "durationDays": "días",
+    "durationUntil": "hasta",
+    "durationCustomRange": "Introduce entre 1 y 90 días"
   },
   "vote": {
     "tapToSelect": "Toca una foto para elegir",
