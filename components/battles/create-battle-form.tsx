@@ -1037,21 +1037,37 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
         type="button"
         disabled={!canPreview}
         onClick={() => setView('preview')}
-        className="w-full rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-40"
+        style={{
+          width: '100%',
+          padding: '16px',
+          borderRadius: '14px',
+          border: 'none',
+          backgroundColor: canPreview ? '#3D2B1F' : '#D4C4B0',
+          color: canPreview ? '#ffffff' : '#3D2B1F',
+          fontSize: '16px',
+          fontWeight: '700',
+          cursor: canPreview ? 'pointer' : 'not-allowed',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          boxShadow: canPreview ? '0 2px 8px rgba(61,43,31,0.3)' : 'none',
+        }}
       >
         {isUploading ? (
-          <span className="flex items-center justify-center gap-2">
-            <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          <>
+            <svg style={{ width: 16, height: 16, animation: 'spin 1s linear infinite', flexShrink: 0 }} viewBox="0 0 24 24" fill="none">
+              <circle style={{ opacity: 0.25 }} cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path style={{ opacity: 0.75 }} fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
             {t('uploading')}
-          </span>
+          </>
         ) : !category ? t('categoryFirst')
           : !title.trim() ? t('titleNeeded')
           : (!hasContentA || !hasContentB) ? t('bothRequired')
           : t('previewTitle')}
       </button>
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
     </div>
     </>
   )
