@@ -78,23 +78,25 @@ app/
 │   ├── ranking/page.tsx        # 유저 랭킹
 │   └── profile/page.tsx        # 내 프로필 (로그인 필요)
 └── api/
-    ├── auth/callback/route.ts  # Supabase OAuth 콜백
-    ├── translate/route.ts      # DeepL 번역 API
-    ├── user/profile/route.ts   # 프로필 데이터
-    └── panels/hot/route.ts     # Hot 패널 데이터
+    ├── auth/callback/route.ts          # Supabase OAuth 콜백
+    ├── translate/route.ts              # DeepL 번역 API
+    ├── user/profile/route.ts           # 프로필 데이터
+    ├── user/profile/voted/route.ts     # 내가 투표한 터치 목록 (VotedBattle[])
+    ├── user/profile/liked/route.ts     # 내가 좋아요한 터치 목록 (LikedBattle[])
+    └── panels/hot/route.ts             # Hot 패널 데이터
 
 actions/
 ├── auth.ts                     # signIn, signUp, signOut, signInWithGoogle
-├── battles.ts                  # createBattle, getRandomBattle, getBattles, deleteBattle
+├── battles.ts                  # createBattle, getRandomBattle, getBattles, deleteBattle, saveBattle
 ├── votes.ts                    # castVote, submitVote, getVoteCounts
-└── likes.ts                    # toggleLike
+└── likes.ts                    # toggleLike, getMyLikedBattleIds
 
 components/
 ├── auth/                       # LoginForm, SignupForm
 ├── battles/                    # BattleVote, CreateBattleForm, MyBetterCard, RandomBetterViewer
 ├── home/                       # HomeBetterViewer, HotPanelClient, SplashScreen 등
 ├── layout/                     # Header, BottomNav, SwipeSections
-├── profile/                    # ProfilePanelClient, ProfileBetterList
+├── profile/                    # ProfilePanelClient, ProfileBetterList, VotedBetterList, LikedBetterList
 └── ranking/                    # RankingView
 
 lib/
@@ -132,7 +134,8 @@ proxy.ts                        # 인증 미들웨어 (Next.js 16)
 
 ```
 users       id, email, name, avatarUrl, createdAt
-betters     id, userId(FK), title, imageAUrl, imageADescription,
+betters     id, userId(FK), title, description,
+            imageAUrl, imageADescription,
             imageBUrl, imageBDescription,
             imageAText, imageBText, isTextOnly,   ← 텍스트 전용 컬럼
             category, closedAt, winner, createdAt
@@ -148,6 +151,13 @@ ALTER TABLE betters
 ADD COLUMN IF NOT EXISTS image_a_text text,
 ADD COLUMN IF NOT EXISTS image_b_text text,
 ADD COLUMN IF NOT EXISTS is_text_only boolean NOT NULL DEFAULT false;
+```
+
+### description 컬럼 마이그레이션 (미실행 시 실행 필요)
+
+```sql
+ALTER TABLE betters
+ADD COLUMN IF NOT EXISTS description text;
 ```
 
 ---
@@ -190,6 +200,33 @@ getTextColorIdx(id, 0 | 1)  // side: 0=A, 1=B
 // app/api/translate/route.ts
 // POST { texts: string[], target: string }
 // 모듈 레벨 Map 캐시, 실패 시 원문 반환
+
+// 배치 구성 (배틀 1개당 4개 텍스트):
+// [title, imageADescription/imageAText, imageBDescription/imageBText, description]
+// 인덱스: i*4+0, i*4+1, i*4+2, i*4+3
+// → hot-panel-client.tsx, random-better-viewer.tsx 동일 순서
+```
+
+### 좋아요 상태 영속성 (RandomBetterViewer)
+```ts
+// components/battles/random-better-viewer.tsx
+// 스와이프 후 돌아와도 좋아요 상태가 초기화되지 않도록 useRef<Map> 사용
+const likedMap = useRef<Map<string, boolean>>(new Map())
+const likeCountMap = useRef<Map<string, number>>(new Map())
+const [, setLikeStateVersion] = useState(0) // Map 변경 시 re-render 트리거
+
+// 마운트 시 서버에서 전체 좋아요 ID 로드
+useEffect(() => {
+  getMyLikedBattleIds().then(ids => {
+    ids.forEach(id => likedMap.current.set(id, true))
+    setLikeStateVersion(v => v + 1)
+  })
+}, [])
+
+// 파생값 (매 렌더마다 Map에서 읽음)
+const isLiked = battle ? (likedMap.current.get(battle.id) ?? battle.isLiked) : false
+const likeCount = battle ? (likeCountMap.current.get(battle.id) ?? battle.likeCount) : 0
+// handleNext/handlePrev에서 setIsLiked/setLikeCount 제거 — Map이 단일 출처
 ```
 
 ### CSS transform 안 fixed 포지셔닝
@@ -209,6 +246,42 @@ useEffect(() => setMounted(true), [])
 // 2. DB 삭제 (CASCADE → votes, likes 자동 삭제)
 // 3. Storage 이미지 삭제 (URL에서 경로 추출)
 // 반환: { success: true } | { error: string }
+```
+
+---
+
+### 프로필 탭 구조 (5탭)
+```
+ProfilePanelClient 탭 순서:
+  내 터치 (touches) → ProfileBetterList
+  내가 투표한 (voted) → VotedBetterList  ← /api/user/profile/voted
+  좋아요한 터치 (liked) → LikedBetterList ← /api/user/profile/liked
+  팔로잉 (following)
+  팔로워 (followers)
+
+탭 스타일: #D4C4B0 배경 pill 컨테이너, 활성 탭 흰색 pill
+```
+
+### 터치 생성 (closedAt)
+```ts
+// create-battle-form.tsx
+// DURATION_PRESETS: 1/3/7/14일 + 직접입력(1~90일), 기본값 7일
+// handleSubmit에서 closedAt 계산 후 formData에 포함
+const closedAt = new Date()
+closedAt.setDate(closedAt.getDate() + durationDays)
+formData.set('closedAt', closedAt.toISOString())
+
+// saveBattle (actions/battles.ts)에서 파싱 후 DB insert
+const closedAt = closedAtStr ? new Date(closedAtStr) : null
+```
+
+### UI 스타일 원칙
+```
+- 모달/폼 내 버튼은 Tailwind 클래스 대신 inline style 사용
+  (Tailwind primary 색상이 테마에 따라 흰 배경에 흰 텍스트로 보일 수 있음)
+- 활성 버튼: backgroundColor '#3D2B1F', color '#ffffff'
+- 비활성/조건미충족 버튼: backgroundColor '#D4C4B0', color '#3D2B1F'
+- 미리보기 하단 sticky 버튼 컨테이너: backgroundColor '#EDE4DA', borderTop '1px solid #D4C4B0'
 ```
 
 ---
@@ -314,11 +387,14 @@ npm run cap:ios      # Xcode 열기
 - A/B 투표 (중복 방지, 이유 입력 옵션)
 - 실시간 투표 수 (Supabase Realtime)
 - 랜덤 탐색 (본인 터치·이미 투표한 터치 제외, sessionStorage로 중복 방지)
-- 좋아요 토글 + Hot 100 랭킹
+- 좋아요 토글 + Hot 100 랭킹 + 좋아요 상태 스와이프 후 유지 (useRef Map)
 - 유저 랭킹 (참여 수 / 투표 적중률)
-- 프로필 (내 터치, 통계, 받은 투표 이유, 삭제 기능, 마감일 표시)
+- 프로필 5탭 (내 터치 / 투표한 터치 / 좋아요한 터치 / 팔로잉 / 팔로워)
+- 터치 배틀 description 필드 (생성 폼, 랜덤뷰어, Hot 패널, DeepL 번역 포함)
+- 투표 기간 선택 (1/3/7/14일 프리셋 + 직접입력) → closedAt DB 저장
+- 마감일 카드 표시 (내 터치, 투표한 터치, 좋아요한 터치 카드)
 - 4패널 스와이프 홈 (랜덤/Hot/랭킹/프로필)
-- 자동 번역 (DeepL, 한국어 외 언어에서 제목·설명 번역)
+- 자동 번역 (DeepL, 한국어 외 언어에서 제목·설명·배틀설명 번역, 배틀당 4텍스트 배치)
 - 6개 언어 i18n (ko, en, ja, zh, es, fr)
 - PWA (manifest, service worker, iOS 최적화)
 - Capacitor Android/iOS 네이티브 빌드 준비
@@ -327,7 +403,7 @@ npm run cap:ios      # Xcode 열기
 - 이미지 업로드 시 canvas 리사이징 (1280px, JPEG 0.82)
 
 ### 미구현
-- 터치 마감 (`closedAt` 필드 있으나 마감 처리 로직 미구현)
+- 터치 마감 처리 로직 (closedAt DB에는 저장되나 자동 마감·winner 결정 미구현)
 - 유저 검색 / 팔로우
 - 신고·모더레이션
 - 계정 탈퇴 기능
