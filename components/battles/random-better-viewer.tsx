@@ -71,9 +71,9 @@ function FitTitle({ text }: { text: string }) {
   useEffect(() => {
     const el = ref.current
     if (!el) return
-    let size = 1.125
+    let size = 0.8125
     el.style.fontSize = `${size}rem`
-    while (el.scrollWidth > el.offsetWidth + 1 && size > 0.72) {
+    while (el.scrollWidth > el.offsetWidth + 1 && size > 0.65) {
       size = Math.round((size - 0.04) * 1000) / 1000
       el.style.fontSize = `${size}rem`
     }
@@ -81,7 +81,7 @@ function FitTitle({ text }: { text: string }) {
   return (
     <h2
       ref={ref}
-      style={{ margin: 0, fontWeight: 800, fontSize: '1.125rem', lineHeight: 1.3, color: '#3D2B1F', whiteSpace: 'nowrap', overflow: 'hidden' }}
+      style={{ margin: 0, fontWeight: 800, fontSize: '0.8125rem', lineHeight: 1.3, color: '#3D2B1F', whiteSpace: 'nowrap', overflow: 'hidden' }}
     >
       {text}
     </h2>
@@ -892,13 +892,13 @@ export function RandomBetterViewer({
           onClick={phase !== 'submitting' ? handleNext : undefined}
           style={{
             position: 'absolute',
-            bottom: 0, left: 24, right: 24,
-            height: 60,
+            bottom: 0, left: 16, right: 16,
+            height: 50,
             background: '#ffffff',
             borderRadius: '12px 12px 0 0',
             boxShadow: '0 -2px 8px rgba(0,0,0,0.06)',
-            opacity: 0.75,
-            transform: 'scale(0.96)',
+            opacity: 0.6,
+            transform: 'scale(0.94)',
             cursor: 'pointer',
           }}
         >
@@ -911,7 +911,7 @@ export function RandomBetterViewer({
             <span style={{ color: 'rgba(61,43,31,0.6)', fontSize: '11px', fontWeight: 600, letterSpacing: '0.3px' }}>
               {t('swipe.next')}
             </span>
-            <span style={{ color: 'rgba(61,43,31,0.5)', fontSize: '16px', animation: 'bounceY 1.5s ease-in-out infinite', lineHeight: 1 }}>∧</span>
+            <span style={{ color: 'rgba(61,43,31,0.5)', fontSize: '14px', animation: 'bounceY 1.5s ease-in-out infinite', lineHeight: 1 }}>∧</span>
           </div>
         </div>
       )}
@@ -919,7 +919,7 @@ export function RandomBetterViewer({
       {/* ── 폴라로이드 카드 ── */}
       <div style={{
         position: 'absolute',
-        top: 16, left: 16, right: 16, bottom: 80,
+        top: 8, left: 8, right: 8, bottom: 62,
         display: 'flex', flexDirection: 'column',
         borderRadius: 12,
         boxShadow: '0 2px 4px rgba(0,0,0,0.08), 0 8px 16px rgba(0,0,0,0.12), 0 20px 40px rgba(0,0,0,0.15)',
@@ -931,11 +931,11 @@ export function RandomBetterViewer({
         {/* ── 로딩 ── */}
         {phase === 'loading' && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', background: 'white' }}>
-            <div style={{ height: 14, flexShrink: 0 }} />
-            <div style={{ flex: 1, margin: '0 12px', borderRadius: 4, background: '#1c1c1e' }} />
-            <div style={{ height: 12, flexShrink: 0 }} />
-            <div style={{ flex: 1, margin: '0 12px', borderRadius: 4, background: '#161618' }} />
-            <div style={{ height: 68, flexShrink: 0, background: '#f0ebe4', borderTop: '1px solid #EDE4DA' }} />
+            <div style={{ height: 8, flexShrink: 0 }} />
+            <div style={{ flex: 1, margin: '0 6px', borderRadius: 4, background: '#1c1c1e' }} />
+            <div style={{ height: 6, flexShrink: 0 }} />
+            <div style={{ flex: 1, margin: '0 6px', borderRadius: 4, background: '#161618' }} />
+            <div style={{ height: 62, flexShrink: 0, background: '#f0ebe4', borderTop: '1px solid #EDE4DA' }} />
           </div>
         )}
 
@@ -986,14 +986,14 @@ export function RandomBetterViewer({
             <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: 'white', display: 'flex', flexDirection: 'column' }}>
 
               {/* 상단 폴라로이드 여백 */}
-              <div style={{ height: 14, flexShrink: 0 }} />
+              <div style={{ height: 8, flexShrink: 0 }} />
 
               {/* 사진 A (상단) */}
               <div
                 onClick={phase === 'voting' ? () => handlePickPhoto('A') : undefined}
                 style={{
                   flex: 1,
-                  marginLeft: 12, marginRight: 12,
+                  marginLeft: 6, marginRight: 6,
                   position: 'relative',
                   overflow: 'hidden',
                   borderRadius: 4,
@@ -1015,7 +1015,7 @@ export function RandomBetterViewer({
                   <img
                     src={battle.imageAUrl}
                     alt="A"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#F5EFE8', display: 'block' }}
                   />
                 )}
                 {/* A 배지 */}
@@ -1076,15 +1076,15 @@ export function RandomBetterViewer({
                 )}
               </div>
 
-              {/* A/B 사이 흰색 여백 (12px) */}
-              <div style={{ height: 12, flexShrink: 0 }} />
+              {/* A/B 사이 흰색 여백 (6px) */}
+              <div style={{ height: 6, flexShrink: 0 }} />
 
               {/* 사진 B (하단) */}
               <div
                 onClick={phase === 'voting' ? () => handlePickPhoto('B') : undefined}
                 style={{
                   flex: 1,
-                  marginLeft: 12, marginRight: 12,
+                  marginLeft: 6, marginRight: 6,
                   position: 'relative',
                   overflow: 'hidden',
                   borderRadius: 4,
@@ -1106,7 +1106,7 @@ export function RandomBetterViewer({
                   <img
                     src={battle.imageBUrl}
                     alt="B"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                    style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#F5EFE8', display: 'block' }}
                   />
                 )}
                 {/* B 배지 */}
@@ -1168,7 +1168,7 @@ export function RandomBetterViewer({
               </div>
 
               {/* ── VS 오버레이 (사진 A/B 사이 중앙) ── */}
-              <div style={{ position: 'absolute', top: 'calc(50% + 7px)', left: 12, right: 12, transform: 'translateY(-50%)', zIndex: 5, pointerEvents: 'none' }}>
+              <div style={{ position: 'absolute', top: 'calc(50% + 4px)', left: 6, right: 6, transform: 'translateY(-50%)', zIndex: 5, pointerEvents: 'none' }}>
                 {phase === 'voted' && voteResult ? (
                   <div style={{ position: 'relative', height: 36, overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: barFilled ? `${pctA}%` : '0%', background: 'linear-gradient(to right, #4338CA, #6366F1)', transition: 'width 0.75s cubic-bezier(0.25,1,0.5,1)' }} />
@@ -1269,19 +1269,19 @@ export function RandomBetterViewer({
             </div>{/* 사진 섹션 끝 */}
 
             {/* ── 폴라로이드 하단 흰색 정보 바 ── */}
-            <div style={{ flexShrink: 0, background: '#ffffff', padding: '10px 14px 20px' }}>
+            <div style={{ flexShrink: 0, background: '#ffffff', padding: '8px 10px 10px', maxHeight: 70, overflow: 'hidden' }}>
               {(() => {
                 const cat = CATEGORY_MAP[battle.category]
                 const badge = CAT_BADGE[battle.category]
                 return (
                   <>
                     {/* 카테고리 + AI 배지 + 작성자 (한 줄) */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: badge.bg, color: badge.text, fontSize: '0.875rem', fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 3 }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, background: badge.bg, color: badge.text, fontSize: '11px', fontWeight: 700, padding: '2px 6px', borderRadius: 4 }}>
                         {cat.emoji} {t(`categories.${battle.category}` as Parameters<typeof t>[0])}
                       </span>
                       {translated && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.1)', color: '#6366F1', fontSize: '0.875rem', fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>✦ AI</span>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2, background: 'rgba(99,102,241,0.1)', color: '#6366F1', fontSize: '11px', fontWeight: 700, padding: '1px 5px', borderRadius: 4 }}>✦ AI</span>
                       )}
                       <div style={{ flex: 1 }} />
                       {battle.author && (
@@ -1291,22 +1291,22 @@ export function RandomBetterViewer({
                         >
                           {battle.author.avatarUrl ? (
                             /* eslint-disable-next-line @next/next/no-img-element */
-                            <img src={battle.author.avatarUrl} alt="" style={{ width: 22, height: 22, borderRadius: '50%', objectFit: 'cover' }} />
+                            <img src={battle.author.avatarUrl} alt="" style={{ width: 18, height: 18, borderRadius: '50%', objectFit: 'cover' }} />
                           ) : (
                             <span style={{
-                              width: 22, height: 22, borderRadius: '50%',
+                              width: 18, height: 18, borderRadius: '50%',
                               background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
-                              fontSize: '0.55rem', fontWeight: 900, color: 'white',
+                              fontSize: '0.5rem', fontWeight: 900, color: 'white',
                             }}>
                               {battle.author.displayName[0]?.toUpperCase() ?? '?'}
                             </span>
                           )}
-                          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3D2B1F', maxWidth: 68, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontSize: '11px', fontWeight: 700, color: '#3D2B1F', maxWidth: 68, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {battle.author.displayName}
                           </span>
                           {battle.author.country && (
-                            <span style={{ fontSize: '0.875rem', lineHeight: 1 }}>{countryToFlag(battle.author.country)}</span>
+                            <span style={{ fontSize: '11px', lineHeight: 1 }}>{countryToFlag(battle.author.country)}</span>
                           )}
                         </button>
                       )}
@@ -1315,15 +1315,15 @@ export function RandomBetterViewer({
                     <FitTitle text={translated?.title ?? battle.title} />
                     {phase === 'voting' && battle.description ? (
                       <p style={{
-                        margin: '2px 0 0', fontSize: '0.78rem', color: '#666666', fontWeight: 400,
+                        margin: '2px 0 0', fontSize: '11px', color: '#666666', fontWeight: 400,
                         overflow: 'hidden', textOverflow: 'ellipsis',
-                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+                        display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical',
                         lineHeight: '1.4',
                       }}>
                         {translated?.description ?? battle.description}
                       </p>
                     ) : (
-                      <p style={{ margin: '2px 0 0', fontSize: '0.875rem', color: '#9CA3AF', fontWeight: 500 }}>
+                      <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#9CA3AF', fontWeight: 500 }}>
                         {(phase === 'picked' || phase === 'submitting') && t('vote.addReasonOptional')}
                         {phase === 'voted' && t('vote.voteDone')}
                       </p>
