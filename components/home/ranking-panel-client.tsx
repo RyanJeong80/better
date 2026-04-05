@@ -260,7 +260,7 @@ export function RankingPanelClient({ viewerUserId }: { viewerUserId?: string | n
                 {entry.country && (
                   <span style={{ fontSize: '1rem', flexShrink: 0 }}>{countryToFlag(entry.country)}</span>
                 )}
-                <LevelBadge level={calcLevel(entry.participated, entry.accuracy === -1 ? null : entry.accuracy)} size="xs" showName={false} />
+                <LevelBadge level={calcLevel(entry.overallTotalVotes, entry.overallAccuracy)} size="xs" showName={false} />
                 {isCategoryMode ? (
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
                     <span style={{ fontSize: '1rem', fontWeight: 800, color: '#6366F1', fontVariantNumeric: 'tabular-nums' }}>

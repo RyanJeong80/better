@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { eq, and } from 'drizzle-orm'
+import { eq, and, inArray } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { votes, users, betters } from '@/lib/db/schema'
+import { votes, users, betters, userStats } from '@/lib/db/schema'
 import { createClient } from '@/lib/supabase/server'
 import { CATEGORY_FILTERS } from '@/lib/constants/categories'
 import type { BetterCategory, CategoryFilter } from '@/lib/constants/categories'
@@ -13,6 +13,8 @@ export type PanelRankEntry = {
   country: string | null
   participated: number
   accuracy: number | null
+  overallTotalVotes: number
+  overallAccuracy: number | null
 }
 
 export type PanelRankResponse = {
@@ -80,10 +82,30 @@ async function buildAllRanking(currentUserId: string | null): Promise<PanelRankR
 
   console.log('[panel/ranking all] countMap size:', countMap.size)
 
-  const entries = [...countMap.entries()]
-    .map(([id, s]) => ({ id, name: s.name, avatarUrl: s.avatarUrl, country: s.country, participated: s.count, accuracy: null }))
+  const sorted = [...countMap.entries()]
+    .map(([id, s]) => ({ id, name: s.name, avatarUrl: s.avatarUrl, country: s.country, participated: s.count }))
     .sort((a, b) => b.participated - a.participated)
     .slice(0, 30)
+
+  // 상위 30명 + 현재 유저의 overall stats 조회
+  const statsIds = [...new Set([
+    ...sorted.map(e => e.id),
+    ...(currentUserId ? [currentUserId] : []),
+  ])]
+  const statsRows = statsIds.length > 0
+    ? await db.select({ userId: userStats.userId, totalVotes: userStats.totalVotes, accuracyRate: userStats.accuracyRate, correctVotes: userStats.correctVotes })
+        .from(userStats).where(inArray(userStats.userId, statsIds))
+    : []
+  const statsMap = new Map(statsRows.map(r => [r.userId, r]))
+
+  const toOverall = (userId: string) => {
+    const s = statsMap.get(userId)
+    if (!s) return { overallTotalVotes: 0, overallAccuracy: null }
+    const acc = s.correctVotes > 0 ? parseFloat(s.accuracyRate as string) : null
+    return { overallTotalVotes: s.totalVotes, overallAccuracy: acc }
+  }
+
+  const entries = sorted.map(e => ({ ...e, accuracy: null, ...toOverall(e.id) }))
 
   const myEntry = currentUserId
     ? (() => {
@@ -171,10 +193,30 @@ async function buildCategoryRanking(
 
   console.log('[panel/ranking cat] allEntries:', allEntries.length, 'sample:', allEntries.slice(0, 3))
 
-  const entries = allEntries
+  const sorted = allEntries
     .filter(e => e.accuracy !== null)
     .sort((a, b) => (b.accuracy ?? 0) - (a.accuracy ?? 0) || b.participated - a.participated)
     .slice(0, 30)
+
+  // 상위 30명 + 현재 유저의 overall stats 조회
+  const statsIds = [...new Set([
+    ...sorted.map(e => e.id),
+    ...(currentUserId ? [currentUserId] : []),
+  ])]
+  const overallRows = statsIds.length > 0
+    ? await db.select({ userId: userStats.userId, totalVotes: userStats.totalVotes, accuracyRate: userStats.accuracyRate, correctVotes: userStats.correctVotes })
+        .from(userStats).where(inArray(userStats.userId, statsIds))
+    : []
+  const overallMap = new Map(overallRows.map(r => [r.userId, r]))
+
+  const toOverall = (userId: string) => {
+    const s = overallMap.get(userId)
+    if (!s) return { overallTotalVotes: 0, overallAccuracy: null }
+    const acc = s.correctVotes > 0 ? parseFloat(s.accuracyRate as string) : null
+    return { overallTotalVotes: s.totalVotes, overallAccuracy: acc }
+  }
+
+  const entries = sorted.map(e => ({ ...e, ...toOverall(e.id) }))
 
   const myEntry = currentUserId
     ? (() => {
