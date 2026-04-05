@@ -316,7 +316,7 @@ export function HotPanelClient({
                         )}
                         {/* A 라벨 */}
                         <div style={{
-                          position: 'absolute', top: 7, left: 7,
+                          position: 'absolute', bottom: 7, left: 7, zIndex: 3,
                           background: '#3D2B1F', color: 'white',
                           fontSize: '0.6rem', fontWeight: 900, padding: '2px 7px', borderRadius: 4,
                         }}>A</div>
@@ -377,7 +377,7 @@ export function HotPanelClient({
                         )}
                         {/* B 라벨 */}
                         <div style={{
-                          position: 'absolute', top: 7, left: 7,
+                          position: 'absolute', bottom: 7, left: 7, zIndex: 3,
                           background: '#D4C4B0', color: '#3D2B1F',
                           fontSize: '0.6rem', fontWeight: 900, padding: '2px 7px', borderRadius: 4,
                         }}>B</div>

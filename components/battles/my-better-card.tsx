@@ -113,7 +113,7 @@ function ImageCell({
 
       {/* Side label */}
       <div style={{
-        position: 'absolute', top: 7, left: 7,
+        position: 'absolute', bottom: 7, left: 7, zIndex: 3,
         background: side === 'A' ? '#3D2B1F' : '#D4C4B0',
         color: side === 'A' ? 'white' : '#3D2B1F',
         fontSize: '0.62rem', fontWeight: 900, padding: '2px 7px', borderRadius: 4,

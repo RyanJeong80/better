@@ -877,13 +877,14 @@ export function RandomBetterViewer({
       )}
 
       {/* ── 사진 상세보기 모달 ── */}
-      {detailPhoto && (
+      {detailPhoto && createPortal(
         <PhotoDetailModal
           url={detailPhoto.url}
           description={detailPhoto.description}
           side={detailPhoto.side}
           onClose={() => setDetailPhoto(null)}
-        />
+        />,
+        document.body,
       )}
 
       {/* ── 다음 카드 미리보기 ── */}
