@@ -1018,6 +1018,21 @@ export function RandomBetterViewer({
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', display: 'block' }}
                   />
                 )}
+                {/* 원본보기 버튼 A */}
+                {!battle.isTextOnly && (
+                  <button
+                    onClick={e => { e.stopPropagation(); setDetailPhoto({ url: battle.imageAUrl, description: translated?.descA ?? battle.imageADescription ?? null, side: 'A' }) }}
+                    style={{
+                      position: 'absolute', top: 8, left: 8, zIndex: 10,
+                      backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
+                      color: '#ffffff', border: 'none', borderRadius: 6,
+                      padding: '4px 8px', fontSize: '11px', fontWeight: 500,
+                      cursor: 'pointer', letterSpacing: '0.3px',
+                    }}
+                  >
+                    {t('photo.viewOriginal')}
+                  </button>
+                )}
                 {/* A 배지 */}
                 <div style={{
                   position: 'absolute', bottom: 10, left: 10, zIndex: 3,
@@ -1108,6 +1123,21 @@ export function RandomBetterViewer({
                     alt="B"
                     style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', display: 'block' }}
                   />
+                )}
+                {/* 원본보기 버튼 B */}
+                {!battle.isTextOnly && (
+                  <button
+                    onClick={e => { e.stopPropagation(); setDetailPhoto({ url: battle.imageBUrl, description: translated?.descB ?? battle.imageBDescription ?? null, side: 'B' }) }}
+                    style={{
+                      position: 'absolute', top: 8, left: 8, zIndex: 10,
+                      backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
+                      color: '#ffffff', border: 'none', borderRadius: 6,
+                      padding: '4px 8px', fontSize: '11px', fontWeight: 500,
+                      cursor: 'pointer', letterSpacing: '0.3px',
+                    }}
+                  >
+                    {t('photo.viewOriginal')}
+                  </button>
                 )}
                 {/* B 배지 */}
                 <div style={{

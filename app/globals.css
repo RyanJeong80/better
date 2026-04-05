@@ -108,3 +108,9 @@ a.bg-background {
 button {
   background-color: transparent;
 }
+
+/* ── 원본보기 모달 슬라이드 업 ── */
+@keyframes _slideUpModal {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}

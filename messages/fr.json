@@ -98,6 +98,9 @@
     "durationUntil": "jusqu'au",
     "durationCustomRange": "Entrez entre 1 et 90 jours"
   },
+  "photo": {
+    "viewOriginal": "Original"
+  },
   "vote": {
     "tapToSelect": "Appuyez sur une photo pour choisir",
     "addReasonOptional": "Ajoutez une raison et votez",

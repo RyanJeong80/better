@@ -98,6 +98,9 @@
     "durationUntil": "まで",
     "durationCustomRange": "1〜90日の範囲で入力してください"
   },
+  "photo": {
+    "viewOriginal": "原画"
+  },
   "vote": {
     "tapToSelect": "写真をタップして選んでください",
     "addReasonOptional": "理由を書いて投票しよう",

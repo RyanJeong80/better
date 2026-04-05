@@ -98,6 +98,9 @@
     "durationUntil": "까지",
     "durationCustomRange": "1~90일 사이로 입력해주세요"
   },
+  "photo": {
+    "viewOriginal": "원본보기"
+  },
   "vote": {
     "tapToSelect": "사진을 눌러 선택하세요",
     "addReasonOptional": "이유를 남기고 투표하세요",

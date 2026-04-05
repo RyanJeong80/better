@@ -54,7 +54,7 @@ const CAT_BADGE: Record<BetterCategory, { bg: string; text: string }> = {
 }
 
 function ImageCell({
-  imageUrl, votes, total, pct, side, isWinner, id, isTextOnly, sideText,
+  imageUrl, votes, total, pct, side, isWinner, id, isTextOnly, sideText, onViewOriginal,
 }: {
   imageUrl: string
   votes: number
@@ -65,7 +65,9 @@ function ImageCell({
   id: string
   isTextOnly?: boolean
   sideText?: string | null
+  onViewOriginal?: (url: string) => void
 }) {
+  const t = useTranslations()
   const colorOffset = side === 'A' ? 0 : 1
   return (
     <div style={{ position: 'relative', paddingTop: '100%', overflow: 'hidden', background: '#111' }}>
@@ -91,6 +93,22 @@ function ImageCell({
           alt={`사진 ${side}`}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
         />
+      )}
+
+      {/* 원본보기 버튼 */}
+      {!isTextOnly && onViewOriginal && (
+        <button
+          onClick={e => { e.stopPropagation(); onViewOriginal(imageUrl) }}
+          style={{
+            position: 'absolute', top: 8, left: 8, zIndex: 10,
+            backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
+            color: '#ffffff', border: 'none', borderRadius: 6,
+            padding: '4px 8px', fontSize: '11px', fontWeight: 500,
+            cursor: 'pointer', letterSpacing: '0.3px',
+          }}
+        >
+          {t('photo.viewOriginal')}
+        </button>
       )}
 
       {/* Side label */}
@@ -299,6 +317,7 @@ export function MyBetterCard({
   const [mounted, setMounted] = useState(false)
   const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
   const [touchesModalUserId, setTouchesModalUserId] = useState<string | null>(null)
+  const [originalImage, setOriginalImage] = useState<string | null>(null)
   const t = useTranslations()
 
   useEffect(() => setMounted(true), [])
@@ -335,6 +354,7 @@ export function MyBetterCard({
               id={battle.id}
               isTextOnly={battle.isTextOnly}
               sideText={battle.imageAText}
+              onViewOriginal={setOriginalImage}
             />
             <ImageCell
               imageUrl={battle.imageBUrl}
@@ -346,6 +366,7 @@ export function MyBetterCard({
               id={battle.id}
               isTextOnly={battle.isTextOnly}
               sideText={battle.imageBText}
+              onViewOriginal={setOriginalImage}
             />
           </div>
         </div>
@@ -529,6 +550,46 @@ export function MyBetterCard({
           userId={touchesModalUserId}
           onClose={() => setTouchesModalUserId(null)}
         />
+      )}
+      {mounted && originalImage && createPortal(
+        <div
+          onClick={() => setOriginalImage(null)}
+          style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
+            backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 99999,
+            display: 'flex', flexDirection: 'column',
+            animation: '_slideUpModal 0.3s ease-out',
+          }}
+        >
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '16px 20px', flexShrink: 0,
+          }}>
+            <span style={{ color: '#ffffff', fontSize: '14px', opacity: 0.8 }}>
+              {t('photo.viewOriginal')}
+            </span>
+            <button
+              onClick={e => { e.stopPropagation(); setOriginalImage(null) }}
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
+                width: 36, height: 36, color: '#ffffff', fontSize: '18px',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
+          </div>
+          <div
+            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px 32px', overflow: 'hidden' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={originalImage}
+              alt=""
+              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: 8 }}
+            />
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   )

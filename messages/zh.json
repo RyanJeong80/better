@@ -98,6 +98,9 @@
     "durationUntil": "之前",
     "durationCustomRange": "请输入1~90天之间的数字"
   },
+  "photo": {
+    "viewOriginal": "原图"
+  },
   "vote": {
     "tapToSelect": "点击照片进行选择",
     "addReasonOptional": "留下理由并投票",

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Heart, Flame, ArrowUpDown } from 'lucide-react'
 import { useTranslations, useLocale } from 'next-intl'
 import { CATEGORY_MAP } from '@/lib/constants/categories'
@@ -80,6 +81,7 @@ export function HotPanelClient({
   const [status, setStatus] = useState<'loading' | 'done' | 'error'>('loading')
   const [profileModalUserId, setProfileModalUserId] = useState<string | null>(null)
   const [touchesModalUserId, setTouchesModalUserId] = useState<string | null>(null)
+  const [originalImage, setOriginalImage] = useState<string | null>(null)
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [category, setCategory] = useState<CategoryFilter>('all')
   const [sortOrder, setSortOrder] = useState<SortOrder>('popular')
@@ -284,6 +286,21 @@ export function HotPanelClient({
                             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                           />
                         )}
+                        {/* 원본보기 버튼 A */}
+                        {!entry.isTextOnly && (
+                          <button
+                            onClick={e => { e.stopPropagation(); setOriginalImage(entry.imageAUrl) }}
+                            style={{
+                              position: 'absolute', top: 8, left: 8, zIndex: 10,
+                              backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
+                              color: '#ffffff', border: 'none', borderRadius: 6,
+                              padding: '4px 8px', fontSize: '11px', fontWeight: 500,
+                              cursor: 'pointer', letterSpacing: '0.3px',
+                            }}
+                          >
+                            {t('photo.viewOriginal')}
+                          </button>
+                        )}
                         {/* A 설명 오버레이 */}
                         {!entry.isTextOnly && entry.imageADescription && (
                           <div style={{
@@ -329,6 +346,21 @@ export function HotPanelClient({
                             alt="B"
                             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                           />
+                        )}
+                        {/* 원본보기 버튼 B */}
+                        {!entry.isTextOnly && (
+                          <button
+                            onClick={e => { e.stopPropagation(); setOriginalImage(entry.imageBUrl) }}
+                            style={{
+                              position: 'absolute', top: 8, left: 8, zIndex: 10,
+                              backgroundColor: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(4px)', WebkitBackdropFilter: 'blur(4px)',
+                              color: '#ffffff', border: 'none', borderRadius: 6,
+                              padding: '4px 8px', fontSize: '11px', fontWeight: 500,
+                              cursor: 'pointer', letterSpacing: '0.3px',
+                            }}
+                          >
+                            {t('photo.viewOriginal')}
+                          </button>
                         )}
                         {/* B 설명 오버레이 */}
                         {!entry.isTextOnly && entry.imageBDescription && (
@@ -485,6 +517,46 @@ export function HotPanelClient({
           viewerUserId={viewerUserId}
           onClose={() => setTouchesModalUserId(null)}
         />
+      )}
+      {originalImage && createPortal(
+        <div
+          onClick={() => setOriginalImage(null)}
+          style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100dvh',
+            backgroundColor: 'rgba(0,0,0,0.92)', zIndex: 99999,
+            display: 'flex', flexDirection: 'column',
+            animation: '_slideUpModal 0.3s ease-out',
+          }}
+        >
+          <div style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            padding: '16px 20px', flexShrink: 0,
+          }}>
+            <span style={{ color: '#ffffff', fontSize: '14px', opacity: 0.8 }}>
+              {t('photo.viewOriginal')}
+            </span>
+            <button
+              onClick={e => { e.stopPropagation(); setOriginalImage(null) }}
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.15)', border: 'none', borderRadius: '50%',
+                width: 36, height: 36, color: '#ffffff', fontSize: '18px',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >✕</button>
+          </div>
+          <div
+            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px 32px', overflow: 'hidden' }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={originalImage}
+              alt=""
+              style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: 8 }}
+            />
+          </div>
+        </div>,
+        document.body
       )}
     </div>
   )
