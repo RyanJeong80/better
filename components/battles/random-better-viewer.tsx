@@ -1015,7 +1015,7 @@ export function RandomBetterViewer({
                   <img
                     src={battle.imageAUrl}
                     alt="A"
-                    style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#F5EFE8', display: 'block' }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', display: 'block' }}
                   />
                 )}
                 {/* A 배지 */}
@@ -1106,7 +1106,7 @@ export function RandomBetterViewer({
                   <img
                     src={battle.imageBUrl}
                     alt="B"
-                    style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#F5EFE8', display: 'block' }}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center center', display: 'block' }}
                   />
                 )}
                 {/* B 배지 */}
