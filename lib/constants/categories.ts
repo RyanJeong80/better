@@ -16,7 +16,7 @@ export const CATEGORIES = [
   },
   {
     id: 'love' as const,
-    label: '연애/심리',
+    label: '라이벌',
     emoji: '💕',
     description: '고백할까 말까? 이 행동 어떻게 생각해? 이 사람 어때?',
   },
@@ -28,7 +28,7 @@ export const CATEGORIES = [
   },
   {
     id: 'food' as const,
-    label: '맛집/카페',
+    label: '음식/맛집',
     emoji: '🍽️',
     description: '이 집 vs 저 집, 이 메뉴 vs 저 메뉴, 어느 카페가 더 좋아?',
   },
@@ -40,7 +40,7 @@ export const CATEGORIES = [
   },
   {
     id: 'decision' as const,
-    label: '결정장애',
+    label: '고민/결정',
     emoji: '🤔',
     description: '어떤걸 사는게 나은지, 어디로 가는게 나을지, 무엇이든 결정하기 어렵다면?',
   },
