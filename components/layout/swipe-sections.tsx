@@ -74,6 +74,7 @@ export function SwipeSections({
       >
         {/* 로고 */}
         <span
+          onClick={() => onActiveChange(0)}
           style={{
             fontFamily: 'var(--font-josefin), "Josefin Sans", sans-serif',
             fontWeight: 300,
@@ -82,6 +83,8 @@ export function SwipeSections({
             fontSize: '20px',
             flexShrink: 0,
             lineHeight: 1,
+            cursor: 'pointer',
+            userSelect: 'none',
           }}
         >
           TOUCHED
