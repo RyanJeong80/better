@@ -1,12 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { like } from 'drizzle-orm'
+import { desc } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { users, betters } from '@/lib/db/schema'
+import { betters } from '@/lib/db/schema'
 import type { BetterCategory } from '@/lib/constants/categories'
 
 function checkAuth(req: NextRequest) {
   const auth = req.headers.get('Authorization') ?? ''
   return auth.replace('Bearer ', '') === process.env.ADMIN_PASSWORD
+}
+
+export async function GET(req: NextRequest) {
+  if (!checkAuth(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const list = await db.select({
+    id: betters.id,
+    title: betters.title,
+    category: betters.category,
+    createdAt: betters.createdAt,
+  }).from(betters).orderBy(desc(betters.createdAt))
+
+  return NextResponse.json({ battles: list })
 }
 
 const SAMPLE_TOUCHES = [

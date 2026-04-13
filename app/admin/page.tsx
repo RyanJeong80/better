@@ -396,15 +396,29 @@ function VirtualUserSection({
 
 // ─── Dummy Vote Section ───────────────────────────────────────────
 
+type TouchItem = { id: string; title: string; category: string }
+
 function DummyVoteSection({ api }: { api: (url: string, options?: RequestInit) => Promise<Response> }) {
+  const [touches, setTouches] = useState<TouchItem[]>([])
   const [battleId, setBattleId] = useState('')
   const [count, setCount] = useState('50')
   const [ratioA, setRatioA] = useState('60')
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [loading, setLoading] = useState(false)
+  const [touchesLoading, setTouchesLoading] = useState(false)
+
+  async function loadTouches() {
+    setTouchesLoading(true)
+    const res = await api('/api/admin/battles')
+    const data = await res.json()
+    setTouches(data.battles ?? [])
+    setTouchesLoading(false)
+  }
+
+  useEffect(() => { loadTouches() }, [])
 
   async function handleSubmit() {
-    if (!battleId.trim()) { setMsg({ ok: false, text: '터치 ID를 입력하세요' }); return }
+    if (!battleId) { setMsg({ ok: false, text: '터치를 선택하세요' }); return }
     const n = parseInt(count)
     if (!n || n < 1 || n > 1000) { setMsg({ ok: false, text: '투표 수는 1~1000 사이로 입력하세요' }); return }
     const a = parseInt(ratioA)
@@ -413,25 +427,46 @@ function DummyVoteSection({ api }: { api: (url: string, options?: RequestInit) =
     setLoading(true); setMsg(null)
     const res = await api('/api/admin/votes', {
       method: 'POST',
-      body: JSON.stringify({ battleId: battleId.trim(), count: n, ratioA: a }),
+      body: JSON.stringify({ battleId, count: n, ratioA: a }),
     })
     const data = await res.json()
     if (res.ok) {
       setMsg({ ok: true, text: `투표 ${data.created}개 생성! (A: ${data.aCount}, B: ${data.bCount})` })
-      setBattleId('')
     } else {
       setMsg({ ok: false, text: data.error ?? '오류 발생' })
     }
     setLoading(false)
   }
 
+  const catMeta = CATEGORY_META
+
   return (
     <div style={S.card}>
-      <div style={S.sectionTitle}>더미 투표 데이터 생성</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div style={S.sectionTitle as React.CSSProperties & { marginBottom: number }}>더미 투표 데이터 생성</div>
+        <button onClick={loadTouches} style={{ ...S.secondaryBtn, padding: '5px 12px', fontSize: 12 }} disabled={touchesLoading}>
+          {touchesLoading ? '로딩...' : '목록 새로고침'}
+        </button>
+      </div>
       <div style={S.row}>
         <div style={S.fieldGroup}>
-          <label style={S.label}>터치 ID (UUID)</label>
-          <input value={battleId} onChange={e => setBattleId(e.target.value)} style={S.input} placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+          <label style={S.label}>터치 선택 ({touches.length}개)</label>
+          <select
+            value={battleId}
+            onChange={e => setBattleId(e.target.value)}
+            style={S.select}
+            disabled={touchesLoading}
+          >
+            <option value="">-- 터치 선택...</option>
+            {touches.map(t => {
+              const meta = catMeta[t.category] ?? { label: t.category, emoji: '?' }
+              return (
+                <option key={t.id} value={t.id}>
+                  {meta.emoji} [{meta.label}] {t.title} ({t.id.slice(0, 8)}…)
+                </option>
+              )
+            })}
+          </select>
         </div>
       </div>
       <div style={S.row}>
