@@ -150,6 +150,11 @@ export async function saveBattle(
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) redirect('/login')
 
+    // 관리자 가상 유저 오버라이드
+    const virtualUserId = (formData.get('virtualUserId') as string) || null
+    const adminToken = (formData.get('adminToken') as string) || null
+    const useVirtualUser = virtualUserId && adminToken && adminToken === process.env.ADMIN_PASSWORD
+
     const title = (formData.get('title') as string)?.trim()
     const description = (formData.get('description') as string)?.trim() || null
     const imageAUrl = (formData.get('imageAUrl') as string) || ''
@@ -179,22 +184,26 @@ export async function saveBattle(
 
     console.log('[saveBattle] step 3: upsert user, id:', user.id)
 
-    // public.users에 없으면 생성 — 실패해도 트리거로 이미 존재하면 FK 통과
-    try {
-      await db.insert(users).values({
-        id: user.id,
-        email: user.email!,
-        name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
-        avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
-      }).onConflictDoNothing()
-    } catch (upsertErr) {
-      console.warn('[saveBattle] user upsert failed (continuing):', (upsertErr as Error)?.message)
+    const effectiveUserId = useVirtualUser ? virtualUserId! : user.id
+
+    // 실제 유저일 때만 upsert (가상 유저는 이미 DB에 존재)
+    if (!useVirtualUser) {
+      try {
+        await db.insert(users).values({
+          id: user.id,
+          email: user.email!,
+          name: user.user_metadata?.full_name ?? user.user_metadata?.name ?? null,
+          avatarUrl: user.user_metadata?.avatar_url ?? user.user_metadata?.picture ?? null,
+        }).onConflictDoNothing()
+      } catch (upsertErr) {
+        console.warn('[saveBattle] user upsert failed (continuing):', (upsertErr as Error)?.message)
+      }
     }
 
     console.log('[saveBattle] step 4: DB insert better')
 
     const [newBetter] = await db.insert(betters).values({
-      userId: user.id,
+      userId: effectiveUserId,
       title,
       description: description || null,
       imageAUrl,

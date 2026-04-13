@@ -711,6 +711,17 @@ export function CreateBattleForm({ onClose }: { onClose?: () => void } = {}) {
     closedAt.setDate(closedAt.getDate() + durationDays)
     formData.set('closedAt', closedAt.toISOString())
 
+    // 관리자 가상 유저 선택 시 해당 유저 ID로 배틀 생성
+    try {
+      const virtualUserJson = typeof window !== 'undefined' ? sessionStorage.getItem('admin_virtual_user') : null
+      const adminPw = typeof window !== 'undefined' ? sessionStorage.getItem('admin_password') : null
+      if (virtualUserJson && adminPw) {
+        const vu = JSON.parse(virtualUserJson)
+        formData.set('virtualUserId', vu.id)
+        formData.set('adminToken', adminPw)
+      }
+    } catch {}
+
     try {
       const result = await saveBattle(null, formData)
       if (result && 'error' in result) {

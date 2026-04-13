@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { VirtualUserBadge } from '@/components/layout/VirtualUserBadge'
 
 export async function Header() {
   let user = null
@@ -27,7 +28,8 @@ export async function Header() {
           Touched
         </Link>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
+          <VirtualUserBadge />
           {user ? (
             <>
               {/* 데스크탑 전용 */}
