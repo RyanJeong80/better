@@ -15,8 +15,8 @@ export function VirtualUserBadge() {
       setVu(raw ? JSON.parse(raw) : null)
     }
     sync()
-    window.addEventListener('admin_virtual_user_changed', sync)
-    return () => window.removeEventListener('admin_virtual_user_changed', sync)
+    window.addEventListener('adminUserChanged', sync)
+    return () => window.removeEventListener('adminUserChanged', sync)
   }, [])
 
   if (!vu) return null

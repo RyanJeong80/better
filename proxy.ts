@@ -18,6 +18,11 @@ function detectLocale(acceptLang: string, cookieLocale?: string): string {
 }
 
 export async function proxy(request: NextRequest) {
+  // /admin은 Supabase 세션 처리 없이 통과 (쿠키 간섭 방지)
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    return NextResponse.next({ request })
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
   if (!supabaseUrl || supabaseUrl.includes('your-project')) {
     return NextResponse.next({ request })
@@ -94,6 +99,6 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/|admin|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

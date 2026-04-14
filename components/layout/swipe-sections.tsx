@@ -41,11 +41,11 @@ export function SwipeSections({
       } catch { setAdminVU(null) }
     }
     sync()
-    window.addEventListener('admin_virtual_user_changed', sync)
+    window.addEventListener('adminUserChanged', sync)
     window.addEventListener('storage', sync)
     window.addEventListener('focus', sync)
     return () => {
-      window.removeEventListener('admin_virtual_user_changed', sync)
+      window.removeEventListener('adminUserChanged', sync)
       window.removeEventListener('storage', sync)
       window.removeEventListener('focus', sync)
     }
@@ -129,13 +129,15 @@ export function SwipeSections({
         {/* 중앙 spacer */}
         <div style={{ flex: 1 }} />
 
-        {/* 만들기 버튼 */}
-        {user ? (
+        {/* 만들기 버튼 — 실제 유저 또는 관리자 가상 유저 선택 시 활성 */}
+        {(user || adminVU) ? (
           <button
             onClick={onOpenCreate}
             style={{
               display: 'inline-flex', alignItems: 'center', gap: 3,
-              background: 'linear-gradient(135deg, #6366F1, #8B5CF6)',
+              background: adminVU && !user
+                ? '#FF6B35'
+                : 'linear-gradient(135deg, #6366F1, #8B5CF6)',
               color: 'white', fontWeight: 700, fontSize: '1rem',
               padding: '7px 13px', borderRadius: 999,
               border: 'none', cursor: 'pointer', flexShrink: 0, lineHeight: 1,

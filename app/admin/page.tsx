@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { LEVEL_LIST } from '@/lib/level'
 import { CATEGORY_FILTERS } from '@/lib/constants/categories'
 
@@ -89,20 +90,15 @@ export default function AdminPage() {
     setChecking(false)
   }, [])
 
-  async function handleLogin() {
-    setAuthError('')
-    const res = await fetch('/api/admin/auth', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password: pw }),
-    })
-    if (res.ok) {
-      sessionStorage.setItem('admin_authed', '1')
-      sessionStorage.setItem('admin_password', pw)
-      setAuthed(true)
-    } else {
+  function handleLogin() {
+    const adminPw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD
+    if (!adminPw || pw !== adminPw) {
       setAuthError('비밀번호가 틀렸습니다')
+      return
     }
+    sessionStorage.setItem('admin_authed', '1')
+    sessionStorage.setItem('admin_password', pw)
+    setAuthed(true)
   }
 
   if (checking) return null
@@ -138,6 +134,7 @@ export default function AdminPage() {
 // ─── Dashboard ────────────────────────────────────────────────────
 
 function AdminDashboard() {
+  const router = useRouter()
   const [virtualUsers, setVirtualUsers] = useState<VirtualUser[]>([])
   const [selectedVU, setSelectedVU] = useState<SelectedVirtualUser | null>(null)
   const [stats, setStats] = useState<Stats | null>(null)
@@ -182,7 +179,7 @@ function AdminDashboard() {
     const vu = { id: u.id, name: u.name, country: u.country }
     setSelectedVU(vu)
     sessionStorage.setItem('admin_virtual_user', JSON.stringify(vu))
-    window.dispatchEvent(new Event('admin_virtual_user_changed'))
+    window.dispatchEvent(new Event('adminUserChanged'))
   }
 
   function selectOnly(u: VirtualUser) {
@@ -191,13 +188,13 @@ function AdminDashboard() {
 
   function selectAndGo(u: VirtualUser) {
     saveVU(u)
-    window.location.href = '/'
+    router.push('/')
   }
 
   function clearVU() {
     setSelectedVU(null)
     sessionStorage.removeItem('admin_virtual_user')
-    window.dispatchEvent(new Event('admin_virtual_user_changed'))
+    window.dispatchEvent(new Event('adminUserChanged'))
   }
 
   return (
@@ -212,7 +209,7 @@ function AdminDashboard() {
         <span style={{ fontWeight: 700, fontSize: 17, color: '#EDE4DA' }}>🔐 TOUCHED 관리자</span>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
-            onClick={() => { window.location.href = '/' }}
+            onClick={() => router.push('/')}
             style={{ backgroundColor: '#EDE4DA', color: '#3D2B1F', border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
           >
             🏠 앱으로 가기

@@ -146,14 +146,17 @@ export async function saveBattle(
     console.log('[saveBattle] step 1: createClient')
     const supabase = await createClient()
 
-    console.log('[saveBattle] step 2: getUser')
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) redirect('/login')
-
-    // 관리자 가상 유저 오버라이드
+    // 관리자 가상 유저 체크 (auth보다 먼저 — 토큰 유효 시 로그인 우회 가능)
     const virtualUserId = (formData.get('virtualUserId') as string) || null
     const adminToken = (formData.get('adminToken') as string) || null
-    const useVirtualUser = virtualUserId && adminToken && adminToken === process.env.ADMIN_PASSWORD
+    const useVirtualUser = !!(
+      virtualUserId && adminToken &&
+      (adminToken === process.env.ADMIN_PASSWORD || adminToken === process.env.NEXT_PUBLIC_ADMIN_PASSWORD)
+    )
+
+    console.log('[saveBattle] step 2: getUser')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user && !useVirtualUser) redirect('/login')
 
     const title = (formData.get('title') as string)?.trim()
     const description = (formData.get('description') as string)?.trim() || null
@@ -182,12 +185,11 @@ export async function saveBattle(
       if (!imageBText) return { error: 'B 텍스트를 입력해주세요' }
     }
 
-    console.log('[saveBattle] step 3: upsert user, id:', user.id)
-
-    const effectiveUserId = useVirtualUser ? virtualUserId! : user.id
+    const effectiveUserId = useVirtualUser ? virtualUserId! : user!.id
+    console.log('[saveBattle] step 3: upsert user, id:', effectiveUserId)
 
     // 실제 유저일 때만 upsert (가상 유저는 이미 DB에 존재)
-    if (!useVirtualUser) {
+    if (!useVirtualUser && user) {
       try {
         await db.insert(users).values({
           id: user.id,
