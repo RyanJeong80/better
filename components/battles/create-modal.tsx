@@ -8,9 +8,18 @@ import { CreateBattleForm } from '@/components/battles/create-battle-form'
 
 export function CreateModal({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [mounted, setMounted] = useState(false)
+  const [adminVU, setAdminVU] = useState<{ name: string; country: string | null } | null>(null)
   const t = useTranslations('create')
 
   useEffect(() => setMounted(true), [])
+
+  useEffect(() => {
+    if (!open) return
+    try {
+      const raw = sessionStorage.getItem('admin_virtual_user')
+      setAdminVU(raw ? JSON.parse(raw) : null)
+    } catch { setAdminVU(null) }
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -56,6 +65,26 @@ export function CreateModal({ open, onClose }: { open: boolean; onClose: () => v
         <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 0' }}>
           <div style={{ width: 36, height: 4, borderRadius: 999, background: 'rgba(61,43,31,0.2)' }} />
         </div>
+
+        {/* 관리자 가상 유저 배너 */}
+        {adminVU && (
+          <div style={{
+            backgroundColor: '#FF6B35', color: '#fff',
+            padding: '8px 20px', display: 'flex',
+            alignItems: 'center', justifyContent: 'space-between',
+            flexShrink: 0,
+          }}>
+            <span style={{ fontSize: 13, fontWeight: 600 }}>
+              ✏️ {adminVU.name}으로 올리기
+            </span>
+            <span
+              onClick={() => { window.location.href = '/admin' }}
+              style={{ fontSize: 12, cursor: 'pointer', textDecoration: 'underline', opacity: 0.9 }}
+            >
+              변경
+            </span>
+          </div>
+        )}
 
         {/* 헤더 */}
         <div style={{

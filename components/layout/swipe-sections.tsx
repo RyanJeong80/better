@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/layout/language-switcher'
@@ -30,6 +30,26 @@ export function SwipeSections({
   const t = useTranslations()
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
+
+  // 관리자 가상 유저 감지
+  const [adminVU, setAdminVU] = useState<{ name: string } | null>(null)
+  useEffect(() => {
+    const sync = () => {
+      try {
+        const raw = sessionStorage.getItem('admin_virtual_user')
+        setAdminVU(raw ? JSON.parse(raw) : null)
+      } catch { setAdminVU(null) }
+    }
+    sync()
+    window.addEventListener('admin_virtual_user_changed', sync)
+    window.addEventListener('storage', sync)
+    window.addEventListener('focus', sync)
+    return () => {
+      window.removeEventListener('admin_virtual_user_changed', sync)
+      window.removeEventListener('storage', sync)
+      window.removeEventListener('focus', sync)
+    }
+  }, [])
 
   useEffect(() => {
     const prev = document.body.style.overflow
@@ -89,6 +109,22 @@ export function SwipeSections({
         >
           TOUCHED
         </span>
+
+        {/* 관리자 모드 배지 */}
+        {adminVU && (
+          <button
+            onClick={() => { window.location.href = '/admin' }}
+            style={{
+              backgroundColor: '#FF6B35', color: '#fff',
+              border: 'none', borderRadius: 6,
+              padding: '3px 8px', fontSize: 11, fontWeight: 700,
+              cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+              flexShrink: 0,
+            }}
+          >
+            ✏️ {adminVU.name}
+          </button>
+        )}
 
         {/* 중앙 spacer */}
         <div style={{ flex: 1 }} />
