@@ -1,35 +1,45 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 
 type VirtualUser = { id: string; name: string; country: string | null }
 
 export function VirtualUserBadge() {
+  const router = useRouter()
   const [vu, setVu] = useState<VirtualUser | null>(null)
 
   useEffect(() => {
-    const raw = sessionStorage.getItem('admin_virtual_user')
-    if (raw) {
-      try { setVu(JSON.parse(raw)) } catch {}
+    const sync = () => {
+      const raw = sessionStorage.getItem('admin_virtual_user')
+      setVu(raw ? JSON.parse(raw) : null)
     }
-    const handler = () => {
-      const raw2 = sessionStorage.getItem('admin_virtual_user')
-      setVu(raw2 ? JSON.parse(raw2) : null)
-    }
-    window.addEventListener('admin_virtual_user_changed', handler)
-    return () => window.removeEventListener('admin_virtual_user_changed', handler)
+    sync()
+    window.addEventListener('admin_virtual_user_changed', sync)
+    return () => window.removeEventListener('admin_virtual_user_changed', sync)
   }, [])
 
   if (!vu) return null
 
   return (
-    <div
-      className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold"
-      style={{ background: '#3D2B1F', color: '#EDE4DA' }}
+    <button
+      onClick={() => router.push('/admin')}
+      style={{
+        backgroundColor: '#FF6B35',
+        color: '#fff',
+        border: 'none',
+        borderRadius: 6,
+        padding: '3px 8px',
+        fontSize: 11,
+        fontWeight: 600,
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 4,
+        flexShrink: 0,
+      }}
     >
-      <span>작성자:</span>
-      <span>{vu.name}</span>
-      {vu.country && <span>{vu.country}</span>}
-    </div>
+      ✏️ {vu.name}
+    </button>
   )
 }

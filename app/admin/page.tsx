@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { LEVEL_LIST } from '@/lib/level'
-import { CATEGORIES, CATEGORY_FILTERS } from '@/lib/constants/categories'
+import { CATEGORY_FILTERS } from '@/lib/constants/categories'
 
 // ─── Types ────────────────────────────────────────────────────────
 
@@ -138,6 +139,7 @@ export default function AdminPage() {
 // ─── Dashboard ────────────────────────────────────────────────────
 
 function AdminDashboard() {
+  const router = useRouter()
   const [virtualUsers, setVirtualUsers] = useState<VirtualUser[]>([])
   const [selectedVU, setSelectedVU] = useState<SelectedVirtualUser | null>(null)
   const [stats, setStats] = useState<Stats | null>(null)
@@ -178,11 +180,20 @@ function AdminDashboard() {
     }
   }, [])
 
-  function selectVU(u: VirtualUser) {
+  function saveVU(u: VirtualUser) {
     const vu = { id: u.id, name: u.name, country: u.country }
     setSelectedVU(vu)
     sessionStorage.setItem('admin_virtual_user', JSON.stringify(vu))
     window.dispatchEvent(new Event('admin_virtual_user_changed'))
+  }
+
+  function selectOnly(u: VirtualUser) {
+    saveVU(u)
+  }
+
+  function selectAndGo(u: VirtualUser) {
+    saveVU(u)
+    router.push('/')
   }
 
   function clearVU() {
@@ -192,34 +203,58 @@ function AdminDashboard() {
   }
 
   return (
-    <div style={S.page}>
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-          <div>
-            <div style={{ fontSize: 24, fontWeight: 800, color: '#3D2B1F' }}>관리자 패널</div>
-            <div style={{ fontSize: 13, color: '#8C6E5D' }}>Touched Admin Dashboard</div>
-          </div>
+    <div style={{ minHeight: '100vh', background: '#EDE4DA' }}>
+      {/* Sticky header */}
+      <div style={{
+        position: 'sticky', top: 0, zIndex: 100,
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 16px', height: 56,
+        backgroundColor: '#3D2B1F',
+      }}>
+        <span style={{ fontWeight: 700, fontSize: 17, color: '#EDE4DA' }}>🔐 TOUCHED 관리자</span>
+        <div style={{ display: 'flex', gap: 8 }}>
           <button
-            onClick={() => {
-              sessionStorage.removeItem('admin_authed')
-              sessionStorage.removeItem('admin_password')
-              window.location.reload()
-            }}
-            style={S.secondaryBtn}
+            onClick={() => router.push('/')}
+            style={{ backgroundColor: '#EDE4DA', color: '#3D2B1F', border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
+          >
+            🏠 앱으로 가기
+          </button>
+          <button
+            onClick={() => { sessionStorage.removeItem('admin_authed'); sessionStorage.removeItem('admin_password'); window.location.reload() }}
+            style={{ backgroundColor: 'rgba(237,228,218,0.15)', color: '#EDE4DA', border: '1px solid rgba(237,228,218,0.3)', borderRadius: 8, padding: '7px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
           >
             로그아웃
           </button>
         </div>
+      </div>
 
-        {/* 현재 작성자 */}
-        <CurrentAuthorCard selected={selectedVU} onClear={clearVU} />
+      {/* Current author banner */}
+      {selectedVU && (
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '10px 20px', backgroundColor: '#FF6B35', color: '#fff',
+        }}>
+          <span style={{ fontSize: 14, fontWeight: 600 }}>
+            ✏️ 현재 작성자: {selectedVU.name} {countryFlag(selectedVU.country)}
+          </span>
+          <button
+            onClick={clearVU}
+            style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: '#fff', border: 'none', borderRadius: 6, padding: '4px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+          >
+            초기화
+          </button>
+        </div>
+      )}
 
+      {/* Content */}
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px' }}>
         {/* 가상 사용자 관리 */}
         <VirtualUserSection
           users={virtualUsers}
           onCreated={loadUsers}
           onDeleted={loadUsers}
-          onSelect={selectVU}
+          onSelectOnly={selectOnly}
+          onSelectAndGo={selectAndGo}
           selectedId={selectedVU?.id}
           api={api}
         />
@@ -237,43 +272,16 @@ function AdminDashboard() {
   )
 }
 
-// ─── Current Author Card ──────────────────────────────────────────
-
-function CurrentAuthorCard({ selected, onClear }: { selected: SelectedVirtualUser | null; onClear: () => void }) {
-  return (
-    <div style={{ ...S.card, background: selected ? '#3D2B1F' : '#fff', border: selected ? 'none' : '1px solid #D4C4B0' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: selected ? '#D4C4B0' : '#8C6E5D', marginBottom: 4 }}>
-            현재 작성자
-          </div>
-          {selected ? (
-            <div style={{ fontSize: 18, fontWeight: 700, color: '#EDE4DA' }}>
-              {selected.name} {countryFlag(selected.country)}
-            </div>
-          ) : (
-            <div style={{ fontSize: 15, color: '#8C6E5D' }}>실제 로그인 계정</div>
-          )}
-        </div>
-        {selected && (
-          <button onClick={onClear} style={{ backgroundColor: '#EDE4DA', color: '#3D2B1F', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            초기화
-          </button>
-        )}
-      </div>
-    </div>
-  )
-}
-
 // ─── Virtual User Section ─────────────────────────────────────────
 
 function VirtualUserSection({
-  users, onCreated, onDeleted, onSelect, selectedId, api,
+  users, onCreated, onDeleted, onSelectOnly, onSelectAndGo, selectedId, api,
 }: {
   users: VirtualUser[]
   onCreated: () => void
   onDeleted: () => void
-  onSelect: (u: VirtualUser) => void
+  onSelectOnly: (u: VirtualUser) => void
+  onSelectAndGo: (u: VirtualUser) => void
   selectedId?: string
   api: (url: string, options?: RequestInit) => Promise<Response>
 }) {
@@ -375,12 +383,18 @@ function VirtualUserSection({
                 <td style={S.td}>{countryFlag(u.country)} {u.country ?? '—'}</td>
                 <td style={S.td}>{LEVEL_LIST.find(l => l.level === u.level)?.emoji ?? ''} {u.levelName ?? '아이언'}</td>
                 <td style={S.td}>
-                  <div style={{ display: 'flex', gap: 6 }}>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     <button
-                      onClick={() => onSelect(u)}
-                      style={u.id === selectedId ? S.secondaryBtn : S.successBtn}
+                      onClick={() => onSelectAndGo(u)}
+                      style={{ backgroundColor: '#3D2B1F', color: '#fff', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
                     >
-                      {u.id === selectedId ? '선택됨' : '선택'}
+                      선택 후 앱으로 →
+                    </button>
+                    <button
+                      onClick={() => onSelectOnly(u)}
+                      style={{ backgroundColor: u.id === selectedId ? '#FF6B35' : '#D4C4B0', color: u.id === selectedId ? '#fff' : '#3D2B1F', border: 'none', borderRadius: 6, padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                    >
+                      {u.id === selectedId ? '✓ 선택됨' : '선택만'}
                     </button>
                     <button onClick={() => handleDelete(u.id, u.name ?? '')} style={S.dangerBtn}>🗑️</button>
                   </div>
