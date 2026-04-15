@@ -42,6 +42,10 @@ DIRECT_DATABASE_URL=postgresql://postgres:[password]@db.[project-ref].supabase.c
 
 # DeepL 번역 API
 DEEPL_API_KEY=your_deepl_api_key
+
+# 관리자 페이지
+ADMIN_PASSWORD=your_admin_password          # 서버 전용 (API 라우트 인증)
+NEXT_PUBLIC_ADMIN_PASSWORD=your_admin_password  # 클라이언트 (어드민 페이지 로그인 체크)
 ```
 
 ---
@@ -64,11 +68,14 @@ app/
 ├── layout.tsx                  # 루트 레이아웃 (폰트, 메타데이터, PWA)
 ├── globals.css                 # 전역 스타일
 ├── privacy/page.tsx            # 개인정보처리방침 (/privacy)
+├── admin/
+│   ├── layout.tsx              # pass-through (루트 레이아웃 상속)
+│   └── page.tsx                # 관리자 패널 (비밀번호 보호, 클라이언트 전용)
 ├── (auth)/
 │   ├── login/page.tsx
 │   └── signup/page.tsx         # 개인정보처리방침 동의 체크박스 포함
 ├── (main)/
-│   ├── layout.tsx              # Header + BottomNav
+│   ├── layout.tsx              # pass-through
 │   ├── page.tsx                # 홈 (4패널 스와이프: 랜덤/Hot/랭킹/프로필)
 │   ├── battles/
 │   │   ├── new/page.tsx        # 터치 생성 (로그인 필요)
@@ -83,7 +90,13 @@ app/
     ├── user/profile/route.ts           # 프로필 데이터
     ├── user/profile/voted/route.ts     # 내가 투표한 터치 목록 (VotedBattle[])
     ├── user/profile/liked/route.ts     # 내가 좋아요한 터치 목록 (LikedBattle[])
-    └── panels/hot/route.ts             # Hot 패널 데이터
+    ├── panels/hot/route.ts             # Hot 패널 데이터
+    └── admin/
+        ├── auth/route.ts               # 관리자 비밀번호 검증 (POST)
+        ├── users/route.ts              # 가상 유저 CRUD (GET/POST/DELETE)
+        ├── votes/route.ts              # 더미 투표 생성 (POST)
+        ├── battles/route.ts            # 터치 목록 조회(GET) + 샘플 생성(POST)
+        └── stats/route.ts              # 통계 대시보드 (GET)
 
 actions/
 ├── auth.ts                     # signIn, signUp, signOut, signInWithGoogle
@@ -93,9 +106,9 @@ actions/
 
 components/
 ├── auth/                       # LoginForm, SignupForm
-├── battles/                    # BattleVote, CreateBattleForm, MyBetterCard, RandomBetterViewer
+├── battles/                    # BattleVote, CreateBattleForm, CreateModal, MyBetterCard, RandomBetterViewer
 ├── home/                       # HomeBetterViewer, HotPanelClient, SplashScreen 등
-├── layout/                     # Header, BottomNav, SwipeSections
+├── layout/                     # SwipeSections (실제 네비바), VirtualUserBadge (미사용 Header도 존재)
 ├── profile/                    # ProfilePanelClient, ProfileBetterList, VotedBetterList, LikedBetterList
 └── ranking/                    # RankingView
 
@@ -169,6 +182,7 @@ ADD COLUMN IF NOT EXISTS description text;
 - **보호 경로**: `/battles/new`, `/profile` → 미인증 시 `/login` 리다이렉트
 - **Auth 경로**: `/login`, `/signup` → 인증 상태 시 `/` 리다이렉트
 - `/privacy` — 공개 접근 가능
+- `/admin` — **Supabase 세션 처리 완전 제외** (matcher에서도 제외). 자체 비밀번호로 보호 (sessionStorage)
 - Supabase 미연결 시 인증 체크 건너뜀 (개발 편의)
 
 ---
@@ -237,6 +251,38 @@ import { createPortal } from 'react-dom'
 const [mounted, setMounted] = useState(false)
 useEffect(() => setMounted(true), [])
 {mounted && createPortal(<Dialog />, document.body)}
+```
+
+### 관리자 페이지 (/admin)
+```
+접근: NEXT_PUBLIC_ADMIN_PASSWORD 클라이언트 직접 비교 → sessionStorage('admin_authed'='1')
+API 인증: Authorization: Bearer {password} 헤더 → ADMIN_PASSWORD 서버 비교
+가상 유저: public.users에 email='virtual_*@touched.local' 패턴으로 INSERT
+          auth.users 없이 public.users만 생성 (Supabase 인증 불필요)
+세션 보호: proxy.ts에서 /admin 완전 제외 (Supabase 쿠키 간섭 방지)
+이동: router.push('/') 사용 (window.location.href는 SSR 세션 손실 가능)
+```
+
+### 가상 유저 선택 및 전파
+```ts
+// sessionStorage 키: 'admin_virtual_user'
+// { id, name, country }
+// 이벤트: window.dispatchEvent(new Event('adminUserChanged'))
+// 구독처: swipe-sections.tsx (네비바 배지), create-modal.tsx (모달 배너)
+
+// 만들기 폼에서 가상 유저 ID 주입 (create-battle-form.tsx handleSubmit)
+const virtualUserJson = sessionStorage.getItem('admin_virtual_user')
+const adminPw = sessionStorage.getItem('admin_password')
+if (virtualUserJson && adminPw) {
+  formData.set('virtualUserId', JSON.parse(virtualUserJson).id)
+  formData.set('adminToken', adminPw)
+}
+
+// saveBattle (actions/battles.ts)에서 토큰 검증
+// useVirtualUser=true이면 Supabase auth 로그인 체크 우회 가능
+const useVirtualUser = virtualUserId && adminToken &&
+  (adminToken === ADMIN_PASSWORD || adminToken === NEXT_PUBLIC_ADMIN_PASSWORD)
+if (!user && !useVirtualUser) redirect('/login')
 ```
 
 ### 삭제 기능 패턴
@@ -401,6 +447,7 @@ npm run cap:ios      # Xcode 열기
 - 개인정보처리방침 페이지 (/privacy)
 - 모바일 반응형 (하단 네비게이션)
 - 이미지 업로드 시 canvas 리사이징 (1280px, JPEG 0.82)
+- 관리자 페이지 (/admin): 가상 유저 생성/관리, 더미 투표 생성, 샘플 터치 일괄 생성, 통계 대시보드
 
 ### 미구현
 - 터치 마감 처리 로직 (closedAt DB에는 저장되나 자동 마감·winner 결정 미구현)
@@ -443,6 +490,18 @@ npm run cap:ios      # Xcode 열기
 ### 텍스트 전용 터치 DB 오류
 - **증상**: `image_a_text`, `image_b_text`, `is_text_only` 컬럼 없을 때 `Failed query`
 - **해결**: `deleteBattle`에서 `isTextOnly` 컬럼 select 제거, URL 포함 여부로 이미지 삭제 판단
+
+---
+
+### 어드민 → 앱 이동 시 Supabase 세션 손실
+- **증상**: `/admin`에서 앱으로 이동 시 로그인 상태가 끊김
+- **원인 1**: `proxy.ts`가 `/admin` 방문 시 `supabase.auth.setAll`로 쿠키를 재작성하면서 세션 충돌
+- **원인 2**: `window.location.href = '/'` 전체 리로드 시 SSR에서 세션 쿠키를 못 읽는 경우 발생
+- **원인 3**: 어드민 페이지 비밀번호 확인이 서버 API 호출이어서 불필요한 세션 처리 발생
+- **해결**:
+  1. `proxy.ts` 초반에 `/admin` 경로 early return 추가 + matcher에서 `admin` 제외
+  2. `window.location.href` → `router.push('/')` 교체 (클라이언트 내비게이션으로 세션 유지)
+  3. 비밀번호 확인을 `NEXT_PUBLIC_ADMIN_PASSWORD` 클라이언트 직접 비교로 변경
 
 ---
 
