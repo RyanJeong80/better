@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { betters } from '@/lib/db/schema'
+import { betters, users } from '@/lib/db/schema'
 import type { BetterCategory } from '@/lib/constants/categories'
 
 function checkAuth(req: NextRequest) {
@@ -17,9 +17,46 @@ export async function GET(req: NextRequest) {
     title: betters.title,
     category: betters.category,
     createdAt: betters.createdAt,
-  }).from(betters).orderBy(desc(betters.createdAt))
+    imageAUrl: betters.imageAUrl,
+    imageBUrl: betters.imageBUrl,
+    userId: betters.userId,
+    userName: users.name,
+    userCountry: users.country,
+  })
+    .from(betters)
+    .leftJoin(users, eq(betters.userId, users.id))
+    .orderBy(desc(betters.createdAt))
 
   return NextResponse.json({ battles: list })
+}
+
+export async function DELETE(req: NextRequest) {
+  if (!checkAuth(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { id } = await req.json()
+  if (!id) return NextResponse.json({ error: 'ID가 필요합니다' }, { status: 400 })
+
+  const [battle] = await db.select({
+    imageAUrl: betters.imageAUrl,
+    imageBUrl: betters.imageBUrl,
+  }).from(betters).where(eq(betters.id, id)).limit(1)
+
+  if (!battle) return NextResponse.json({ error: '터치를 찾을 수 없습니다' }, { status: 404 })
+
+  await db.delete(betters).where(eq(betters.id, id))
+
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (serviceRoleKey) {
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceRoleKey)
+    const extractPath = (url: string) => url.match(/battle-images\/(.+)$/)?.[1] ?? null
+    const paths = [battle.imageAUrl, battle.imageBUrl].map(extractPath).filter((p): p is string => !!p)
+    if (paths.length > 0) {
+      await supabase.storage.from('battle-images').remove(paths).catch(() => {})
+    }
+  }
+
+  return NextResponse.json({ ok: true })
 }
 
 const SAMPLE_TOUCHES = [

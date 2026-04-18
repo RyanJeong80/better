@@ -26,6 +26,18 @@ type Stats = {
   recentBattles: { id: string; title: string; category: string; createdAt: string }[]
 }
 
+type AdminTouchItem = {
+  id: string
+  title: string
+  category: string
+  createdAt: string
+  imageAUrl: string
+  imageBUrl: string
+  userId: string
+  userName: string | null
+  userCountry: string | null
+}
+
 type SelectedVirtualUser = {
   id: string
   name: string
@@ -144,6 +156,7 @@ function AdminDashboard() {
   const [selectedVU, setSelectedVU] = useState<SelectedVirtualUser | null>(null)
   const [stats, setStats] = useState<Stats | null>(null)
   const [statsLoading, setStatsLoading] = useState(false)
+  const [touchFilterUserId, setTouchFilterUserId] = useState<string | null>(null)
 
   function api(url: string, options?: RequestInit) {
     const pw = sessionStorage.getItem('admin_password') ?? ''
@@ -256,7 +269,16 @@ function AdminDashboard() {
           onSelectOnly={selectOnly}
           onSelectAndGo={selectAndGo}
           selectedId={selectedVU?.id}
+          onFilterTouches={setTouchFilterUserId}
           api={api}
+        />
+
+        {/* 전체 터치 관리 */}
+        <TouchManageSection
+          api={api}
+          filterUserId={touchFilterUserId}
+          onClearFilter={() => setTouchFilterUserId(null)}
+          onDeleted={loadStats}
         />
 
         {/* 더미 투표 생성 */}
@@ -275,7 +297,7 @@ function AdminDashboard() {
 // ─── Virtual User Section ─────────────────────────────────────────
 
 function VirtualUserSection({
-  users, onCreated, onDeleted, onSelectOnly, onSelectAndGo, selectedId, api,
+  users, onCreated, onDeleted, onSelectOnly, onSelectAndGo, selectedId, onFilterTouches, api,
 }: {
   users: VirtualUser[]
   onCreated: () => void
@@ -283,6 +305,7 @@ function VirtualUserSection({
   onSelectOnly: (u: VirtualUser) => void
   onSelectAndGo: (u: VirtualUser) => void
   selectedId?: string
+  onFilterTouches: (userId: string | null) => void
   api: (url: string, options?: RequestInit) => Promise<Response>
 }) {
   const [name, setName] = useState('')
@@ -374,7 +397,13 @@ function VirtualUserSection({
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     {u.avatarUrl && <img src={u.avatarUrl} alt="" width={28} height={28} style={{ borderRadius: '50%' }} />}
-                    <span style={{ fontWeight: 600 }}>{u.name}</span>
+                    <button
+                      onClick={() => onFilterTouches(u.id)}
+                      style={{ fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', color: '#3D2B1F', padding: 0, textDecoration: 'underline', textUnderlineOffset: 2 }}
+                      title="이 유저의 터치만 필터"
+                    >
+                      {u.name}
+                    </button>
                     {u.id === selectedId && (
                       <span style={{ fontSize: 10, background: '#3D2B1F', color: '#EDE4DA', borderRadius: 6, padding: '1px 6px' }}>선택됨</span>
                     )}
@@ -403,6 +432,137 @@ function VirtualUserSection({
             ))}
           </tbody>
         </table>
+      )}
+    </div>
+  )
+}
+
+// ─── Touch Manage Section ─────────────────────────────────────────
+
+function TouchManageSection({
+  api, filterUserId, onClearFilter, onDeleted,
+}: {
+  api: (url: string, options?: RequestInit) => Promise<Response>
+  filterUserId: string | null
+  onClearFilter: () => void
+  onDeleted: () => void
+}) {
+  const [allTouches, setAllTouches] = useState<AdminTouchItem[]>([])
+  const [loading, setLoading] = useState(false)
+  const [search, setSearch] = useState('')
+  const [catFilter, setCatFilter] = useState('all')
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null)
+
+  async function loadAllTouches() {
+    setLoading(true)
+    const res = await api('/api/admin/battles')
+    const data = await res.json()
+    setAllTouches(data.battles ?? [])
+    setLoading(false)
+  }
+
+  useEffect(() => { loadAllTouches() }, [])
+
+  async function handleDelete(touchId: string, title: string) {
+    if (!confirm(`"${title}"을 삭제할까요? 투표, 좋아요도 모두 삭제됩니다.`)) return
+    setMsg(null)
+    const res = await api('/api/admin/battles', {
+      method: 'DELETE',
+      body: JSON.stringify({ id: touchId }),
+    })
+    if (res.ok) {
+      setMsg({ ok: true, text: '삭제 완료' })
+      loadAllTouches()
+      onDeleted()
+    } else {
+      const data = await res.json()
+      setMsg({ ok: false, text: data.error ?? '삭제 오류' })
+    }
+  }
+
+  const filtered = allTouches.filter(t => {
+    if (filterUserId && t.userId !== filterUserId) return false
+    if (catFilter !== 'all' && t.category !== catFilter) return false
+    if (search.trim()) {
+      const q = search.trim().toLowerCase()
+      return t.title.toLowerCase().includes(q) || (t.userName ?? '').toLowerCase().includes(q)
+    }
+    return true
+  })
+
+  const catMeta = CATEGORY_META
+
+  return (
+    <div style={S.card}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={S.sectionTitle as React.CSSProperties & { marginBottom: number }}>🗂️ 전체 터치 관리 ({filtered.length}/{allTouches.length})</div>
+        <button onClick={loadAllTouches} style={{ ...S.secondaryBtn, padding: '5px 12px', fontSize: 12 }} disabled={loading}>
+          {loading ? '로딩...' : '새로고침'}
+        </button>
+      </div>
+
+      {filterUserId && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, padding: '6px 12px', background: '#FFF0E8', borderRadius: 8, border: '1px solid #FF6B35' }}>
+          <span style={{ fontSize: 13, color: '#FF6B35', fontWeight: 600 }}>
+            유저 필터 적용 중
+          </span>
+          <button onClick={onClearFilter} style={{ fontSize: 12, background: 'none', border: 'none', color: '#FF6B35', cursor: 'pointer', fontWeight: 700 }}>✕ 해제</button>
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="제목 또는 유저명 검색..."
+          style={{ ...S.input, flex: 1 }}
+        />
+        <select value={catFilter} onChange={e => setCatFilter(e.target.value)} style={{ ...S.select, width: 'auto', flexShrink: 0 }}>
+          <option value="all">전체</option>
+          {Object.entries(catMeta).map(([key, meta]) => (
+            <option key={key} value={key}>{meta.emoji} {meta.label}</option>
+          ))}
+        </select>
+      </div>
+
+      {msg && <div style={{ ...S.msg(msg.ok), marginBottom: 10 }}>{msg.text}</div>}
+
+      {filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '24px 0', color: '#8C6E5D', fontSize: 14 }}>
+          {loading ? '로딩 중...' : '터치가 없습니다'}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+          {filtered.map(t => {
+            const meta = catMeta[t.category] ?? { label: t.category, emoji: '?' }
+            return (
+              <div key={t.id} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '10px 4px', borderBottom: '1px solid #F0E8E0',
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#3D2B1F', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 11, background: '#F0E8E0', borderRadius: 4, padding: '1px 5px', color: '#5C4033', flexShrink: 0 }}>
+                      {meta.emoji} {meta.label}
+                    </span>
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.title}</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: '#8C6E5D', marginTop: 3 }}>
+                    👤 {t.userName ?? '—'} {countryFlag(t.userCountry)}
+                    {'  '}
+                    {new Date(t.createdAt).toLocaleDateString('ko-KR')}
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleDelete(t.id, t.title)}
+                  style={{ ...S.dangerBtn, marginLeft: 8, flexShrink: 0, fontSize: 12, padding: '5px 10px' }}
+                >
+                  🗑️ 삭제
+                </button>
+              </div>
+            )
+          })}
+        </div>
       )}
     </div>
   )

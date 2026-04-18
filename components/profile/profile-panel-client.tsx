@@ -42,6 +42,8 @@ function Skeleton() {
   )
 }
 
+type VirtualUserSession = { id: string; name: string; country: string | null }
+
 export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
   const t = useTranslations()
   const [data, setData] = useState<UserProfileData | null>(null)
@@ -51,23 +53,60 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
   const [activeTab, setActiveTab] = useState<ProfileTab>('touches')
   const [followingCount, setFollowingCount] = useState(0)
   const [followerCount, setFollowerCount] = useState(0)
+  const [virtualUser, setVirtualUser] = useState<VirtualUserSession | null>(null)
   const selectRef = useRef<HTMLSelectElement>(null)
 
+  // 가상 유저 감지
+  useEffect(() => {
+    const sync = () => {
+      try {
+        const raw = sessionStorage.getItem('admin_virtual_user')
+        setVirtualUser(raw ? JSON.parse(raw) : null)
+      } catch { setVirtualUser(null) }
+    }
+    sync()
+    window.addEventListener('adminUserChanged', sync)
+    return () => window.removeEventListener('adminUserChanged', sync)
+  }, [])
+
+  // 실제 유저 프로필 fetch
   useEffect(() => {
     if (!user) { setStatus('done'); return }
     fetch('/api/user/profile')
       .then(r => r.json())
       .then((d: UserProfileData) => {
-      setData(d)
-      setCountry(d.country)
-      setFollowingCount(Number(d.followingCount) || 0)
-      setFollowerCount(Number(d.followerCount) || 0)
-      setStatus('done')
-    })
+        setData(d)
+        setCountry(d.country)
+        setFollowingCount(Number(d.followingCount) || 0)
+        setFollowerCount(Number(d.followerCount) || 0)
+        setStatus('done')
+      })
       .catch(() => setStatus('error'))
   }, [user])
 
-  if (!user) {
+  // 가상 유저 프로필 fetch
+  useEffect(() => {
+    if (user || !virtualUser) return
+    setStatus('loading')
+    setData(null)
+    const pw = sessionStorage.getItem('admin_password') ?? ''
+    fetch(`/api/admin/profile?userId=${virtualUser.id}`, {
+      headers: { Authorization: `Bearer ${pw}` },
+    })
+      .then(r => r.json())
+      .then((d: UserProfileData) => {
+        setData(d)
+        setCountry(d.country)
+        setFollowingCount(Number(d.followingCount) || 0)
+        setFollowerCount(Number(d.followerCount) || 0)
+        setStatus('done')
+      })
+      .catch(() => setStatus('error'))
+  }, [user, virtualUser])
+
+  const isVirtualMode = !user && !!virtualUser
+
+  if (!user && !virtualUser) {
     return (
       <div style={{
         height: '100%', display: 'flex', flexDirection: 'column',
@@ -124,17 +163,41 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
       {/* 유저 헤더 */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <AvatarUpload
-            currentAvatarUrl={data.avatarUrl}
-            initial={data.initial}
-            size={52}
-          />
+          {isVirtualMode ? (
+            <div style={{
+              width: 52, height: 52, borderRadius: '50%',
+              background: 'linear-gradient(135deg, #FF6B35, #F7C59F)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '1.5rem', fontWeight: 800, color: '#fff', flexShrink: 0,
+            }}>
+              {data.initial}
+            </div>
+          ) : (
+            <AvatarUpload
+              currentAvatarUrl={data.avatarUrl}
+              initial={data.initial}
+              size={52}
+            />
+          )}
           <div>
-            <UsernameEditor currentUsername={data.username} />
+            {isVirtualMode ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontWeight: 700, fontSize: '1rem', color: '#3D2B1F' }}>{data.username}</span>
+                <span style={{ fontSize: 10, background: '#FF6B35', color: '#fff', borderRadius: 6, padding: '1px 6px', fontWeight: 700 }}>가상유저</span>
+              </div>
+            ) : (
+              <UsernameEditor currentUsername={data.username} />
+            )}
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, flexWrap: 'wrap' }}>
               <LevelBadge level={data.levelInfo} size="xs" />
               {/* 국적 표시/편집 */}
-              {countryEditing ? (
+              {isVirtualMode ? (
+                country && (
+                  <span style={{ fontSize: '0.875rem', color: '#6B7280' }}>
+                    {countryToFlag(country)} {COUNTRY_OPTIONS.find(c => c.code === country)?.name ?? country}
+                  </span>
+                )
+              ) : countryEditing ? (
                 <select
                   ref={selectRef}
                   defaultValue={country ?? ''}
@@ -188,18 +251,20 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
             </div>
           </div>
         </div>
-        <form action={signOut}>
-          <button
-            type="submit"
-            style={{
-              padding: '6px 14px', borderRadius: 999, fontSize: '1rem', fontWeight: 700,
-              border: '1.5px solid #3D2B1F', background: 'transparent',
-              cursor: 'pointer', color: '#3D2B1F',
-            }}
-          >
-            {t('auth.logout')}
-          </button>
-        </form>
+        {!isVirtualMode && (
+          <form action={signOut}>
+            <button
+              type="submit"
+              style={{
+                padding: '6px 14px', borderRadius: 999, fontSize: '1rem', fontWeight: 700,
+                border: '1.5px solid #3D2B1F', background: 'transparent',
+                cursor: 'pointer', color: '#3D2B1F',
+              }}
+            >
+              {t('auth.logout')}
+            </button>
+          </form>
+        )}
       </div>
 
       {/* 레벨 카드 */}
@@ -286,13 +351,15 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
 
       {/* 탭 버튼 */}
       {(() => {
-        const tabs: { id: ProfileTab; label: string }[] = [
-          { id: 'touches',   label: t('profile.myTouchesTab') },
-          { id: 'voted',     label: t('profile.votedTouchesTab') },
-          { id: 'liked',     label: t('profile.likedTouchesTab') },
-          { id: 'following', label: `${t('profile.followingTab')} ${followingCount}` },
-          { id: 'followers', label: `${t('profile.followersTab')} ${followerCount}` },
-        ]
+        const tabs: { id: ProfileTab; label: string }[] = isVirtualMode
+          ? [{ id: 'touches', label: t('profile.myTouchesTab') }]
+          : [
+              { id: 'touches',   label: t('profile.myTouchesTab') },
+              { id: 'voted',     label: t('profile.votedTouchesTab') },
+              { id: 'liked',     label: t('profile.likedTouchesTab') },
+              { id: 'following', label: `${t('profile.followingTab')} ${followingCount}` },
+              { id: 'followers', label: `${t('profile.followersTab')} ${followerCount}` },
+            ]
         return (
           <div style={{
             display: 'flex',
