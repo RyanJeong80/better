@@ -91,13 +91,18 @@ export default function AdminPage() {
   }, [])
 
   function handleLogin() {
-    const adminPw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD
-    if (!adminPw || pw !== adminPw) {
+    const adminPw = process.env.NEXT_PUBLIC_ADMIN_PASSWORD?.trim()
+    const input = pw.trim()
+    if (!adminPw) {
+      setAuthError('환경변수 NEXT_PUBLIC_ADMIN_PASSWORD가 설정되지 않았습니다')
+      return
+    }
+    if (input !== adminPw) {
       setAuthError('비밀번호가 틀렸습니다')
       return
     }
     sessionStorage.setItem('admin_authed', '1')
-    sessionStorage.setItem('admin_password', pw)
+    sessionStorage.setItem('admin_password', input)
     setAuthed(true)
   }
 
