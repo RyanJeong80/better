@@ -97,7 +97,7 @@ export function SwipeSections({
           onClick={() => onActiveChange(0)}
           style={{
             fontFamily: 'var(--font-josefin), "Josefin Sans", sans-serif',
-            fontWeight: 300,
+            fontWeight: 700,
             letterSpacing: '0.15em',
             color: '#3D2B1F',
             fontSize: '20px',
