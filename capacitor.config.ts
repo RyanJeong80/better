@@ -22,8 +22,8 @@ const config: CapacitorConfig = {
       androidSplashResourceName: 'splash',
       androidScaleType: 'CENTER_CROP',
       showSpinner: false,
-      iosSpinnerStyle: 'small',
-      spinnerColor: '#3D2B1F',
+      splashFullScreen: true,
+      splashImmersive: true,
     },
   },
 }
