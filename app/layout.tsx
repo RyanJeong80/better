@@ -3,6 +3,7 @@ import { Josefin_Sans, Zen_Kaku_Gothic_New, ZCOOL_XiaoWei } from 'next/font/goog
 
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
+import { DeepLinkHandler } from '@/components/auth/deep-link-handler'
 import './globals.css'
 
 const josefinSans = Josefin_Sans({
@@ -76,6 +77,7 @@ export default async function RootLayout({
       </head>
       <body className="font-sans antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <DeepLinkHandler />
           {children}
         </NextIntlClientProvider>
       </body>

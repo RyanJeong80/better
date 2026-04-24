@@ -4,7 +4,9 @@ import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { Capacitor } from '@capacitor/core'
 import { signIn, signInWithGoogle, type AuthState } from '@/actions/auth'
+import { createClient } from '@/lib/supabase/client'
 
 function SubmitButton() {
   const { pending } = useFormStatus()
@@ -34,10 +36,30 @@ export function LoginForm({ message }: { message?: string }) {
   const [state, formAction] = useActionState<AuthState, FormData>(signIn, null)
   const t = useTranslations('auth')
 
+  const handleGoogleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (Capacitor.isNativePlatform()) {
+      const supabase = createClient()
+      const { data } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: 'com.touched.app://callback',
+          skipBrowserRedirect: true,
+        },
+      })
+      if (data?.url) {
+        const { Browser } = await import('@capacitor/browser')
+        await Browser.open({ url: data.url, windowName: '_self' })
+      }
+    } else {
+      await signInWithGoogle()
+    }
+  }
+
   return (
     <div className="space-y-4">
       {/* Google 로그인 */}
-      <form action={signInWithGoogle}>
+      <form onSubmit={handleGoogleLogin}>
         <button
           type="submit"
           className="flex w-full items-center justify-center gap-3 rounded-xl border border-input bg-background py-2.5 text-sm font-semibold transition-colors hover:bg-accent"

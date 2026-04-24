@@ -7,6 +7,7 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://better-ivory.vercel.app',
     cleartext: false,
+    androidScheme: 'https',
   },
   ios: {
     contentInset: 'always',
