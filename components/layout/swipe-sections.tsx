@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/layout/language-switcher'
 import type { UserInfo } from '@/app/(main)/page'
+import { Capacitor } from '@capacitor/core'
 
 export function SwipeSections({
   betterContent,
@@ -30,6 +31,15 @@ export function SwipeSections({
   const t = useTranslations()
   const touchStartX = useRef(0)
   const touchStartY = useRef(0)
+
+  // 안드로이드 상태바 색상/스타일 설정
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return
+    import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
+      StatusBar.setBackgroundColor({ color: '#EDE4DA' })
+      StatusBar.setStyle({ style: Style.Dark })
+    })
+  }, [])
 
   // 관리자 가상 유저 감지
   const [adminVU, setAdminVU] = useState<{ name: string } | null>(null)

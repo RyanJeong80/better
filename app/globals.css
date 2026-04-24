@@ -89,6 +89,14 @@ body {
     var(--font-zen-kaku),
     var(--font-zcool),
     sans-serif;
+  /* 안드로이드 상태바 / iOS notch 영역 처리 */
+  padding-top: env(safe-area-inset-top);
+}
+
+@supports (padding-top: constant(safe-area-inset-top)) {
+  body {
+    padding-top: constant(safe-area-inset-top);
+  }
 }
 
 /* ── 입력창: 베이지 배경에서도 항상 흰색 ── */
