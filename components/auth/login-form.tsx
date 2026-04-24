@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useState } from 'react'
 import { useFormStatus } from 'react-dom'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
@@ -34,27 +34,33 @@ function SubmitButton() {
 
 export function LoginForm({ message }: { message?: string }) {
   const [state, formAction] = useActionState<AuthState, FormData>(signIn, null)
+  const [googleLoading, setGoogleLoading] = useState(false)
   const t = useTranslations('auth')
 
   const handleGoogleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     if (Capacitor.isNativePlatform()) {
-      const supabase = createClient()
-      const { data } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'com.touched.app://callback',
-          skipBrowserRedirect: true,
-        },
-      })
-      if (data?.url) {
-        const { Browser } = await import('@capacitor/browser')
-        await Browser.open({
-          url: data.url,
-          windowName: '_self',
-          presentationStyle: 'fullscreen',
-          toolbarColor: '#EDE4DA',
+      setGoogleLoading(true)
+      try {
+        const supabase = createClient()
+        const { data } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: 'com.touched.app://callback',
+            skipBrowserRedirect: true,
+          },
         })
+        if (data?.url) {
+          const { Browser } = await import('@capacitor/browser')
+          await Browser.open({
+            url: data.url,
+            windowName: '_self',
+            presentationStyle: 'fullscreen',
+            toolbarColor: '#EDE4DA',
+          })
+        }
+      } finally {
+        setGoogleLoading(false)
       }
     } else {
       await signInWithGoogle()
@@ -63,11 +69,26 @@ export function LoginForm({ message }: { message?: string }) {
 
   return (
     <div className="space-y-4">
+      {/* Google 로그인 로딩 오버레이 */}
+      {googleLoading && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          backgroundColor: '#EDE4DA',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <svg className="h-8 w-8 animate-spin" viewBox="0 0 24 24" fill="none">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="#3D2B1F" strokeWidth="4" />
+            <path className="opacity-75" fill="#3D2B1F" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          </svg>
+        </div>
+      )}
+
       {/* Google 로그인 */}
       <form onSubmit={handleGoogleLogin}>
         <button
           type="submit"
-          className="flex w-full items-center justify-center gap-3 rounded-xl border border-input bg-background py-2.5 text-sm font-semibold transition-colors hover:bg-accent"
+          disabled={googleLoading}
+          className="flex w-full items-center justify-center gap-3 rounded-xl border border-input bg-background py-2.5 text-sm font-semibold transition-colors hover:bg-accent disabled:opacity-60"
         >
           <svg viewBox="0 0 24 24" className="h-5 w-5">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import { Capacitor } from '@capacitor/core'
 import { createClient } from '@/lib/supabase/client'
 import { updateAvatarUrl } from '@/actions/users'
 
@@ -60,13 +61,38 @@ export function AvatarUpload({ currentAvatarUrl, initial, size = 52 }: AvatarUpl
     setPendingFile(null)
   }, [pendingFile])
 
+  const handleAvatarClick = useCallback(async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
+        const image = await Camera.getPhoto({
+          quality: 90,
+          allowEditing: false,
+          resultType: CameraResultType.DataUrl,
+          source: CameraSource.Photos,
+        })
+        if (image.dataUrl) {
+          // DataUrl → Blob → objectUrl for CropModal
+          const res = await fetch(image.dataUrl)
+          const blob = await res.blob()
+          const objectUrl = URL.createObjectURL(blob)
+          setPendingFile({ objectUrl })
+        }
+      } catch {
+        // 사용자가 취소한 경우 무시
+      }
+    } else {
+      fileInputRef.current?.click()
+    }
+  }, [])
+
   const fontSize = `${(size * 0.025).toFixed(2)}rem`
 
   return (
     <>
       <style>{`@keyframes _av_spin { to { transform: rotate(360deg) } }`}</style>
       <button
-        onClick={() => fileInputRef.current?.click()}
+        onClick={handleAvatarClick}
         disabled={uploading}
         style={{
           width: size, height: size, borderRadius: '50%', flexShrink: 0,

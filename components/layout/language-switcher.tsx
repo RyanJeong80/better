@@ -50,7 +50,6 @@ export function LanguageSwitcher() {
         ref={btnRef}
         onClick={handleOpen}
         onTouchStart={e => e.stopPropagation()}
-        onTouchEnd={handleOpen as (e: React.TouchEvent) => void}
         aria-label="Change language"
         style={{
           width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
