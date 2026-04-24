@@ -63,16 +63,19 @@ export function AvatarUpload({ currentAvatarUrl, initial, size = 52 }: AvatarUpl
 
   const handleAvatarClick = useCallback(async () => {
     if (Capacitor.isNativePlatform()) {
+      setUploading(true)
       try {
         const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
         const image = await Camera.getPhoto({
-          quality: 90,
+          quality: 80,
           allowEditing: false,
           resultType: CameraResultType.DataUrl,
           source: CameraSource.Photos,
+          width: 400,
+          height: 400,
         })
+        setUploading(false)
         if (image.dataUrl) {
-          // DataUrl → Blob → objectUrl for CropModal
           const res = await fetch(image.dataUrl)
           const blob = await res.blob()
           const objectUrl = URL.createObjectURL(blob)
@@ -80,6 +83,7 @@ export function AvatarUpload({ currentAvatarUrl, initial, size = 52 }: AvatarUpl
         }
       } catch {
         // 사용자가 취소한 경우 무시
+        setUploading(false)
       }
     } else {
       fileInputRef.current?.click()
@@ -101,7 +105,9 @@ export function AvatarUpload({ currentAvatarUrl, initial, size = 52 }: AvatarUpl
           fontSize, fontWeight: 900, color: 'white',
           border: 'none', cursor: uploading ? 'default' : 'pointer',
           padding: 0, overflow: 'hidden', position: 'relative',
-        }}
+          touchAction: 'manipulation',
+          WebkitTapHighlightColor: 'transparent',
+        } as React.CSSProperties}
       >
         {avatarUrl ? (
           <img
