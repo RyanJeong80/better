@@ -64,6 +64,10 @@ export function AvatarUpload({ currentAvatarUrl, initial, size = 52 }: AvatarUpl
 
   const pickFromSource = useCallback(async (useCamera: boolean) => {
     setShowSourcePicker(false)
+    if (!Capacitor.isNativePlatform()) {
+      fileInputRef.current?.click()
+      return
+    }
     setUploading(true)
     try {
       const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
@@ -87,12 +91,9 @@ export function AvatarUpload({ currentAvatarUrl, initial, size = 52 }: AvatarUpl
     }
   }, [])
 
+  // 플랫폼 체크 없이 항상 바텀 시트 표시 — isNativePlatform()이 WebView에서 늦게 초기화되는 문제 우회
   const handleAvatarClick = useCallback(() => {
-    if (Capacitor.isNativePlatform()) {
-      setShowSourcePicker(true)
-    } else {
-      fileInputRef.current?.click()
-    }
+    setShowSourcePicker(true)
   }, [])
 
   const fontSize = `${(size * 0.025).toFixed(2)}rem`
@@ -168,6 +169,7 @@ export function AvatarUpload({ currentAvatarUrl, initial, size = 52 }: AvatarUpl
       )}
       {mounted && showSourcePicker && createPortal(
         <SourcePickerSheet
+          isNative={Capacitor.isNativePlatform()}
           onCamera={() => pickFromSource(true)}
           onGallery={() => pickFromSource(false)}
           onCancel={() => setShowSourcePicker(false)}
@@ -181,10 +183,12 @@ export function AvatarUpload({ currentAvatarUrl, initial, size = 52 }: AvatarUpl
 // ─── Source Picker Sheet ──────────────────────────────────────────
 
 function SourcePickerSheet({
+  isNative,
   onCamera,
   onGallery,
   onCancel,
 }: {
+  isNative: boolean
   onCamera: () => void
   onGallery: () => void
   onCancel: () => void
@@ -210,19 +214,21 @@ function SourcePickerSheet({
           width: 36, height: 4, borderRadius: 2, background: '#D1D5DB',
           margin: '0 auto 16px',
         }} />
-        <button
-          onClick={onCamera}
-          style={{
-            width: '100%', padding: '16px', borderRadius: 14,
-            background: 'white', border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', gap: 14,
-            fontSize: '1rem', fontWeight: 600, color: '#1F2937',
-            marginBottom: 10,
-          }}
-        >
-          <span style={{ fontSize: '1.4rem' }}>📷</span>
-          카메라로 촬영
-        </button>
+        {isNative && (
+          <button
+            onClick={onCamera}
+            style={{
+              width: '100%', padding: '16px', borderRadius: 14,
+              background: 'white', border: 'none', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: 14,
+              fontSize: '1rem', fontWeight: 600, color: '#1F2937',
+              marginBottom: 10,
+            }}
+          >
+            <span style={{ fontSize: '1.4rem' }}>📷</span>
+            카메라로 촬영
+          </button>
+        )}
         <button
           onClick={onGallery}
           style={{
