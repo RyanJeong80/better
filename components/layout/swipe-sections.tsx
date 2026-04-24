@@ -90,12 +90,14 @@ export function SwipeSections({
         background: 'var(--color-background)',
       }}
     >
-      {/* ── 상단 바 (48px) ── */}
+      {/* ── 상단 바 (48px + safe area) ── */}
       <div
         style={{
-          height: 50, flexShrink: 0,
+          height: 'calc(50px + env(safe-area-inset-top))',
+          flexShrink: 0,
           display: 'flex', alignItems: 'center',
           paddingLeft: 16, paddingRight: 12,
+          paddingTop: 'env(safe-area-inset-top)',
           background: '#EDE4DA',
           borderBottom: '1px solid rgba(61,43,31,0.12)',
           position: 'relative', zIndex: 1,
