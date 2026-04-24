@@ -49,7 +49,12 @@ export function LoginForm({ message }: { message?: string }) {
       })
       if (data?.url) {
         const { Browser } = await import('@capacitor/browser')
-        await Browser.open({ url: data.url, windowName: '_self' })
+        await Browser.open({
+          url: data.url,
+          windowName: '_self',
+          presentationStyle: 'fullscreen',
+          toolbarColor: '#EDE4DA',
+        })
       }
     } else {
       await signInWithGoogle()
