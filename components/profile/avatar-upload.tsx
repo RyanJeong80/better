@@ -20,6 +20,7 @@ export function AvatarUpload({ currentAvatarUrl, initial, size = 52 }: AvatarUpl
   const [pendingFile, setPendingFile] = useState<{ objectUrl: string } | null>(null)
   const [uploading, setUploading] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [showSourcePicker, setShowSourcePicker] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -61,30 +62,34 @@ export function AvatarUpload({ currentAvatarUrl, initial, size = 52 }: AvatarUpl
     setPendingFile(null)
   }, [pendingFile])
 
-  const handleAvatarClick = useCallback(async () => {
-    if (Capacitor.isNativePlatform()) {
-      setUploading(true)
-      try {
-        const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
-        const image = await Camera.getPhoto({
-          quality: 80,
-          allowEditing: false,
-          resultType: CameraResultType.DataUrl,
-          source: CameraSource.Photos,
-          width: 400,
-          height: 400,
-        })
-        setUploading(false)
-        if (image.dataUrl) {
-          const res = await fetch(image.dataUrl)
-          const blob = await res.blob()
-          const objectUrl = URL.createObjectURL(blob)
-          setPendingFile({ objectUrl })
-        }
-      } catch {
-        // 사용자가 취소한 경우 무시
-        setUploading(false)
+  const pickFromSource = useCallback(async (useCamera: boolean) => {
+    setShowSourcePicker(false)
+    setUploading(true)
+    try {
+      const { Camera, CameraResultType, CameraSource } = await import('@capacitor/camera')
+      const image = await Camera.getPhoto({
+        quality: 80,
+        allowEditing: false,
+        resultType: CameraResultType.DataUrl,
+        source: useCamera ? CameraSource.Camera : CameraSource.Photos,
+        width: 400,
+        height: 400,
+      })
+      setUploading(false)
+      if (image.dataUrl) {
+        const res = await fetch(image.dataUrl)
+        const blob = await res.blob()
+        const objectUrl = URL.createObjectURL(blob)
+        setPendingFile({ objectUrl })
       }
+    } catch {
+      setUploading(false)
+    }
+  }, [])
+
+  const handleAvatarClick = useCallback(() => {
+    if (Capacitor.isNativePlatform()) {
+      setShowSourcePicker(true)
     } else {
       fileInputRef.current?.click()
     }
@@ -161,7 +166,88 @@ export function AvatarUpload({ currentAvatarUrl, initial, size = 52 }: AvatarUpl
         />,
         document.body,
       )}
+      {mounted && showSourcePicker && createPortal(
+        <SourcePickerSheet
+          onCamera={() => pickFromSource(true)}
+          onGallery={() => pickFromSource(false)}
+          onCancel={() => setShowSourcePicker(false)}
+        />,
+        document.body,
+      )}
     </>
+  )
+}
+
+// ─── Source Picker Sheet ──────────────────────────────────────────
+
+function SourcePickerSheet({
+  onCamera,
+  onGallery,
+  onCancel,
+}: {
+  onCamera: () => void
+  onGallery: () => void
+  onCancel: () => void
+}) {
+  return (
+    <div
+      onClick={onCancel}
+      style={{
+        position: 'fixed', inset: 0, zIndex: 9999,
+        background: 'rgba(0,0,0,0.5)',
+        display: 'flex', flexDirection: 'column',
+        justifyContent: 'flex-end',
+      }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background: '#F5F5F5', borderRadius: '20px 20px 0 0',
+          padding: '12px 16px calc(16px + env(safe-area-inset-bottom))',
+        }}
+      >
+        <div style={{
+          width: 36, height: 4, borderRadius: 2, background: '#D1D5DB',
+          margin: '0 auto 16px',
+        }} />
+        <button
+          onClick={onCamera}
+          style={{
+            width: '100%', padding: '16px', borderRadius: 14,
+            background: 'white', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 14,
+            fontSize: '1rem', fontWeight: 600, color: '#1F2937',
+            marginBottom: 10,
+          }}
+        >
+          <span style={{ fontSize: '1.4rem' }}>📷</span>
+          카메라로 촬영
+        </button>
+        <button
+          onClick={onGallery}
+          style={{
+            width: '100%', padding: '16px', borderRadius: 14,
+            background: 'white', border: 'none', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 14,
+            fontSize: '1rem', fontWeight: 600, color: '#1F2937',
+            marginBottom: 10,
+          }}
+        >
+          <span style={{ fontSize: '1.4rem' }}>🖼️</span>
+          앨범에서 선택
+        </button>
+        <button
+          onClick={onCancel}
+          style={{
+            width: '100%', padding: '14px', borderRadius: 14,
+            background: 'white', border: 'none', cursor: 'pointer',
+            fontSize: '1rem', fontWeight: 600, color: '#6B7280',
+          }}
+        >
+          취소
+        </button>
+      </div>
+    </div>
   )
 }
 

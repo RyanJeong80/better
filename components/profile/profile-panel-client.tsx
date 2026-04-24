@@ -256,9 +256,9 @@ export function ProfilePanelClient({ user }: { user: UserInfo | null }) {
             <button
               type="submit"
               style={{
-                padding: '6px 14px', borderRadius: 999, fontSize: '12px', fontWeight: 700,
+                padding: '5px 10px', borderRadius: 999, fontSize: '10px', fontWeight: 700,
                 border: '1.5px solid #3D2B1F', background: 'transparent',
-                cursor: 'pointer', color: '#3D2B1F', whiteSpace: 'nowrap',
+                cursor: 'pointer', color: '#3D2B1F', whiteSpace: 'nowrap', flexShrink: 0,
               }}
             >
               {t('auth.logout')}
