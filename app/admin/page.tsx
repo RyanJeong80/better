@@ -7,6 +7,22 @@ import { CATEGORY_FILTERS } from '@/lib/constants/categories'
 
 // ─── Types ────────────────────────────────────────────────────────
 
+type BulkRow = {
+  username: string
+  country: string
+  category: string
+  title: string
+  description: string
+  imageADescription: string
+  imageBDescription: string
+  imageAUrl: string
+  imageBUrl: string
+  tags: string[]
+  durationDays: number
+  voteCount: number
+  voteRatioA: number
+}
+
 type VirtualUser = {
   id: string
   name: string
@@ -286,6 +302,9 @@ function AdminDashboard() {
 
         {/* 샘플 데이터 일괄 생성 */}
         <SampleDataSection api={api} virtualUsers={virtualUsers} onCreated={loadStats} />
+
+        {/* 엑셀 일괄 업로드 */}
+        <ExcelBulkUploadSection api={api} onCreated={loadStats} />
 
         {/* 통계 대시보드 */}
         <StatsDashboard stats={stats} loading={statsLoading} onRefresh={loadStats} />
@@ -739,6 +758,226 @@ function SampleDataSection({
         {loading ? '생성 중...' : '생성하기'}
       </button>
       {msg && <div style={S.msg(msg.ok)}>{msg.text}</div>}
+    </div>
+  )
+}
+
+// ─── Excel Bulk Upload Section ────────────────────────────────────
+
+function ExcelBulkUploadSection({
+  api, onCreated,
+}: {
+  api: (url: string, options?: RequestInit) => Promise<Response>
+  onCreated: () => void
+}) {
+  const [previewData, setPreviewData] = useState<BulkRow[]>([])
+  const [uploading, setUploading] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [total, setTotal] = useState(0)
+  const [currentItem, setCurrentItem] = useState('')
+  const [results, setResults] = useState<{ title: string; ok: boolean; error?: string }[] | null>(null)
+  const [fileKey, setFileKey] = useState(0)
+
+  const handleExcelUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setResults(null)
+
+    const XLSX = await import('xlsx')
+    const reader = new FileReader()
+    reader.onload = (evt) => {
+      const data = evt.target?.result
+      const workbook = XLSX.read(data, { type: 'binary' })
+      const sheet = workbook.Sheets[workbook.SheetNames[0]]
+      const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as any[][]
+
+      const parsed = rows.slice(1).filter(row => row[0] && row[3]).map(row => ({
+        username: row[0]?.toString().trim() ?? '',
+        country: row[1]?.toString().trim() ?? 'KR',
+        category: row[2]?.toString().trim() ?? 'decision',
+        title: row[3]?.toString().trim() ?? '',
+        description: row[4]?.toString().trim() ?? '',
+        imageADescription: row[5]?.toString().trim() ?? '',
+        imageBDescription: row[6]?.toString().trim() ?? '',
+        imageAUrl: row[7]?.toString().trim() ?? '',
+        imageBUrl: row[8]?.toString().trim() ?? '',
+        tags: (row[9]?.toString() ?? '').split(',').map((t: string) => t.trim().replace(/^#/, '')).filter(Boolean),
+        durationDays: parseInt(row[10]) || 7,
+        voteCount: parseInt(row[11]) || 0,
+        voteRatioA: parseInt(row[12]) || 50,
+      }))
+
+      setPreviewData(parsed)
+    }
+    reader.readAsBinaryString(file)
+  }
+
+  const downloadTemplate = async () => {
+    const XLSX = await import('xlsx')
+    const template = [
+      ['username', 'country', 'category', 'title', 'description',
+        'image_a_description', 'image_b_description',
+        'image_a_url', 'image_b_url', 'tags', 'duration_days',
+        'vote_count', 'vote_ratio_a'],
+      ['김패션', 'KR', 'fashion', '나이키 vs 아디다스',
+        '더 선호하는 브랜드는?', 'Nike', 'Adidas',
+        '', '', '#패션,#브랜드', '7', '30', '60'],
+      ['TrendyU', 'US', 'it', 'iPhone vs Galaxy',
+        'Which is better?', 'iPhone 15', 'Galaxy S24',
+        '', '', '#IT,#스마트폰', '7', '50', '55'],
+    ]
+
+    const ws = XLSX.utils.aoa_to_sheet(template)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Touched 더미데이터')
+
+    ws['!cols'] = [
+      { wch: 15 }, { wch: 8 }, { wch: 12 }, { wch: 25 },
+      { wch: 20 }, { wch: 15 }, { wch: 15 },
+      { wch: 40 }, { wch: 40 }, { wch: 20 },
+      { wch: 12 }, { wch: 12 }, { wch: 15 },
+    ]
+
+    XLSX.writeFile(wb, 'touched_template.xlsx')
+  }
+
+  const handleBulkUpload = async () => {
+    if (previewData.length === 0) return
+    setUploading(true)
+    setProgress(0)
+    setTotal(previewData.length)
+    setResults(null)
+
+    const allResults: { title: string; ok: boolean; error?: string }[] = []
+
+    for (let i = 0; i < previewData.length; i++) {
+      const row = previewData[i]
+      setProgress(i + 1)
+      setCurrentItem(row.title)
+
+      try {
+        const res = await api('/api/admin/bulk-upload', {
+          method: 'POST',
+          body: JSON.stringify({ row }),
+        })
+        const data = await res.json()
+        if (res.ok && data.ok) {
+          allResults.push({ title: row.title, ok: true })
+        } else {
+          allResults.push({ title: row.title, ok: false, error: data.error ?? '오류' })
+        }
+      } catch (e) {
+        allResults.push({ title: row.title, ok: false, error: (e as Error).message })
+      }
+
+      if (i < previewData.length - 1) {
+        await new Promise(resolve => setTimeout(resolve, 300))
+      }
+    }
+
+    setUploading(false)
+    setResults(allResults)
+    setPreviewData([])
+    setFileKey(k => k + 1)
+    onCreated()
+  }
+
+  const successCount = results?.filter(r => r.ok).length ?? 0
+  const failCount = results?.filter(r => !r.ok).length ?? 0
+
+  return (
+    <div style={S.card}>
+      <div style={S.sectionTitle}>📊 엑셀 일괄 업로드</div>
+
+      <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+        <button onClick={downloadTemplate} style={S.secondaryBtn}>
+          📥 템플릿 다운로드
+        </button>
+        <label style={{ ...S.primaryBtn, cursor: 'pointer', display: 'inline-block' }}>
+          📂 파일 선택
+          <input
+            key={fileKey}
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleExcelUpload}
+            style={{ display: 'none' }}
+          />
+        </label>
+      </div>
+
+      <div style={{ fontSize: 12, color: '#8C6E5D', marginBottom: 12 }}>
+        컬럼: username / country / category / title / description / image_a_description / image_b_description / image_a_url / image_b_url / tags / duration_days / vote_count / vote_ratio_a
+      </div>
+
+      {previewData.length > 0 && !uploading && (
+        <div>
+          <div style={{ fontSize: 13, color: '#5C4033', fontWeight: 600, marginBottom: 10 }}>
+            {previewData.length}개 항목 발견
+          </div>
+          <div style={{ overflowX: 'auto', marginBottom: 14 }}>
+            <table style={S.table}>
+              <thead>
+                <tr>
+                  <th style={S.th}>작성자</th>
+                  <th style={S.th}>국가</th>
+                  <th style={S.th}>카테고리</th>
+                  <th style={S.th}>제목</th>
+                  <th style={S.th}>이미지A</th>
+                  <th style={S.th}>이미지B</th>
+                  <th style={S.th}>투표수</th>
+                </tr>
+              </thead>
+              <tbody>
+                {previewData.map((row, i) => (
+                  <tr key={i}>
+                    <td style={S.td}>{row.username}</td>
+                    <td style={S.td}>{row.country}</td>
+                    <td style={S.td}>{row.category}</td>
+                    <td style={S.td} title={row.title}>{row.title.length > 20 ? row.title.slice(0, 20) + '…' : row.title}</td>
+                    <td style={S.td}>{row.imageAUrl ? '✅' : '🎲 picsum'}</td>
+                    <td style={S.td}>{row.imageBUrl ? '✅' : '🎲 picsum'}</td>
+                    <td style={S.td}>{row.voteCount > 0 ? row.voteCount : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <button onClick={handleBulkUpload} style={S.primaryBtn}>
+            🚀 {previewData.length}개 일괄 업로드
+          </button>
+        </div>
+      )}
+
+      {uploading && (
+        <div style={{ background: '#FAF6F1', borderRadius: 10, padding: 16, border: '1px solid #E5D8CC' }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#3D2B1F', marginBottom: 8 }}>
+            업로드 중... ({progress}/{total})
+          </div>
+          <div style={{ width: '100%', background: '#E5D8CC', borderRadius: 8, height: 10, marginBottom: 8 }}>
+            <div style={{
+              width: `${Math.round((progress / total) * 100)}%`,
+              background: '#3D2B1F', height: '100%', borderRadius: 8,
+              transition: 'width 0.3s ease',
+            }} />
+          </div>
+          <div style={{ fontSize: 12, color: '#5C4033' }}>📝 {currentItem} 처리 중...</div>
+        </div>
+      )}
+
+      {results && (
+        <div style={{ background: '#FAF6F1', borderRadius: 10, padding: 16, border: '1px solid #E5D8CC' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#3D2B1F', marginBottom: failCount > 0 ? 8 : 0 }}>
+            완료: ✅ {successCount}개 성공{failCount > 0 ? ` / ❌ ${failCount}개 실패` : ''}
+          </div>
+          {failCount > 0 && (
+            <div style={{ fontSize: 12, color: '#DC2626', display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {results.filter(r => !r.ok).map((r, i) => (
+                <div key={i}>❌ {r.title}: {r.error}</div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
